@@ -1,0 +1,31 @@
+﻿@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container h-100">
+    <div class="row h-100 align-items-center justify-content-center" style="min-height: calc(100vh - 180px);">
+        <div class="col-md-8 col-lg-6 col-xl-5">
+            <div class="card login-logout-card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link @(Context.Request.Path.Value?.EndsWith("Login") ?? false ? "active" : "")" 
+                               href="/Identity/Account/Login">Sign In</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(Context.Request.Path.Value?.EndsWith("Register") ?? false ? "active" : "")" 
+                               href="/Identity/Account/Register">Sign Up</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

@@ -1,0 +1,958 @@
+﻿@{
+    ViewData["Title"] = "Facilities Page";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">HOMEOWNERS</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Home/Facilities">Facilities</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Services">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Annoucements">Annoucements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contanct">Contanct</a>
+                </li>
+            </ul>
+
+            <!-- Profile Menu -->
+            <div class="nav-item dropdown profile-menu">
+                <a class="nav-link dropdown-toggle" href="#" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li class="dropdown-header">Account</li>
+                    <li>
+                        <a class="dropdown-item" href="/Identity/Account/Login">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="/Identity/Account/Register">
+                            <i class="bi bi-person-plus"></i> Register
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="/Identity/Account/Manage">
+                            <i class="bi bi-gear"></i> Profile Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container book-amenities-section">
+    <h2 class="text-center section-title">Book Amenities</h2>
+    <p class="lead text-center section-subtitle">Reserve our premier facilities for your events and activities</p>
+
+    <div class="row g-4">
+        <!-- Function Hall -->
+        <div class="col-md-4">
+            <div class="amenity-card">
+                <img src="/images/assets/hall.jpg" class="amenity-image" alt="Function Hall">
+                <div class="amenity-content">
+                    <h3>Function Hall</h3>
+                    <p>Perfect for events, meetings, and celebrations. Includes basic sound system and flexible seating arrangements.</p>
+                    <div class="amenity-details">
+                        <div class="amenity-info">
+                            <span class="price">₱5,000</span>
+                            <span class="duration">per 4 hours</span>
+                        </div>
+                        <div class="capacity">
+                            <i class="bi bi-people"></i>
+                            <span>Up to 100 people</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#bookingModal">Book Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Swimming Pool -->
+        <div class="col-md-4">
+            <div class="amenity-card">
+                <img src="/images/assets/pool.jpeg" class="amenity-image" alt="Swimming Pool">
+                <div class="amenity-content">
+                    <h3>Swimming Pool</h3>
+                    <p>Resort-style pool perfect for leisure swimming and pool parties. Includes access to changing rooms.</p>
+                    <div class="amenity-details">
+                        <div class="amenity-info">
+                            <span class="price">₱200</span>
+                            <span class="duration">per person</span>
+                        </div>
+                        <div class="capacity">
+                            <i class="bi bi-clock"></i>
+                            <span>8:00 AM - 8:00 PM</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#bookingModal">Book Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sports Complex -->
+        <div class="col-md-4">
+            <div class="amenity-card">
+                <img src="/images/assets/complex.JPG" class="amenity-image" alt="Sports Complex">
+                <div class="amenity-content">
+                    <h3>Sports Complex</h3>
+                    <p>Multi-purpose courts for basketball, volleyball, and badminton. Equipment rental available.</p>
+                    <div class="amenity-details">
+                        <div class="amenity-info">
+                            <span class="price">₱500</span>
+                            <span class="duration">per hour</span>
+                        </div>
+                        <div class="capacity">
+                            <i class="bi bi-clock"></i>
+                            <span>6:00 AM - 10:00 PM</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#bookingModal">Book Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clubhouse -->
+        <div class="col-md-4">
+            <div class="amenity-card">
+                <img src="/images/assets/clubhouse.png" class="amenity-image" alt="Clubhouse">
+                <div class="amenity-content">
+                    <h3>Clubhouse</h3>
+                    <p>Access to co-working space, café, and entertainment areas. Perfect for casual meetings.</p>
+                    <div class="amenity-details">
+                        <div class="amenity-info">
+                            <span class="price">₱150</span>
+                            <span class="duration">per person</span>
+                        </div>
+                        <div class="capacity">
+                            <i class="bi bi-clock"></i>
+                            <span>7:00 AM - 11:00 PM</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#bookingModal">Book Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sports Complex -->
+        <div class="col-md-4">
+            <div class="amenity-card">
+                <img src="/images/assets/complex.JPG" class="amenity-image" alt="Sports Complex">
+                <div class="amenity-content">
+                    <h3>Sports Complex</h3>
+                    <p>Multi-purpose courts for basketball, volleyball, and badminton. Equipment rental available.</p>
+                    <div class="amenity-details">
+                        <div class="amenity-info">
+                            <span class="price">₱500</span>
+                            <span class="duration">per hour</span>
+                        </div>
+                        <div class="capacity">
+                            <i class="bi bi-clock"></i>
+                            <span>6:00 AM - 10:00 PM</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#bookingModal">Book Now</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sports Complex -->
+        <div class="col-md-4">
+            <div class="amenity-card">
+                <img src="/images/assets/complex.JPG" class="amenity-image" alt="Sports Complex">
+                <div class="amenity-content">
+                    <h3>Sports Complex</h3>
+                    <p>Multi-purpose courts for basketball, volleyball, and badminton. Equipment rental available.</p>
+                    <div class="amenity-details">
+                        <div class="amenity-info">
+                            <span class="price">₱500</span>
+                            <span class="duration">per hour</span>
+                        </div>
+                        <div class="capacity">
+                            <i class="bi bi-clock"></i>
+                            <span>6:00 AM - 10:00 PM</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#bookingModal">Book Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container facilities-section">
+    <h2 class="text-center section-title">Featured Facilities</h2>
+    <p class="lead text-center section-subtitle">Discover our premium community amenities designed for your lifestyle</p>
+
+    <div class="row featurette">
+        <div class="col-md-7">
+            <h2 class="featurette-heading">Function Hall <span class="text-body-secondary">Host your special events.</span></h2>
+            <p class="lead">Elegant venue perfect for community events, private celebrations, and gatherings. Features modern AV equipment, flexible seating arrangements, and full catering support.</p>
+        </div>
+        <div class="col-md-5">
+            <img src="/images/assets/hall.jpg" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Function Hall">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+        <div class="col-md-7 order-md-2">
+            <h2 class="featurette-heading">Swimming Pool <span class="text-body-secondary">Dive into relaxation.</span></h2>
+            <p class="lead">Resort-style pool with dedicated lap lanes and children's area. Includes lounging areas, seasonal lifeguard service, and modern changing facilities.</p>
+        </div>
+        <div class="col-md-5 order-md-1">
+            <img src="/images/assets/pool.jpeg" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Swimming Pool">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+        <div class="col-md-7">
+            <h2 class="featurette-heading">Sports Complex <span class="text-body-secondary">Stay active and healthy.</span></h2>
+            <p class="lead">Multi-purpose courts for tennis, basketball, and volleyball. Features proper lighting for evening activities, equipment rentals, and professional coaching services.</p>
+        </div>
+        <div class="col-md-5">
+            <img src="/images/assets/complex.JPG" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Sports Complex">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+        <div class="col-md-7 order-md-2">
+            <h2 class="featurette-heading">Clubhouse <span class="text-body-secondary">Your community hub.</span></h2>
+            <p class="lead">Central hub featuring a café, co-working space, and entertainment areas. Perfect for socializing, working, or just relaxing in a comfortable environment.</p>
+        </div>
+        <div class="col-md-5 order-md-1">
+            <img src="/images/assets/clubhouse.png" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Clubhouse">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+</div>
+
+<style>
+    .facilities-section {
+        padding: 5rem 0;
+        background-color: white;
+    }
+
+        .facilities-section .btn-primary {
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+        }
+
+        .facilities-section .featurette-image {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+            object-fit: cover;
+            height: 400px;
+        }
+
+        .facilities-section .featurette:hover .featurette-image {
+            transform: translateY(-5px);
+        }
+
+        .facilities-section .featurette {
+            margin-top: 3rem;
+        }
+
+        .facilities-section .featurette-heading {
+            margin-top: 2rem;
+        }
+
+    /* Featurette Divider */
+    .featurette-divider {
+        margin: 5rem 0;
+        border-top: 1px solid rgba(78, 110, 77, 0.1);
+    }
+
+    /* Featurette Sections */
+    .featurette {
+        padding: 3rem 0;
+        align-items: center;
+    }
+
+    .featurette-heading {
+        font-size: 2.5rem;
+        font-weight: 600;
+        line-height: 1.2;
+        color: #4e6e4d;
+        margin-bottom: 1.5rem;
+    }
+
+        .featurette-heading .text-body-secondary {
+            color: #666 !important;
+            font-weight: 400;
+        }
+
+    .featurette .lead {
+        font-size: 1.25rem;
+        line-height: 1.6;
+        color: #666;
+    }
+
+    .featurette-image {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+
+    .featurette:hover .featurette-image {
+        transform: translateY(-5px);
+    }
+</style>
+
+<footer class="footer-section">
+    <div class="footer-wrapper">
+        <div class="container">
+            <div class="row">
+                <!-- Company Info -->
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="brand-text-footer">HOMEOWNERS</h5>
+                    <p class="footer-description">Your trusted partner in finding the perfect home. We provide comprehensive real estate services with a focus on quality and customer satisfaction.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5>Quick Links</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <ul class="footer-links">
+                                <li><a asp-controller="Home" asp-action="Facilities">Facilities</a></li>
+                                <li><a asp-controller="Home" asp-action="Services">Services</a></li>
+                                <li><a asp-controller="Home" asp-action="Annoucements">Annoucements</a></li>
+                                <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <ul class="footer-links">
+                                <li><a href="#">About Us</a></li>
+                                <li><a href="#">Contact</a></li>
+                                <li><a href="#">Privacy Policy</a></li>
+                                <li><a href="#">Terms & Conditions</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Newsletter & Contact -->
+                <div class="col-lg-4">
+                    <h5>Stay Connected</h5>
+                    <div class="newsletter-form mb-4">
+                        <p class="footer-description">Subscribe to our newsletter for updates and special offers.</p>
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Enter your email">
+                            <button class="btn btn-primary" type="button">Subscribe</button>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>123 Real Estate Ave, Business District, CA 90210</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-telephone"></i>
+                            <span>+1 (555) 123-4567</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-envelope"></i>
+                            <span>contact@homeowners.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Copyright -->
+    <div class="footer-bottom">
+        <div class="container">
+            <hr class="footer-divider">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <p class="mb-0">&copy; 2025 HomeOwners. All rights reserved.</p>
+                <a href="#" class="back-to-top">
+                    Back to top <i class="bi bi-arrow-up"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .footer-section {
+        background-color: #4e6e4d;
+        color: white;
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-top: 5rem;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        padding: 4rem 0 1rem;
+    }
+
+    .brand-text-footer {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .footer-description {
+        opacity: 0.9;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .social-link {
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+        background-color: white;
+        color: #4e6e4d;
+        transform: translateY(-3px);
+    }
+
+    .footer-section h5 {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+    }
+
+    .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 0.8rem;
+    }
+
+    .footer-links a {
+        color: white;
+        opacity: 0.9;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .footer-links a:hover {
+        opacity: 1;
+        padding-left: 5px;
+    }
+
+    .newsletter-form .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.75rem;
+    }
+
+    .newsletter-form .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .newsletter-form .btn {
+        background-color: white;
+        color: #4e6e4d;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+
+    .newsletter-form .btn:hover {
+        background-color: rgba(255, 255, 255, 0.9);
+        color: #4e6e4d;
+    }
+
+    .contact-info {
+        margin-top: 2rem;
+    }
+
+    .contact-item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        align-items: flex-start;
+    }
+
+    .contact-item i {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    .contact-item span {
+        opacity: 0.9;
+        line-height: 1.4;
+    }
+
+    .footer-divider {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        margin: 2rem 0;
+    }
+
+    .back-to-top {
+        color: white;
+        text-decoration: none;
+        opacity: 0.9;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .back-to-top:hover {
+        color: white;
+        opacity: 1;
+        transform: translateY(-2px);
+    }
+</style>
+
+<style>
+    .navbar {
+        background-color: rgba(78, 110, 77, 0.95) !important;
+        backdrop-filter: blur(10px);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        color: white !important;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-text {
+        background: linear-gradient(45deg, #fff, #e0e0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-nav {
+        gap: 1rem;
+    }
+
+    .navbar-nav .nav-link {
+        color: white !important;
+        font-weight: 500;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem !important;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+    }
+
+    /* Profile Menu Styling */
+    .profile-menu .nav-link {
+        padding: 0.5rem !important;
+        font-size: 1.5rem;
+        color: white !important;
+        transition: all 0.3s ease;
+    }
+
+    .profile-menu .nav-link:hover {
+        transform: translateY(-2px);
+    }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        min-width: 200px;
+        margin-top: 0.5rem;
+    }
+
+    .dropdown-header {
+        color: #666;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+
+    .dropdown-item {
+        padding: 0.6rem 1rem;
+        color: #333;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: #4e6e4d;
+    }
+
+    .dropdown-item i {
+        font-size: 1.1rem;
+    }
+
+    /* Mobile Responsive Styling */
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+
+    .navbar-toggler i {
+        font-size: 1.5rem;
+    }
+
+    #carouselExampleIndicators {
+        margin-top: 0;
+        position: relative;
+        width: 100vw;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+    }
+
+    .carousel-item {
+        height: 70vh;
+    }
+
+    .carousel-item img {
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
+        filter: brightness(0.7); /* Darken the image slightly */
+    }
+
+    .carousel-caption {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        bottom: auto;
+        max-width: 800px;
+        width: 100%;
+        padding: 0 20px;
+        text-align: center;
+        background: transparent;
+    }
+
+    .carousel-caption h1 {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .carousel-caption p {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .carousel-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .carousel-buttons .btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background-color: #4e6e4d;
+        border-color: #4e6e4d;
+    }
+
+    .btn-primary:hover {
+        background-color: #4e6e4d;
+        border-color: #4e6e4d;
+    }
+
+    .btn-light {
+        color: #333;
+        background-color: #fff;
+        border-color: #fff;
+    }
+
+    .carousel-indicators {
+        bottom: 2rem;
+    }
+
+    .carousel-indicators button {
+        width: 12px;
+        height: 12px;
+        margin: 0 5px;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: none;
+    }
+
+    .carousel-indicators button.active {
+        background-color: #fff;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 5%;
+    }
+
+    /* Add these styles to your existing <style> section */
+
+    /* Marketing and Featurette Styles */
+    .container.marketing {
+        padding: 5rem 0;
+        max-width: 1140px;
+        margin: 0 auto;
+    }
+
+    /* Three Column Marketing Section */
+    .marketing .col-lg-4 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 0 1.5rem;
+    }
+
+    .marketing .col-lg-4 h2 {
+        color: #4e6e4d;
+        font-weight: 600;
+        font-size: 1.8rem;
+        margin: 1.5rem 0 1rem;
+    }
+
+    .marketing .col-lg-4 p {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .marketing .rounded-circle {
+        background-color: #4e6e4d;
+        padding: 0.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .marketing .col-lg-4:hover .rounded-circle {
+        transform: scale(1.05);
+    }
+
+
+    .book-amenities-section {
+        padding: 5rem 0;
+        background-color: #f8f9fa;
+    }
+
+    .amenity-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .amenity-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .amenity-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .amenity-content {
+        padding: 1.5rem;
+    }
+
+    .amenity-content h3 {
+        color: #4e6e4d;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .amenity-content p {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        min-height: 60px;
+    }
+
+    .amenity-details {
+        margin-bottom: 1.5rem;
+    }
+
+    .amenity-info {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .price {
+        color: #4e6e4d;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .duration {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .capacity {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .capacity i {
+        color: #4e6e4d;
+        font-size: 1.1rem;
+    }
+
+    .amenity-card .btn-primary {
+        background-color: #4e6e4d;
+        border-color: #4e6e4d;
+        padding: 0.75rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .amenity-card .btn-primary:hover {
+        background-color: #3d5a3c;
+        border-color: #3d5a3c;
+        transform: translateY(-2px);
+    }
+
+    .section-title {
+        color: #4e6e4d;
+        font-weight: 500;
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        color: #666;
+        margin-bottom: 3rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+<style>
+    .facilities-section {
+        padding: 5rem 0;
+        margin-top: 76px; 
+        background-color: white;
+    }
+
+    .section-title {
+        color: #4e6e4d;
+        font-weight: 500;
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        padding-top: 2rem;
+    }
+
+    .section-subtitle {
+        color: #666;
+        margin-bottom: 3rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 1.2rem;
+        line-height: 1.6;
+    }
+
+    .book-amenities-section {
+        padding: 5rem 0;
+        background-color: #f8f9fa;
+        margin-top: 2rem;
+    }
+</style>
+
+@*
+    IF IMPLEMENTAN UG DATABASE KANI GAMITON
+<div class="container mt-5">
+    <h1 class="text-center">Available Properties</h1>
+    <div class="row">
+        @foreach (var property in Model.Properties)
+        {
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <img src="@property.ImageUrl" class="card-img-top" alt="@property.Name">
+                    <div class="card-body">
+                        <h5 class="card-title">@property.Name</h5>
+                        <p class="card-text">@property.Description</p>
+                        <p class="card-text"><strong>Price:</strong> @property.Price</p>
+                        <a href="/Home/PropertyDetails/@property.Id" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+*@

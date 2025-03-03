@@ -18,7 +18,27 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Privacy()
+    public IActionResult Annoucements()
+    {
+        return View();
+    }
+
+    public IActionResult Facilities()
+    {
+        return View();
+    }
+
+    public IActionResult Services()
+    {
+        return View();
+    }
+
+    public IActionResult Contact()
+    {
+        return View();
+    }
+
+    public IActionResult Notifications()
     {
         return View();
     }

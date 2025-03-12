@@ -7,7 +7,13 @@ var connectionString = builder.Configuration.GetConnectionString("HomeDbContextC
 
 builder.Services.AddDbContext<HomeDbContext>(options => options.UseSqlServer(connectionString));
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<HomeDbContext>();
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
+})
+.AddEntityFrameworkStores<HomeDbContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

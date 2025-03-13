@@ -16,6 +16,7 @@ namespace HomeOwners.Areas.Identity.Pages.Account.Manage
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            Input = new InputModel();
         }
 
         [BindProperty]

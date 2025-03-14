@@ -4,48 +4,169 @@
     ViewData["Title"] = "User Details";
 }
 
-<div class="container mt-5 pt-3">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>User Details</h1>
-                <div>
-                    <a asp-page="./Edit" asp-route-id="@Model.UserDetails.Id" class="btn btn-primary">
-                        <i class="bi bi-pencil"></i> Edit
-                    </a>
-                    <a asp-page="./Users" class="btn btn-outline-secondary ms-2">
-                        <i class="bi bi-arrow-left"></i> Back to List
-                    </a>
-                </div>
-            </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <div class="d-flex align-items-center">
-                        <div class="avatar me-3 bg-light rounded-circle text-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-person text-muted" style="font-size: 1.5rem; line-height: 48px;"></i>
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" asp-area="Admin" asp-page="/Dashboard">
+            <span class="brand-text">ADMIN DASHBOARD</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Users</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Services</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Facilities</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Annoucements</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Reports</a>
+                </li>
+            </ul>
+
+            <!-- Profile Menu -->
+            <div class="nav-item dropdown profile-menu">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <span class="d-none d-lg-inline">@User.Identity?.Name</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                        <i class="bi bi-gear"></i> Profile Settings
+                    </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form class="form-inline" action="/Identity/Account/Logout" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="returnUrl" value="/Identity/Account/Login" />
+                            <button type="submit" class="dropdown-item">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container dashboard-container">
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-person-lines-fill me-2"></i>User Details</h2>
+            <p class="text-muted mb-0">View detailed user information</p>
+        </div>
+        <div>
+            <a asp-page="./Edit" asp-route-id="@Model.UserDetails.Id" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+            <a asp-page="./Users" class="btn btn-outline-secondary ms-2">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- User Profile Card -->
+        <div class="col-md-4 mb-4 mb-md-0">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center p-4">
+                    <div class="user-avatar mb-3 mx-auto">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <h4 class="card-title mb-1">@Model.UserDetails.UserName</h4>
+                    <p class="text-muted mb-3">@Model.UserDetails.Email</p>
+                    
+                    <div class="mb-3">
+                        @foreach (var role in Model.UserRoles)
+                        {
+                            <span class="badge bg-primary-soft me-1 mb-1">@role</span>
+                        }
+                    </div>
+                    
+                    <div class="user-meta">
+                        <div class="d-flex align-items-center justify-content-center mb-2">
+                            <i class="bi bi-calendar3 me-2 text-muted"></i>
+                            <span>Joined @(Model.UserDetails.CreatedDate?.ToString("MMMM dd, yyyy") ?? "Unknown")</span>
                         </div>
-                        <div>
-                            <h5 class="mb-0">@Model.UserDetails.UserName</h5>
-                            <small class="text-muted">
-                                @foreach (var role in Model.UserRoles)
+                        
+                        <div class="d-flex align-items-center justify-content-center">
+                            <i class="bi bi-shield-lock me-2 text-muted"></i>
+                            <span>Account Status: 
+                                @if (Model.UserDetails.LockoutEnd != null && Model.UserDetails.LockoutEnd > DateTimeOffset.Now)
                                 {
-                                    <span class="badge bg-primary me-1">@role</span>
+                                    <span class="text-danger">Locked</span>
                                 }
-                            </small>
+                                else
+                                {
+                                    <span class="text-success">Active</span>
+                                }
+                            </span>
                         </div>
                     </div>
                 </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid gap-2">
+                        <a asp-page="./Edit" asp-route-id="@Model.UserDetails.Id" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Edit User
+                        </a>
+                        <a asp-page="./Delete" asp-route-id="@Model.UserDetails.Id" class="btn btn-outline-danger">
+                            <i class="bi bi-trash"></i> Delete User
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Details Card -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" role="tab">
+                                <i class="bi bi-info-circle me-1"></i> Basic Information
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-3">Username</dt>
-                        <dd class="col-sm-9">@Model.UserDetails.UserName</dd>
+                    <dl class="row detail-list">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-person me-2 text-muted"></i>Username:</dt>
+                        <dd class="col-sm-8">@Model.UserDetails.UserName</dd>
 
-                        <dt class="col-sm-3">Email</dt>
-                        <dd class="col-sm-9">@Model.UserDetails.Email</dd>
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-envelope me-2 text-muted"></i>Email:</dt>
+                        <dd class="col-sm-8">@Model.UserDetails.Email</dd>
 
-                        <dt class="col-sm-3">Email Confirmed</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-check-circle me-2 text-muted"></i>Email Confirmed:</dt>
+                        <dd class="col-sm-8">
                             @if (Model.UserDetails.EmailConfirmed)
                             {
                                 <span class="badge bg-success">Confirmed</span>
@@ -56,13 +177,13 @@
                             }
                         </dd>
 
-                        <dt class="col-sm-3">Phone Number</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-telephone me-2 text-muted"></i>Phone Number:</dt>
+                        <dd class="col-sm-8">
                             @(string.IsNullOrEmpty(Model.UserDetails.PhoneNumber) ? "Not provided" : Model.UserDetails.PhoneNumber)
                         </dd>
 
-                        <dt class="col-sm-3">Phone Confirmed</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-check-circle me-2 text-muted"></i>Phone Confirmed:</dt>
+                        <dd class="col-sm-8">
                             @if (Model.UserDetails.PhoneNumberConfirmed)
                             {
                                 <span class="badge bg-success">Confirmed</span>
@@ -73,8 +194,8 @@
                             }
                         </dd>
 
-                        <dt class="col-sm-3">Two Factor Enabled</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-shield me-2 text-muted"></i>Two Factor Auth:</dt>
+                        <dd class="col-sm-8">
                             @if (Model.UserDetails.TwoFactorEnabled)
                             {
                                 <span class="badge bg-success">Enabled</span>
@@ -85,8 +206,8 @@
                             }
                         </dd>
 
-                        <dt class="col-sm-3">Lockout Enabled</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-lock me-2 text-muted"></i>Lockout Enabled:</dt>
+                        <dd class="col-sm-8">
                             @if (Model.UserDetails.LockoutEnabled)
                             {
                                 <span class="badge bg-info">Enabled</span>
@@ -97,8 +218,8 @@
                             }
                         </dd>
 
-                        <dt class="col-sm-3">Account Status</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-person-check me-2 text-muted"></i>Account Status:</dt>
+                        <dd class="col-sm-8">
                             @if (Model.UserDetails.LockoutEnd != null && Model.UserDetails.LockoutEnd > DateTimeOffset.Now)
                             {
                                 <span class="badge bg-danger">Locked Out</span>
@@ -110,18 +231,18 @@
                             }
                         </dd>
 
-                        <dt class="col-sm-3">Joined Date</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-calendar me-2 text-muted"></i>Joined Date:</dt>
+                        <dd class="col-sm-8">
                             @(Model.UserDetails.CreatedDate?.ToString("MMMM dd, yyyy") ?? "Unknown")
                         </dd>
 
-                        <dt class="col-sm-3">Roles</dt>
-                        <dd class="col-sm-9">
+                        <dt class="col-sm-4 text-sm-end"><i class="bi bi-person-badge me-2 text-muted"></i>User Roles:</dt>
+                        <dd class="col-sm-8">
                             @if (Model.UserRoles.Any())
                             {
                                 foreach (var role in Model.UserRoles)
                                 {
-                                    <span class="badge bg-primary me-1">@role</span>
+                                    <span class="badge bg-primary-soft me-1 mb-1">@role</span>
                                 }
                             }
                             else
@@ -131,20 +252,225 @@
                         </dd>
                     </dl>
                 </div>
-                <div class="card-footer bg-white d-flex justify-content-between">
-                    <a asp-page="./Delete" asp-route-id="@Model.UserDetails.Id" class="btn btn-outline-danger">
-                        <i class="bi bi-trash"></i> Delete User
-                    </a>
-                    <div>
-                        <a asp-page="./Edit" asp-route-id="@Model.UserDetails.Id" class="btn btn-outline-primary">
-                            <i class="bi bi-pencil"></i> Edit
-                        </a>
-                        <a asp-page="./Users" class="btn btn-outline-secondary ms-2">
-                            <i class="bi bi-arrow-left"></i> Back to List
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-light: #f8f9fa;
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+    }
+
+    body {
+        background-color: #f9f9f9;
+    }
+
+    .navbar {
+        background-color: var(--primary-color) !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        color: white !important;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-text {
+        background: linear-gradient(45deg, #fff, #e0e0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-nav {
+        gap: 0.5rem;
+    }
+
+        .navbar-nav .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.15);
+                transform: translateY(-1px);
+            }
+
+    .profile-menu .nav-link {
+        padding: 0.5rem !important;
+        color: white !important;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+    }
+
+        .profile-menu .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        min-width: 220px;
+        margin-top: 0.5rem;
+    }
+
+    .dropdown-header {
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+
+    .dropdown-item {
+        padding: 0.6rem 1rem;
+        color: var(--text-dark);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item i {
+            font-size: 1.1rem;
+        }
+
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler i {
+            font-size: 1.5rem;
+        }
+
+    .dashboard-container {
+        margin-top: 6rem;
+        padding-bottom: 2rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        padding-bottom: 1rem;
+    }
+
+        .dashboard-header h2 {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+    /* Page Header Styles */
+    .page-header h2 {
+        color: var(--primary-color);
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    /* User Details Styling */
+    .detail-list dt {
+        color: var(--text-dark);
+        font-weight: 600;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+
+    .detail-list dd {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .detail-list dd:last-of-type {
+        border-bottom: none;
+    }
+
+    /* User Avatar Styling */
+    .user-avatar {
+        width: 100px;
+        height: 100px;
+        background-color: var(--primary-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+    }
+
+    .user-avatar i {
+        font-size: 3rem;
+    }
+
+    /* Badge Styling */
+    .badge.bg-primary-soft {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+
+    /* Card & Tab Styling */
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Button Styles */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+</style>
+

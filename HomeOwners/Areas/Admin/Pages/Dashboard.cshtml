@@ -63,7 +63,8 @@
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" method="post">
+                        <form class="form-inline" action="/Identity/Account/Logout" method="post">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="returnUrl" value="/Identity/Account/Login" />
                             <button type="submit" class="dropdown-item">
                                 <i class="bi bi-box-arrow-right"></i> Logout
@@ -457,15 +458,15 @@
     }
     
     .service-icon {
-        background-color: var(--info-color);
+        background-color: var(--primary-color);
     }
     
     .facility-icon {
-        background-color: var(--warning-color);
+        background-color: var(--primary-color);
     }
     
     .revenue-icon {
-        background-color: var(--success-color);
+        background-color: var(--primary-color);
     }
 
     /* Chart Cards Styling */

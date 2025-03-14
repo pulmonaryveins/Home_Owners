@@ -63,7 +63,9 @@ namespace HomeOwners.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+
+            var id = RouteData.Values["id"]?.ToString();
+            if (id == null)
             {
                 return Page();
             }

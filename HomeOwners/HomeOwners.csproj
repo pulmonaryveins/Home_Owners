@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\images\logo\" />
     <Folder Include="wwwroot\images\assets\" />
   </ItemGroup>

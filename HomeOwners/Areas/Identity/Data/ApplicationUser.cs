@@ -9,7 +9,6 @@ namespace HomeOwners.Areas.Identity.Data;
 // Add profile data for application users by adding properties to the ApplicationUser class
 public class ApplicationUser : IdentityUser
 {
-    // Note: IdentityUser already includes Username property
-    // No need to add it explicitly
+    // Add CreatedDate property
+    public DateTime? CreatedDate { get; set; } = DateTime.Now;
 }
-

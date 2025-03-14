@@ -89,9 +89,17 @@ namespace HomeOwners.Areas.Identity.Pages.Account
 
                     // Check if the user is an admin and redirect accordingly
                     var user = await _userManager.FindByNameAsync(Input.Username);
-                    if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+                    if (user != null)
                     {
-                        return LocalRedirect("/Admin/Dashboard");
+                        // Check user roles and redirect accordingly
+                        if (await _userManager.IsInRoleAsync(user, "Admin"))
+                        {
+                            return LocalRedirect("/Admin/Dashboard");
+                        }
+                        else if (await _userManager.IsInRoleAsync(user, "Staff"))
+                        {
+                            return LocalRedirect("/Staff/Dashboard");
+                        }
                     }
 
                     return LocalRedirect(returnUrl);

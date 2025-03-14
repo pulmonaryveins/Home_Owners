@@ -25,6 +25,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RequireStaffRole", policy => policy.RequireRole("Staff"));
 });
 
 var app = builder.Build();
@@ -55,6 +56,12 @@ app.MapAreaControllerRoute(
     areaName: "Admin",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
+// Make sure this is added to enable Staff area routing
+app.MapAreaControllerRoute(
+    name: "staffArea",
+    areaName: "Staff",
+    pattern: "Staff/{controller=Dashboard}/{action=Index}/{id?}");
+
 app.MapRazorPages();
 
 // Create roles and admin user if they don't exist
@@ -67,6 +74,12 @@ using (var scope = app.Services.CreateScope())
     if (!await roleManager.RoleExistsAsync("Admin"))
     {
         await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+
+    // Create Staff role if it doesn't exist
+    if (!await roleManager.RoleExistsAsync("Staff"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Staff"));
     }
 
     // Create Admin user if it doesn't exist
@@ -85,6 +98,25 @@ using (var scope = app.Services.CreateScope())
         if (result.Succeeded)
         {
             await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
+    }
+
+    // Create Staff user if it doesn't exist - MOVED INSIDE THE USING BLOCK
+    string staffEmail = "staff@example.com";
+    if (await userManager.FindByEmailAsync(staffEmail) == null)
+    {
+        var staffUser = new ApplicationUser
+        {
+            UserName = "staff",
+            Email = staffEmail,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(staffUser, "Staff@123456"); // Change this to a secure password
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(staffUser, "Staff");
         }
     }
 }

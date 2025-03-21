@@ -1,0 +1,146 @@
+/* Announcements Section Styles */
+.announcements-section {
+    padding-top: 120px;
+    padding-bottom: 5rem;
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    color: #4e6e4d;
+    font-weight: 600;
+    font-size: 2.5rem;
+}
+
+/* Announcement Cards */
+.announcement-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    position: relative;
+    border: 1px solid rgba(78, 110, 77, 0.1);
+    transition: all 0.3s ease;
+}
+
+.announcement-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.announcement-card.urgent {
+    border-left: 4px solid #dc3545;
+}
+
+.announcement-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: #dc3545;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.announcement-card h3 {
+    color: #4e6e4d;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.announcement-meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.announcement-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+
+/* Forum Section Styles */
+.forum-section {
+    padding: 4rem 0;
+}
+
+.forum-categories {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.forum-categories .btn {
+    border-color: #4e6e4d;
+    color: #4e6e4d;
+}
+
+.forum-categories .btn.active,
+.forum-categories .btn:hover {
+    background-color: #4e6e4d;
+    color: white;
+}
+
+/* Thread Cards */
+.thread-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(78, 110, 77, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+/* Sidebar Widgets */
+.sidebar-widget {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* Calendar Events */
+.calendar-event {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+/* Poll Widget */
+.poll-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+/* Utility Classes */
+.btn-outline-primary {
+    color: #4e6e4d;
+    border-color: #4e6e4d;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:active {
+    color: white;
+    background-color: #4e6e4d;
+    border-color: #4e6e4d;
+}

@@ -1,13 +1,14 @@
-﻿@{
+﻿﻿@{
     ViewData["Title"] = "Facilities Page";
 }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
         <!-- Logo -->
         <a class="navbar-brand" href="/">
-            <span class="brand-text">HOMEOWNERS</span>
+            <span class="brand-text">Neighborly</span>
         </a>
 
         <!-- Mobile Toggle Button -->
@@ -37,31 +38,59 @@
                 </li>
             </ul>
 
-            <!-- Profile Menu -->
-            <div class="nav-item dropdown profile-menu">
-                <a class="nav-link dropdown-toggle" href="#" role="button"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle"></i>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li class="dropdown-header">Account</li>
-                    <li>
-                        <a class="dropdown-item" href="/Identity/Account/Login">
-                            <i class="bi bi-box-arrow-in-right"></i> Login
+            <!-- Replace your existing nav-items-right section with this updated version -->
+            <div class="nav-items-right">
+                <!-- Profile Menu -->
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
                         </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="/Identity/Account/Register">
-                            <i class="bi bi-person-plus"></i> Register
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-header">@User.Identity.Name</li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Home" asp-action="Favorites">
+                                    <i class="bi bi-heart"></i> Saved Properties
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
                         </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <a class="dropdown-item" href="/Identity/Account/Manage">
-                            <i class="bi bi-gear"></i> Profile Settings
-                        </a>
-                    </li>
-                </ul>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
             </div>
         </div>
     </div>
@@ -365,11 +394,11 @@
         margin-bottom: 2rem;
     }
 
-    .section-header h2 {
-        color: #4e6e4d;
-        font-weight: 600;
-        font-size: 2.5rem;
-    }
+        .section-header h2 {
+            color: #4e6e4d;
+            font-weight: 600;
+            font-size: 2.5rem;
+        }
 
     .announcement-card {
         background: white;
@@ -382,14 +411,14 @@
         transition: all 0.3s ease;
     }
 
-    .announcement-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
+        .announcement-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
 
-    .announcement-card.urgent {
-        border-left: 4px solid #dc3545;
-    }
+        .announcement-card.urgent {
+            border-left: 4px solid #dc3545;
+        }
 
     .announcement-badge {
         position: absolute;
@@ -434,7 +463,7 @@
         font-size: 0.9rem;
     }
 
-  
+
     .sidebar-widget {
         background: white;
         border-radius: 12px;
@@ -443,14 +472,14 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
 
-    .sidebar-widget h3 {
-        color: #4e6e4d;
-        font-size: 1.4rem;
-        margin-bottom: 1.5rem;
-        font-weight: 600;
-    }
+        .sidebar-widget h3 {
+            color: #4e6e4d;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
 
-    
+
     .calendar-event {
         display: flex;
         align-items: center;
@@ -462,29 +491,29 @@
         transition: all 0.3s ease;
     }
 
-    .calendar-event:hover {
-        transform: translateX(5px);
-        background: #f0f2f1;
-    }
+        .calendar-event:hover {
+            transform: translateX(5px);
+            background: #f0f2f1;
+        }
 
     .event-date {
         text-align: center;
         min-width: 60px;
     }
 
-    .event-date .date {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #4e6e4d;
-        line-height: 1;
-        display: block;
-    }
+        .event-date .date {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4e6e4d;
+            line-height: 1;
+            display: block;
+        }
 
-    .event-date .month {
-        font-size: 0.8rem;
-        color: #666;
-        text-transform: uppercase;
-    }
+        .event-date .month {
+            font-size: 0.8rem;
+            color: #666;
+            text-transform: uppercase;
+        }
 
     .event-details h4 {
         font-size: 1rem;
@@ -505,11 +534,11 @@
         padding: 1.5rem;
     }
 
-    .poll-card h4 {
-        color: #4e6e4d;
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-    }
+        .poll-card h4 {
+            color: #4e6e4d;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
 
     .poll-options {
         margin: 1rem 0;
@@ -678,15 +707,15 @@
         flex-wrap: wrap;
     }
 
-    .forum-categories .btn {
-        border-color: #4e6e4d;
-        color: #4e6e4d;
-    }
+        .forum-categories .btn {
+            border-color: #4e6e4d;
+            color: #4e6e4d;
+        }
 
-    .forum-categories .btn.active {
-        background-color: #4e6e4d;
-        color: white;
-    }
+            .forum-categories .btn.active {
+                background-color: #4e6e4d;
+                color: white;
+            }
 
     .thread-card {
         background: white;
@@ -699,14 +728,14 @@
         position: relative;
     }
 
-    .thread-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
+        .thread-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
 
-    .thread-card.featured {
-        border-left: 4px solid #4e6e4d;
-    }
+        .thread-card.featured {
+            border-left: 4px solid #4e6e4d;
+        }
 
     .thread-badge {
         position: absolute;
@@ -737,11 +766,11 @@
         flex: 1;
     }
 
-    .thread-meta h3 {
-        font-size: 1.2rem;
-        margin-bottom: 0.25rem;
-        color: #4e6e4d;
-    }
+        .thread-meta h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
+            color: #4e6e4d;
+        }
 
     .meta-info {
         font-size: 0.9rem;
@@ -763,16 +792,16 @@
         font-size: 0.9rem;
     }
 
-    .thread-stats span {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+        .thread-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .thread-stats i {
-        color: #4e6e4d;
-        font-size: 1rem;
-    }
+        .thread-stats i {
+            color: #4e6e4d;
+            font-size: 1rem;
+        }
 
     .forum-pagination .page-link {
         color: #4e6e4d;
@@ -790,11 +819,11 @@
         align-items: center;
     }
 
-    .forum-actions .btn {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
+        .forum-actions .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 </style>
 
 <style>
@@ -837,6 +866,7 @@
                 transform: translateY(-1px);
             }
 
+    /* Profile Menu Styling */
     .profile-menu .nav-link {
         padding: 0.5rem !important;
         font-size: 1.5rem;
@@ -881,7 +911,76 @@
             font-size: 1.1rem;
         }
 
+    /* Notification Styling */
+    .notification-menu .nav-link {
+        padding: 0.5rem !important;
+        font-size: 1.4rem;
+        color: white !important;
+        transition: all 0.3s ease;
+        position: relative;
+    }
 
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #dc3545;
+        color: white;
+        border-radius: 50%;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        border: 2px solid #4e6e4d;
+    }
+
+    .notification-dropdown {
+        min-width: 320px;
+        padding: 0.5rem;
+        margin-top: 0.7rem;
+    }
+
+        .notification-dropdown .dropdown-header {
+            color: #333;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .notification-dropdown .dropdown-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-radius: 6px;
+            margin: 0.2rem 0;
+        }
+
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-text {
+        color: #333;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .dropdown-item.unread {
+        background-color: #f8f9fa;
+    }
+
+    /* Mobile Responsive Styling */
     .navbar-toggler {
         border: none;
         padding: 0.5rem;
@@ -894,8 +993,6 @@
         .navbar-toggler i {
             font-size: 1.5rem;
         }
-
-   
     #carouselExampleIndicators {
         margin-top: 0;
         position: relative;
@@ -914,7 +1011,7 @@
             object-fit: cover;
             height: 100%;
             width: 100%;
-            filter: brightness(0.7); 
+            filter: brightness(0.7);
         }
 
     .carousel-caption {
@@ -1114,23 +1211,23 @@
         border-color: #4e6e4d;
     }
 
-    .btn-outline-primary:hover {
-        color: white;
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
-    }
+        .btn-outline-primary:hover {
+            color: white;
+            background-color: #4e6e4d;
+            border-color: #4e6e4d;
+        }
 
-    /* For active state buttons */
-    .btn-outline-primary:not(:disabled):not(.disabled):active,
-    .btn-outline-primary:not(:disabled):not(.disabled).active {
-        color: white;
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
-    }
+        /* For active state buttons */
+        .btn-outline-primary:not(:disabled):not(.disabled):active,
+        .btn-outline-primary:not(:disabled):not(.disabled).active {
+            color: white;
+            background-color: #4e6e4d;
+            border-color: #4e6e4d;
+        }
 
-    /* Ensure focus states maintain the same colors */
-    .btn-outline-primary:focus,
-    .btn-outline-primary.focus {
-        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.25);
-    }
+        /* Ensure focus states maintain the same colors */
+        .btn-outline-primary:focus,
+        .btn-outline-primary.focus {
+            box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.25);
+        }
 </style>

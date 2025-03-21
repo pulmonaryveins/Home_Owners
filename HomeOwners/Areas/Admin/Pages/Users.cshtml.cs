@@ -159,10 +159,15 @@ namespace HomeOwners.Areas.Admin.Pages
     {
         public int PageIndex { get; private set; }
         public int TotalPages { get; private set; }
+        public int PageSize { get; private set; }  // Add this property
+        public int TotalCount { get; private set; }  // Add this property
+
 
         public PaginatedList(List<T> items, int count, int pageIndex, int pageSize)
         {
             PageIndex = pageIndex;
+            PageSize = pageSize;  // Set the property
+            TotalCount = count;  // Set the total count
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             this.AddRange(items);
         }

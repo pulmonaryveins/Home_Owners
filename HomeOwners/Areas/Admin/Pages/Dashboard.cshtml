@@ -57,12 +57,6 @@
                     <span class="d-none d-lg-inline">@User.Identity?.Name</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
-                            <i class="bi bi-gear"></i> Profile Settings
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
                         <form class="form-inline" action="/Identity/Account/Logout" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="returnUrl" value="/Identity/Account/Login" />

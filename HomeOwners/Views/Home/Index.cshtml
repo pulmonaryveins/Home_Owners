@@ -9,7 +9,7 @@
     <div class="container">
         <!-- Logo -->
         <a class="navbar-brand" href="/">
-            <span class="brand-text">HOMEOWNERS</span>
+            <span class="brand-text">Neighborly</span>
         </a>
 
         <!-- Mobile Toggle Button -->
@@ -41,44 +41,6 @@
 
             <!-- Replace your existing nav-items-right section with this updated version -->
             <div class="nav-items-right">
-                <!-- Notifications -->
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <div class="nav-item notification-menu">
-                        <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" 
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bell-fill"></i>
-                            <span class="notification-badge">3</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end notification-dropdown">
-                            <li class="dropdown-header d-flex align-items-center">
-                                <span class="flex-grow-1">Notifications</span>
-                                <small class="text-primary">Mark all as read</small>
-                            </li>
-                            <li><a class="dropdown-item unread" href="#">
-                                <div class="notification-icon">
-                                    <i class="bi bi-envelope-fill text-primary"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <div class="notification-text">New message from Agent</div>
-                                    <small class="text-muted">2 minutes ago</small>
-                                </div>
-                            </a></li>
-                            <li><a class="dropdown-item" href="#">
-                                <div class="notification-icon">
-                                    <i class="bi bi-house-heart-fill text-success"></i>
-                                </div>
-                                <div class="notification-content">
-                                    <div class="notification-text">Property price updated</div>
-                                    <small class="text-muted">1 hour ago</small>
-                                </div>
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-center text-primary" href="/notifications">View All Notifications</a></li>
-                        </ul>
-                    </div>
-                }
-
                 <!-- Profile Menu -->
                 <div class="nav-item dropdown profile-menu">
                     @if (User.Identity.IsAuthenticated)
@@ -90,7 +52,7 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li class="dropdown-header">@User.Identity.Name</li>
                             <li>
-                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
                                     <i class="bi bi-gear"></i> Profile Settings
                                 </a>
                             </li>
@@ -146,7 +108,7 @@
         <div class="carousel-item active">
             <img src="/images/assets/background.jpg" class="d-block w-100" alt="Community Living">
             <div class="carousel-caption d-md-block">
-                <h1>Welcome Home</h1>
+                <h1>Welcome to Neighborly</h1>
                 <p>Stay connected with your community and manage your home effortlessly</p>
                 <div class="carousel-buttons">
                     <a asp-controller="Home" asp-action="Services" class="btn btn-primary">Explore Features</a>

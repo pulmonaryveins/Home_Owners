@@ -1,0 +1,761 @@
+﻿@page
+@model HomeOwners.Areas.Identity.Pages.Home.ProfileModel
+@using HomeOwners.Areas.Identity.Data
+@{
+    ViewData["Title"] = "Profile Management";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">HOMEOWNERS</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Facilities">Facilities</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Services">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Annoucements">Annoucements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Profile Menu -->
+            <div class="nav-items-right">
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-header">@User.Identity.Name</li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Home" asp-action="Favorites">
+                                    <i class="bi bi-heart"></i> Saved Properties
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container profile-container">
+    @if (TempData["StatusMessage"] != null)
+    {
+        <div class="alert @(TempData["StatusType"]?.ToString() == "Error" ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi @(TempData["StatusType"]?.ToString() == "Error" ? "bi-exclamation-triangle" : "bi-check-circle") me-2"></i>
+                <span>@TempData["StatusMessage"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="profile-sidebar">
+                <div class="profile-user-info text-center">
+                    <div class="avatar-container">
+                        <div class="avatar-circle">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <button class="avatar-edit-btn" title="Change Photo">
+                            <i class="bi bi-camera"></i>
+                        </button>
+                    </div>
+                    <h5 class="user-name mt-3 mb-1">@User.Identity?.Name</h5>
+                    <p class="user-role">Homeowner</p>
+                </div>
+                
+                <hr class="sidebar-divider">
+                
+                <ul class="nav nav-pills flex-column profile-nav" id="profileTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active" id="personal-tab" data-bs-toggle="tab" href="#personal" role="tab" aria-controls="personal" aria-selected="true">
+                            <i class="bi bi-person me-1"></i> Personal Information
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="security-tab" data-bs-toggle="tab" href="#security" role="tab" aria-controls="security" aria-selected="false">
+                            <i class="bi bi-shield-lock me-1"></i> Security
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="preferences-tab" data-bs-toggle="tab" href="#preferences" role="tab" aria-controls="preferences" aria-selected="false">
+                            <i class="bi bi-sliders me-1"></i> Preferences
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="col-lg-9">
+            <div class="tab-content profile-tab-content">
+                <!-- Personal Information Tab -->
+                <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form method="post">
+                                <div class="mb-3">
+                                    <label asp-for="Username" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-person text-muted"></i>
+                                        </span>
+                                        <input asp-for="Username" class="form-control border-start-0" placeholder="Enter your username" />
+                                    </div>
+                                    <span asp-validation-for="Username" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-envelope text-muted"></i>
+                                        </span>
+                                        <input asp-for="Email" class="form-control border-start-0" placeholder="Enter your email address" />
+                                    </div>
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="FullName" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-person-badge text-muted"></i>
+                                        </span>
+                                        <input asp-for="FullName" class="form-control border-start-0" placeholder="Enter your full name" />
+                                    </div>
+                                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                                </div>
+                                <div class="d-flex mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save me-1"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form method="post" asp-page-handler="UpdatePassword">
+                                <div class="mb-3">
+                                    <label asp-for="CurrentPassword" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-lock text-muted"></i>
+                                        </span>
+                                        <input asp-for="CurrentPassword" class="form-control border-start-0" placeholder="Enter your current password" />
+                                    </div>
+                                    <span asp-validation-for="CurrentPassword" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="NewPassword" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-key text-muted"></i>
+                                        </span>
+                                        <input asp-for="NewPassword" class="form-control border-start-0" placeholder="Enter your new password" />
+                                    </div>
+                                    <span asp-validation-for="NewPassword" class="text-danger small"></span>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ConfirmPassword" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-check-lg text-muted"></i>
+                                        </span>
+                                        <input asp-for="ConfirmPassword" class="form-control border-start-0" placeholder="Confirm your new password" />
+                                    </div>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                </div>
+                                <div class="d-flex mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-key me-1"></i> Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="password-info card h-100 bg-light border-0">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary">
+                                        <i class="bi bi-shield-lock me-1"></i>
+                                        Password Guidelines
+                                    </h5>
+                                    <ul class="list-unstyled small text-muted">
+                                        <li><i class="bi bi-check-circle me-1"></i> At least 8 characters</li>
+                                        <li><i class="bi bi-check-circle me-1"></i> Include uppercase letters</li>
+                                        <li><i class="bi bi-check-circle me-1"></i> Include lowercase letters</li>
+                                        <li><i class="bi bi-check-circle me-1"></i> Include numbers</li>
+                                        <li><i class="bi bi-check-circle me-1"></i> Include special characters</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-4">
+                    <div class="security-section">
+                        <h5><i class="bi bi-shield-check me-2"></i>Two-Factor Authentication</h5>
+                        <p class="text-muted">Enable two-factor authentication to add an extra layer of security to your account.</p>
+                        <button class="btn btn-outline-primary">
+                            <i class="bi bi-shield-plus me-1"></i> Set Up 2FA
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Preferences Tab -->
+                <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <form method="post" asp-page-handler="UpdatePreferences">
+                                <h5 class="mb-3">Notification Preferences</h5>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input asp-for="EmailNotifications" class="form-check-input" />
+                                        <label asp-for="EmailNotifications" class="form-check-label"></label>
+                                    </div>
+                                    <div class="text-muted small">Receive updates and notifications via email</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input asp-for="SmsNotifications" class="form-check-input" />
+                                        <label asp-for="SmsNotifications" class="form-check-label"></label>
+                                    </div>
+                                    <div class="text-muted small">Receive updates and notifications via SMS</div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input asp-for="MarketingEmails" class="form-check-input" />
+                                        <label asp-for="MarketingEmails" class="form-check-label"></label>
+                                    </div>
+                                    <div class="text-muted small">Receive marketing emails and newsletters</div>
+                                </div>
+                                <div class="d-flex mt-4">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save me-1"></i> Save Preferences
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        /* Primary Color Palette */
+        --primary-color: #4e6e4d;
+        --primary-dark: #4e6e4d;
+        --primary-light: rgba(46, 125, 50, 0.1);
+        --primary-lighter: rgba(46, 125, 50, 0.05);
+        /* Secondary Colors */
+        --secondary-color: #546e7a;
+        --secondary-dark: #37474f;
+        --secondary-light: rgba(84, 110, 122, 0.1);
+        /* Text Colors */
+        --text-light: #f8f9fa;
+        --text-dark: #263238;
+        --text-muted: #78909c;
+        /* Status Colors */
+        --success-color: #2e7d32;
+        --warning-color: #f57f17;
+        --danger-color: #c62828;
+        --info-color: #0277bd;
+        /* UI Elements */
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        --border-radius: 8px;
+        --transition-speed: 0.3s;
+    }
+
+    /* Updated Navbar Styling */
+    .navbar {
+        background-color: var(--primary-color) !important;
+        backdrop-filter: blur(10px);
+        padding: 0.75rem 0;
+        transition: var(--transition-speed);
+    }
+
+    /* Profile Hero Section */
+    .profile-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: var(--text-light);
+        padding: 7rem 0 4rem;
+        margin-bottom: 3rem;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+        box-shadow: var(--card-shadow);
+    }
+
+    /* Profile Sidebar */
+    .profile-sidebar {
+        background: var(--text-light);
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        padding: 2rem 1.5rem;
+    }
+
+    .profile-nav .nav-link {
+        color: var(--text-dark);
+        border-radius: var(--border-radius);
+        transition: var(--transition-speed);
+    }
+
+    .profile-nav .nav-link:hover {
+        background-color: var(--primary-lighter);
+        color: var(--primary-color);
+    }
+
+    .profile-nav .nav-link.active {
+        background-color: var(--primary-color);
+        color: var(--text-light);
+    }
+
+    /* Content Cards */
+    .content-card {
+        background: var(--text-light);
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        padding: 2rem;
+    }
+
+    .content-header h3 {
+        color: var(--primary-color);
+    }
+
+    /* Form Controls */
+    .form-control {
+        border-radius: var(--border-radius);
+        transition: var(--transition-speed);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem var(--primary-light);
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        border-radius: var(--border-radius);
+        transition: var(--transition-speed);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var (--primary-color);
+        border-radius: var(--border-radius);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: var(--text-light);
+    }
+
+    /* Text Colors */
+    .text-muted {
+        color: var(--text-muted) !important;
+    }
+
+    /* Status Alerts */
+    .alert-success {
+        background-color: var(--success-color);
+        color: var(--text-light);
+    }
+
+    .alert-danger {
+        background-color: var(--danger-color);
+        color: var (--text-light);
+    }
+
+    .alert-warning {
+        background-color: var(--warning-color);
+        color: var(--text-light);
+    }
+
+    .alert-info {
+        background-color: var(--info-color);
+        color: var(--text-light);
+    }
+
+    /* Avatar Styling */
+    .avatar-circle {
+        background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .avatar-edit-btn {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .avatar-edit-btn:hover {
+        background: var(--primary-color);
+        color: var(--text-light);
+    }
+
+    /* Security Guidelines */
+    .security-tips {
+        background-color: var(--primary-lighter);
+        border-radius: var(--border-radius);
+    }
+
+    .security-tips i {
+        color: var(--success-color);
+    }
+
+    /* Remove any duplicate or conflicting styles */
+    .navbar {
+        background-color: rgba(78, 110, 77, 0.95) !important;
+        backdrop-filter: blur(10px);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        color: white !important;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-text {
+        background: linear-gradient(45deg, #fff, #e0e0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-nav {
+        gap: 1rem;
+    }
+
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.1);
+                transform: translateY(-1px);
+            }
+
+    /* Profile Menu Styling */
+    .profile-menu .nav-link {
+        padding: 0.5rem !important;
+        font-size: 1.5rem;
+        color: white !important;
+        transition: all 0.3s ease;
+    }
+
+        .profile-menu .nav-link:hover {
+            transform: translateY(-2px);
+        }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        min-width: 200px;
+        margin-top: 0.5rem;
+    }
+
+    .dropdown-header {
+        color: #666;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+
+    .dropdown-item {
+        padding: 0.6rem 1rem;
+        color: #333;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .dropdown-item:hover {
+            background-color: rgba(78, 110, 77, 0.1);
+            color: #4e6e4d;
+        }
+
+        .dropdown-item i {
+            font-size: 1.1rem;
+        }
+
+    /* Mobile Responsive Styling */
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler i {
+            font-size: 1.5rem;
+        }
+
+    /* Profile Management Styling */
+    .profile-container {
+        margin-top: 5rem;
+        padding: 2rem 0;
+    }
+
+    .profile-header {
+        margin-bottom: 2rem;
+    }
+
+    .profile-card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .profile-avatar .avatar-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #ccc;
+    }
+
+    .password-info {
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .security-section {
+        margin-top: 2rem;
+    }
+
+    /* Hero Section */
+    .profile-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 7rem 0 4rem;
+        margin-bottom: 3rem;
+        border-radius: 0 0 30px 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    .hero-image {
+        max-height: 200px;
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+    }
+    
+    /* Profile Container */
+    .profile-container {
+        padding-bottom: 4rem;
+    }
+    
+    /* Profile Sidebar */
+    .profile-sidebar {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        padding: 2rem 1.5rem;
+    }
+    
+    .avatar-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1rem;
+    }
+    
+    .avatar-circle {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+    }
+    
+    .avatar-edit-btn {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 40px;
+        height: 40px;
+        background: white;
+        border: 2px solid var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: var(--primary-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .avatar-edit-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Add the rest of your existing styles here */
+    .profile-form label {
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-form .form-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border-color);
+        border-left: none;
+        font-size: 1rem;
+    }
+    
+    .profile-form .input-group-text {
+        border: 1px solid var(--border-color);
+        border-right: none;
+        color: var(--text-muted);
+    }
+    
+    .profile-form .btn {
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+    }
+
+    /* Content Card Styling */
+    .content-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .content-header {
+        margin-bottom: 2rem;
+    }
+    
+    .content-header h3 {
+        color: var(--primary-color);
+        font-size: 1.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<script>
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.closest('.input-group').querySelector('input');
+            const icon = this.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+    });
+</script>

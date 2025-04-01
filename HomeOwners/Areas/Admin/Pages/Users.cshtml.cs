@@ -8,16 +8,17 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using HomeOwners.Models.Users;
 
 namespace HomeOwners.Areas.Admin.Pages
 {
     [Authorize(Policy = "RequireAdminRole")]
     public class UsersModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UsersModel(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UsersModel(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -94,7 +95,7 @@ namespace HomeOwners.Areas.Admin.Pages
                 SortDirection = "asc";
             }
 
-            // Get all users
+            // Get all users - sort by username and email only at DB level
             var users = _userManager.Users.AsQueryable();
 
             // Apply search filter
@@ -103,7 +104,7 @@ namespace HomeOwners.Areas.Admin.Pages
                 users = users.Where(u => u.UserName.Contains(searchString) || u.Email.Contains(searchString));
             }
 
-            // Apply sorting
+            // Apply sorting - but only on username and email since those are properties of IdentityUser
             switch (sortOrder)
             {
                 case "name_desc":
@@ -114,12 +115,6 @@ namespace HomeOwners.Areas.Admin.Pages
                     break;
                 case "email_desc":
                     users = users.OrderByDescending(u => u.Email);
-                    break;
-                case "date":
-                    users = users.OrderBy(u => u.CreatedDate);
-                    break;
-                case "date_desc":
-                    users = users.OrderByDescending(u => u.CreatedDate);
                     break;
                 default:
                     users = users.OrderBy(u => u.UserName);
@@ -140,14 +135,41 @@ namespace HomeOwners.Areas.Admin.Pages
                     continue;
                 }
 
+                // Try to determine the user's creation date
+                DateTime joinDate = DateTime.Now; // Default value
+
+                // Check if the user is one of our custom user types and extract the CreatedDate
+                if (user is AdminUser adminUser)
+                {
+                    joinDate = adminUser.CreatedDate;
+                }
+                else if (user is StaffUser staffUser)
+                {
+                    joinDate = staffUser.CreatedDate;
+                }
+                else if (user is HomeOwnerUser homeOwnerUser)
+                {
+                    joinDate = homeOwnerUser.CreatedDate;
+                }
+
                 userViewModels.Add(new UserViewModel
                 {
                     Id = user.Id,
                     UserName = user.UserName,
                     Email = user.Email,
                     Roles = roles.ToList(),
-                    JoinDate = user.CreatedDate ?? DateTime.Now
+                    JoinDate = joinDate
                 });
+            }
+
+            // Handle date sorting in memory since we've already populated the JoinDate field
+            if (sortOrder == "date")
+            {
+                userViewModels = userViewModels.OrderBy(u => u.JoinDate).ToList();
+            }
+            else if (sortOrder == "date_desc")
+            {
+                userViewModels = userViewModels.OrderByDescending(u => u.JoinDate).ToList();
             }
 
             int pageSize = 10;
@@ -159,15 +181,14 @@ namespace HomeOwners.Areas.Admin.Pages
     {
         public int PageIndex { get; private set; }
         public int TotalPages { get; private set; }
-        public int PageSize { get; private set; }  // Add this property
-        public int TotalCount { get; private set; }  // Add this property
-
+        public int PageSize { get; private set; }
+        public int TotalCount { get; private set; }
 
         public PaginatedList(List<T> items, int count, int pageIndex, int pageSize)
         {
             PageIndex = pageIndex;
-            PageSize = pageSize;  // Set the property
-            TotalCount = count;  // Set the total count
+            PageSize = pageSize;
+            TotalCount = count;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             this.AddRange(items);
         }

@@ -57,9 +57,8 @@
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                        <form class="form-inline" action="/Identity/Account/Logout" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="returnUrl" value="/Identity/Account/Login" />
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                              asp-route-returnUrl="/Identity/Account/Login" method="post">
                             <button type="submit" class="dropdown-item">
                                 <i class="bi bi-box-arrow-right"></i> Logout
                             </button>

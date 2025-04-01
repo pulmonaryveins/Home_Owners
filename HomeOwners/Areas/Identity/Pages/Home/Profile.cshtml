@@ -153,7 +153,7 @@
                 <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
                     <div class="row">
                         <div class="col-md-8">
-                            <form method="post">
+                            <form method="post" asp-page-handler="UpdatePersonal">
                                 <div class="mb-3">
                                     <label asp-for="Username" class="form-label fw-medium"></label>
                                     <div class="input-group shadow-sm">
@@ -268,7 +268,7 @@
                 <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
                     <div class="row">
                         <div class="col-md-8">
-                            <form method="post" asp-page-handler="UpdatePreferences">
+                            <form method="post" asp-page-handler="UpdatePreferencesAsync">
                                 <h5 class="mb-3">Notification Preferences</h5>
                                 <div class="mb-3">
                                     <div class="form-check form-switch">

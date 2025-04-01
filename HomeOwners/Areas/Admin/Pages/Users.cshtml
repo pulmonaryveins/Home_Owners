@@ -57,13 +57,13 @@
                     <span class="d-none d-lg-inline">@User.Identity?.Name</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                        <form class="form-inline" action="/Identity/Account/Logout" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="returnUrl" value="/Identity/Account/Login" />
-                            <button type="submit" class="dropdown-item">
-                                <i class="bi bi-box-arrow-right"></i> Logout
-                            </button>
-                        </form>
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                          asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </form>
                     </li>
                 </ul>
             </div>
@@ -96,10 +96,10 @@
                 <div class="col-md-6">
                     <form method="get" class="search-form">
                         <div class="input-group">
-                            <input type="text" 
-                                   name="searchString" 
-                                   value="@Model.CurrentFilter" 
-                                   class="form-control" 
+                            <input type="text"
+                                   name="searchString"
+                                   value="@Model.CurrentFilter"
+                                   class="form-control"
                                    placeholder="Search by name or email..."
                                    aria-label="Search users" />
                             <button type="submit" class="btn btn-primary">
@@ -111,9 +111,9 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <div class="dropdown">
-                        <button type="button" 
-                                class="btn btn-outline-primary dropdown-toggle" 
-                                data-bs-toggle="dropdown" 
+                        <button type="button"
+                                class="btn btn-outline-primary dropdown-toggle"
+                                data-bs-toggle="dropdown"
                                 aria-expanded="false">
                             <i class="bi bi-filter"></i>
                             <span class="ms-1">@(string.IsNullOrEmpty(Model.RoleFilter) ? "All Users" : Model.RoleFilter)</span>
@@ -134,9 +134,9 @@
                 <thead>
                     <tr>
                         <th>
-                            <a class="sort-link" asp-page="./Users" 
-                               asp-route-sortOrder="@Model.NameSort" 
-                               asp-route-currentFilter="@Model.CurrentFilter" 
+                            <a class="sort-link" asp-page="./Users"
+                               asp-route-sortOrder="@Model.NameSort"
+                               asp-route-currentFilter="@Model.CurrentFilter"
                                asp-route-roleFilter="@Model.RoleFilter">
                                 Username
                                 @if (Model.SortField == "name")
@@ -146,9 +146,9 @@
                             </a>
                         </th>
                         <th>
-                            <a class="sort-link" asp-page="./Users" 
-                               asp-route-sortOrder="@Model.EmailSort" 
-                               asp-route-currentFilter="@Model.CurrentFilter" 
+                            <a class="sort-link" asp-page="./Users"
+                               asp-route-sortOrder="@Model.EmailSort"
+                               asp-route-currentFilter="@Model.CurrentFilter"
                                asp-route-roleFilter="@Model.RoleFilter">
                                 Email
                                 @if (Model.SortField == "email")
@@ -159,9 +159,9 @@
                         </th>
                         <th>Roles</th>
                         <th>
-                            <a class="sort-link" asp-page="./Users" 
-                               asp-route-sortOrder="@Model.DateSort" 
-                               asp-route-currentFilter="@Model.CurrentFilter" 
+                            <a class="sort-link" asp-page="./Users"
+                               asp-route-sortOrder="@Model.DateSort"
+                               asp-route-currentFilter="@Model.CurrentFilter"
                                asp-route-roleFilter="@Model.RoleFilter">
                                 Joined
                                 @if (Model.SortField == "date")
@@ -197,15 +197,15 @@
                                 <td>@user.JoinDate.ToString("MMM dd, yyyy")</td>
                                 <td>
                                     <div class="action-buttons">
-                                        <a asp-page="./Edit" asp-route-id="@user.Id" 
+                                        <a asp-page="./Edit" asp-route-id="@user.Id"
                                            class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a asp-page="./Details" asp-route-id="@user.Id" 
+                                        <a asp-page="./Details" asp-route-id="@user.Id"
                                            class="btn btn-sm btn-outline-info">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a asp-page="./Delete" asp-route-id="@user.Id" 
+                                        <a asp-page="./Delete" asp-route-id="@user.Id"
                                            class="btn btn-sm btn-outline-danger">
                                             <i class="bi bi-trash"></i>
                                         </a>
@@ -239,50 +239,50 @@
                             var nextDisabled = !Model.Users.HasNextPage ? "disabled" : "";
                         }
                         <li class="page-item @prevDisabled">
-                            <a class="page-link" asp-page="./Users" 
-                               asp-route-pageIndex="1" 
-                               asp-route-currentFilter="@Model.CurrentFilter" 
-                               asp-route-sortOrder="@Model.CurrentSort" 
+                            <a class="page-link" asp-page="./Users"
+                               asp-route-pageIndex="1"
+                               asp-route-currentFilter="@Model.CurrentFilter"
+                               asp-route-sortOrder="@Model.CurrentSort"
                                asp-route-roleFilter="@Model.RoleFilter">
                                 <i class="bi bi-chevron-double-left"></i>
                             </a>
                         </li>
                         <li class="page-item @prevDisabled">
-                            <a class="page-link" asp-page="./Users" 
-                               asp-route-pageIndex="@(Model.Users.PageIndex - 1)" 
-                               asp-route-currentFilter="@Model.CurrentFilter" 
-                               asp-route-sortOrder="@Model.CurrentSort" 
+                            <a class="page-link" asp-page="./Users"
+                               asp-route-pageIndex="@(Model.Users.PageIndex - 1)"
+                               asp-route-currentFilter="@Model.CurrentFilter"
+                               asp-route-sortOrder="@Model.CurrentSort"
                                asp-route-roleFilter="@Model.RoleFilter">
                                 <i class="bi bi-chevron-left"></i>
                             </a>
                         </li>
 
-                        @for (var i = Math.Max(1, Model.Users.PageIndex - 2); 
-                              i <= Math.Min(Model.Users.TotalPages, Model.Users.PageIndex + 2); i++)
+                        @for (var i = Math.Max(1, Model.Users.PageIndex - 2);
+                       i <= Math.Min(Model.Users.TotalPages, Model.Users.PageIndex + 2); i++)
                         {
                             <li class="page-item @(i == Model.Users.PageIndex ? "active" : "")">
-                                <a class="page-link" asp-page="./Users" 
-                                   asp-route-pageIndex="@i" 
-                                   asp-route-currentFilter="@Model.CurrentFilter" 
-                                   asp-route-sortOrder="@Model.CurrentSort" 
+                                <a class="page-link" asp-page="./Users"
+                                   asp-route-pageIndex="@i"
+                                   asp-route-currentFilter="@Model.CurrentFilter"
+                                   asp-route-sortOrder="@Model.CurrentSort"
                                    asp-route-roleFilter="@Model.RoleFilter">@i</a>
                             </li>
                         }
 
                         <li class="page-item @nextDisabled">
-                            <a class="page-link" asp-page="./Users" 
-                               asp-route-pageIndex="@(Model.Users.PageIndex + 1)" 
-                               asp-route-currentFilter="@Model.CurrentFilter" 
-                               asp-route-sortOrder="@Model.CurrentSort" 
+                            <a class="page-link" asp-page="./Users"
+                               asp-route-pageIndex="@(Model.Users.PageIndex + 1)"
+                               asp-route-currentFilter="@Model.CurrentFilter"
+                               asp-route-sortOrder="@Model.CurrentSort"
                                asp-route-roleFilter="@Model.RoleFilter">
                                 <i class="bi bi-chevron-right"></i>
                             </a>
                         </li>
                         <li class="page-item @nextDisabled">
-                            <a class="page-link" asp-page="./Users" 
-                               asp-route-pageIndex="@Model.Users.TotalPages" 
-                               asp-route-currentFilter="@Model.CurrentFilter" 
-                               asp-route-sortOrder="@Model.CurrentSort" 
+                            <a class="page-link" asp-page="./Users"
+                               asp-route-pageIndex="@Model.Users.TotalPages"
+                               asp-route-currentFilter="@Model.CurrentFilter"
+                               asp-route-sortOrder="@Model.CurrentSort"
                                asp-route-roleFilter="@Model.RoleFilter">
                                 <i class="bi bi-chevron-double-right"></i>
                             </a>
@@ -504,11 +504,11 @@
             align-items: center;
         }
 
-    /* Additional Custom Styles */
-    .dashboard-header h2 {
-        color: var(--primary-color);
-        font-size: 1.5rem;
-    }
+        /* Additional Custom Styles */
+        .dashboard-header h2 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
 
     .search-form .form-control {
         border-right: 0;
@@ -524,12 +524,12 @@
         margin: 0;
     }
 
-    .user-table th {
-        background-color: var(--primary-lighter);
-        padding: 1rem;
-        font-weight: 600;
-        border-bottom: 2px solid var(--primary-light);
-    }
+        .user-table th {
+            background-color: var(--primary-lighter);
+            padding: 1rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-light);
+        }
 
     .sort-link {
         color: var(--text-dark);
@@ -539,9 +539,9 @@
         gap: 0.5rem;
     }
 
-    .sort-link:hover {
-        color: var(--primary-color);
-    }
+        .sort-link:hover {
+            color: var(--primary-color);
+        }
 
     .user-info .avatar {
         width: 32px;
@@ -560,9 +560,9 @@
         justify-content: flex-end;
     }
 
-    .action-buttons .btn {
-        padding: 0.25rem 0.5rem;
-    }
+        .action-buttons .btn {
+            padding: 0.25rem 0.5rem;
+        }
 
     .badge.bg-primary-light {
         background-color: var(--primary-light);

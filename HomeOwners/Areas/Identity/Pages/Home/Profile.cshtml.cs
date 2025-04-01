@@ -9,14 +9,14 @@ namespace HomeOwners.Areas.Identity.Pages.Home
 {
     public class ProfileModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager; // Change this
-        private readonly SignInManager<ApplicationUser> _signInManager; // Change this
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         // Add your user preferences service if you have one
         // private readonly IUserPreferencesService _preferencesService;
 
         public ProfileModel(
-            UserManager<ApplicationUser> userManager, // Change this
-            SignInManager<ApplicationUser> signInManager) // Change this
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
                                                           
         {
             _userManager = userManager;
@@ -76,25 +76,12 @@ namespace HomeOwners.Areas.Identity.Pages.Home
 
             Username = user.UserName;
             Email = user.Email;
-            
-            // Get custom user properties if you have them
-            // You might need to fetch from another table or use claims
-            // Example using a custom user class:
-            // if (user is ApplicationUser appUser)
-            // {
-            //     FullName = appUser.FullName;
-            // }
-            
-            // For preferences, you might have a separate service
-            // var preferences = await _preferencesService.GetUserPreferencesAsync(user.Id);
-            // EmailNotifications = preferences.EmailNotifications;
-            // SmsNotifications = preferences.SmsNotifications;
-            // MarketingEmails = preferences.MarketingEmails;
+            FullName = user.FullName;
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostUpdatePersonalAsync()
         {
             if (!ModelState.IsValid)
             {
@@ -109,8 +96,11 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                 return Page();
             }
 
+            bool hasChanges = false;
+
             if (user.UserName != Username)
             {
+                hasChanges = true;
                 var setUsernameResult = await _userManager.SetUserNameAsync(user, Username);
                 if (!setUsernameResult.Succeeded)
                 {
@@ -126,6 +116,7 @@ namespace HomeOwners.Areas.Identity.Pages.Home
 
             if (user.Email != Email)
             {
+                hasChanges = true;
                 var setEmailResult = await _userManager.SetEmailAsync(user, Email);
                 if (!setEmailResult.Succeeded)
                 {
@@ -138,28 +129,54 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                     return Page();
                 }
             }
-            
-            // If you have custom user properties like FullName, update them here
-            // Example:
-            // if (user is ApplicationUser appUser)
-            // {
-            //     appUser.FullName = FullName;
-            //     await _userManager.UpdateAsync(appUser);
-            // }
 
-            // Force a refresh sign-in to update any claim-based values
-            await _signInManager.RefreshSignInAsync(user);
+            if (user.FullName != FullName)
+            {
+                hasChanges = true;
+                user.FullName = FullName;
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    foreach (var error in updateResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    TempData["StatusMessage"] = "Error: Full name could not be updated.";
+                    TempData["StatusType"] = "Error";
+                    return Page();
+                }
+            }
 
-            TempData["StatusMessage"] = "Your profile has been updated successfully.";
-            TempData["StatusType"] = "Success";
-            
+            if (hasChanges)
+            {
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["StatusMessage"] = "Your profile has been updated successfully.";
+                TempData["StatusType"] = "Success";
+            }
+            else
+            {
+                TempData["StatusMessage"] = "No changes detected.";
+                TempData["StatusType"] = "Info";
+            }
+
             return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostUpdatePasswordAsync()
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrEmpty(CurrentPassword) || string.IsNullOrEmpty(NewPassword) || string.IsNullOrEmpty(ConfirmPassword))
             {
+                ModelState.AddModelError(string.Empty, "All password fields are required.");
+                TempData["StatusMessage"] = "Error: All password fields are required.";
+                TempData["StatusType"] = "Error";
+                return Page();
+            }
+
+            if (NewPassword != ConfirmPassword)
+            {
+                ModelState.AddModelError(string.Empty, "The new password and confirmation password do not match.");
+                TempData["StatusMessage"] = "Error: The new password and confirmation password do not match.";
+                TempData["StatusType"] = "Error";
                 return Page();
             }
 
@@ -188,6 +205,11 @@ namespace HomeOwners.Areas.Identity.Pages.Home
             
             TempData["StatusMessage"] = "Your password has been changed successfully.";
             TempData["StatusType"] = "Success";
+            
+            // Clear password fields
+            CurrentPassword = string.Empty;
+            NewPassword = string.Empty;
+            ConfirmPassword = string.Empty;
             
             return RedirectToPage();
         }

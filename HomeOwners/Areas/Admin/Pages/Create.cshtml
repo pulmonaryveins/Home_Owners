@@ -57,13 +57,13 @@
                     <span class="d-none d-lg-inline">@User.Identity?.Name</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                        <form class="form-inline" action="/Identity/Account/Logout" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="returnUrl" value="/Identity/Account/Login" />
-                            <button type="submit" class="dropdown-item">
-                                <i class="bi bi-box-arrow-right"></i> Logout
-                            </button>
-                        </form>
+                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                          asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="dropdown-item">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </form>
                     </li>
                 </ul>
             </div>

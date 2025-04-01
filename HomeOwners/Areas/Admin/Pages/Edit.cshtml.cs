@@ -9,18 +9,19 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using HomeOwners.Models.Users; // Add this import
 
 namespace HomeOwners.Areas.Admin.Pages
 {
     [Authorize(Policy = "RequireAdminRole")]
     public class EditModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<EditModel> _logger;
 
         public EditModel(
-            UserManager<ApplicationUser> userManager,
+            UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<EditModel> logger)
         {
@@ -34,6 +35,7 @@ namespace HomeOwners.Areas.Admin.Pages
 
         public List<string> AvailableRoles { get; set; }
         public string UserId { get; set; }
+        public string UserType { get; set; }
 
         public class InputModel
         {
@@ -79,6 +81,24 @@ namespace HomeOwners.Areas.Admin.Pages
             }
 
             UserId = user.Id;
+
+            // Set user type based on actual type
+            if (user is AdminUser)
+            {
+                UserType = "Admin";
+            }
+            else if (user is StaffUser)
+            {
+                UserType = "Staff";
+            }
+            else if (user is HomeOwnerUser)
+            {
+                UserType = "HomeOwner";
+            }
+            else
+            {
+                UserType = "Standard";
+            }
 
             Input = new InputModel
             {

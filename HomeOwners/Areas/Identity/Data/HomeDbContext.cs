@@ -1,4 +1,5 @@
-﻿using HomeOwners.Models.Users;
+﻿using HomeOwners.Models;
+using HomeOwners.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<AdminUser> AdminUsers { get; set; }
         public DbSet<StaffUser> StaffUsers { get; set; }
         public DbSet<HomeOwnerUser> HomeOwnerUsers { get; set; }
+        public DbSet<UserPreferences> UserPreferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -32,6 +34,11 @@ namespace HomeOwners.Areas.Identity.Data
             builder.Entity<AdminUser>().ToTable("AdminUsers");
             builder.Entity<StaffUser>().ToTable("StaffUsers");
             builder.Entity<HomeOwnerUser>().ToTable("HomeOwnerUsers");
+
+            builder.Entity<UserPreferences>()
+                .HasOne(p => p.User)
+                .WithOne(u => u.Preferences)
+                .HasForeignKey<UserPreferences>(p => p.UserId);
         }
     }
 }

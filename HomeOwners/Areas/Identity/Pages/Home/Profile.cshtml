@@ -12,7 +12,7 @@
     <div class="container">
         <!-- Logo -->
         <a class="navbar-brand" href="/">
-            <span class="brand-text">HOMEOWNERS</span>
+            <span class="brand-text">Neighborly</span>
         </a>
 
         <!-- Mobile Toggle Button -->
@@ -42,8 +42,9 @@
                 </li>
             </ul>
 
-            <!-- Profile Menu -->
+            <!-- Replace your existing nav-items-right section with this updated version -->
             <div class="nav-items-right">
+                <!-- Profile Menu -->
                 <div class="nav-item dropdown profile-menu">
                     @if (User.Identity.IsAuthenticated)
                     {
@@ -52,7 +53,6 @@
                             <i class="bi bi-person-circle"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li class="dropdown-header">@User.Identity.Name</li>
                             <li>
                                 <a class="dropdown-item" asp-controller="Home" asp-action="Favorites">
                                     <i class="bi bi-heart"></i> Saved Properties
@@ -61,7 +61,8 @@
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
-                                      asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
                                     <button type="submit" class="dropdown-item">
                                         <i class="bi bi-box-arrow-right"></i> Logout
                                     </button>
@@ -96,17 +97,6 @@
 
 <!-- Main Content -->
 <div class="container profile-container">
-    @if (TempData["StatusMessage"] != null)
-    {
-        <div class="alert @(TempData["StatusType"]?.ToString() == "Error" ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
-            <div class="d-flex align-items-center">
-                <i class="bi @(TempData["StatusType"]?.ToString() == "Error" ? "bi-exclamation-triangle" : "bi-check-circle") me-2"></i>
-                <span>@TempData["StatusMessage"]</span>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
     <div class="row">
         <!-- Profile Sidebar -->
         <div class="col-lg-3 mb-4">
@@ -120,12 +110,23 @@
                             <i class="bi bi-camera"></i>
                         </button>
                     </div>
-                    <h5 class="user-name mt-3 mb-1">@User.Identity?.Name</h5>
+                    <h5 class="user-name mt-3 mb-1">@Model.FullName</h5>
                     <p class="user-role">Homeowner</p>
+
+                    @if (!string.IsNullOrEmpty(Model.AccountStatus))
+                    {
+                        <div class="mt-2">
+                            <span class="badge rounded-pill
+                                @(Model.AccountStatus == "approved" ? "bg-success" :
+                                  Model.AccountStatus == "pending" ? "bg-warning text-dark" : "bg-danger")">
+                                @Model.AccountStatus.ToUpper()
+                            </span>
+                        </div>
+                    }
                 </div>
-                
+
                 <hr class="sidebar-divider">
-                
+
                 <ul class="nav nav-pills flex-column profile-nav" id="profileTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <a class="nav-link active" id="personal-tab" data-bs-toggle="tab" href="#personal" role="tab" aria-controls="personal" aria-selected="true">
@@ -145,16 +146,22 @@
                 </ul>
             </div>
         </div>
-        
+
         <!-- Main Content Area -->
         <div class="col-lg-9">
             <div class="tab-content profile-tab-content">
                 <!-- Personal Information Tab -->
                 <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <form method="post" asp-page-handler="UpdatePersonal">
-                                <div class="mb-3">
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3><i class="bi bi-person-badge"></i> Personal Information</h3>
+                            <p class="text-muted">Update your personal information and contact details</p>
+                        </div>
+
+                        <form method="post" asp-page-handler="UpdatePersonalAsync">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label asp-for="Username" class="form-label fw-medium"></label>
                                     <div class="input-group shadow-sm">
                                         <span class="input-group-text bg-white border-end-0">
@@ -164,17 +171,8 @@
                                     </div>
                                     <span asp-validation-for="Username" class="text-danger small"></span>
                                 </div>
-                                <div class="mb-3">
-                                    <label asp-for="Email" class="form-label fw-medium"></label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-white border-end-0">
-                                            <i class="bi bi-envelope text-muted"></i>
-                                        </span>
-                                        <input asp-for="Email" class="form-control border-start-0" placeholder="Enter your email address" />
-                                    </div>
-                                    <span asp-validation-for="Email" class="text-danger small"></span>
-                                </div>
-                                <div class="mb-3">
+
+                                <div class="col-md-6 mb-3">
                                     <label asp-for="FullName" class="form-label fw-medium"></label>
                                     <div class="input-group shadow-sm">
                                         <span class="input-group-text bg-white border-end-0">
@@ -184,120 +182,165 @@
                                     </div>
                                     <span asp-validation-for="FullName" class="text-danger small"></span>
                                 </div>
-                                <div class="d-flex mt-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-1"></i> Save Changes
-                                    </button>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Email" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-envelope text-muted"></i>
+                                        </span>
+                                        <input asp-for="Email" class="form-control border-start-0" placeholder="Enter your email address" />
+                                    </div>
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
                                 </div>
-                            </form>
-                        </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="PhoneNumber" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-telephone text-muted"></i>
+                                        </span>
+                                        <input asp-for="PhoneNumber" class="form-control border-start-0" placeholder="Enter your phone number" />
+                                    </div>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="HouseNumber" class="form-label fw-medium"></label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bi bi-house-door text-muted"></i>
+                                        </span>
+                                        <input asp-for="HouseNumber" class="form-control border-start-0" placeholder="Enter your house number" />
+                                    </div>
+                                    <span asp-validation-for="HouseNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                
+
                 <!-- Security Tab -->
                 <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <form method="post" asp-page-handler="UpdatePassword">
-                                <div class="mb-3">
-                                    <label asp-for="CurrentPassword" class="form-label fw-medium"></label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-white border-end-0">
-                                            <i class="bi bi-lock text-muted"></i>
-                                        </span>
-                                        <input asp-for="CurrentPassword" class="form-control border-start-0" placeholder="Enter your current password" />
-                                    </div>
-                                    <span asp-validation-for="CurrentPassword" class="text-danger small"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="NewPassword" class="form-label fw-medium"></label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-white border-end-0">
-                                            <i class="bi bi-key text-muted"></i>
-                                        </span>
-                                        <input asp-for="NewPassword" class="form-control border-start-0" placeholder="Enter your new password" />
-                                    </div>
-                                    <span asp-validation-for="NewPassword" class="text-danger small"></span>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="ConfirmPassword" class="form-label fw-medium"></label>
-                                    <div class="input-group shadow-sm">
-                                        <span class="input-group-text bg-white border-end-0">
-                                            <i class="bi bi-check-lg text-muted"></i>
-                                        </span>
-                                        <input asp-for="ConfirmPassword" class="form-control border-start-0" placeholder="Confirm your new password" />
-                                    </div>
-                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-                                </div>
-                                <div class="d-flex mt-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-key me-1"></i> Update Password
-                                    </button>
-                                </div>
-                            </form>
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3><i class="bi bi-shield-lock"></i> Security Settings</h3>
+                            <p class="text-muted">Manage your password and account security</p>
                         </div>
-                        <div class="col-md-4">
-                            <div class="password-info card h-100 bg-light border-0">
-                                <div class="card-body">
-                                    <h5 class="card-title text-primary">
-                                        <i class="bi bi-shield-lock me-1"></i>
-                                        Password Guidelines
-                                    </h5>
-                                    <ul class="list-unstyled small text-muted">
-                                        <li><i class="bi bi-check-circle me-1"></i> At least 8 characters</li>
-                                        <li><i class="bi bi-check-circle me-1"></i> Include uppercase letters</li>
-                                        <li><i class="bi bi-check-circle me-1"></i> Include lowercase letters</li>
-                                        <li><i class="bi bi-check-circle me-1"></i> Include numbers</li>
-                                        <li><i class="bi bi-check-circle me-1"></i> Include special characters</li>
-                                    </ul>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <form method="post" asp-page-handler="UpdatePasswordAsync">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                                    <div class="mb-3">
+                                        <label asp-for="CurrentPassword" class="form-label fw-medium"></label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <i class="bi bi-lock text-muted"></i>
+                                            </span>
+                                            <input asp-for="CurrentPassword" class="form-control border-start-0" placeholder="Enter your current password" />
+                                            <button class="btn btn-outline-secondary border-start-0 toggle-password" type="button">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="CurrentPassword" class="text-danger small"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="NewPassword" class="form-label fw-medium"></label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <i class="bi bi-key text-muted"></i>
+                                            </span>
+                                            <input asp-for="NewPassword" class="form-control border-start-0" placeholder="Enter your new password" />
+                                            <button class="btn btn-outline-secondary border-start-0 toggle-password" type="button">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="NewPassword" class="text-danger small"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="ConfirmPassword" class="form-label fw-medium"></label>
+                                        <div class="input-group shadow-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <i class="bi bi-check-lg text-muted"></i>
+                                            </span>
+                                            <input asp-for="ConfirmPassword" class="form-control border-start-0" placeholder="Confirm your new password" />
+                                            <button class="btn btn-outline-secondary border-start-0 toggle-password" type="button">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                    </div>
+                                    <div class="d-flex mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-key me-1"></i> Update Password
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="password-info card h-100 bg-light border-0">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary">
+                                            <i class="bi bi-shield-lock me-1"></i>
+                                            Password Guidelines
+                                        </h5>
+                                        <ul class="list-unstyled small text-muted">
+                                            <li><i class="bi bi-check-circle me-1"></i> At least 8 characters</li>
+                                            <li><i class="bi bi-check-circle me-1"></i> Include uppercase letters</li>
+                                            <li><i class="bi bi-check-circle me-1"></i> Include lowercase letters</li>
+                                            <li><i class="bi bi-check-circle me-1"></i> Include numbers</li>
+                                            <li><i class="bi bi-check-circle me-1"></i> Include special characters</li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <hr class="my-4">
-                    <div class="security-section">
-                        <h5><i class="bi bi-shield-check me-2"></i>Two-Factor Authentication</h5>
-                        <p class="text-muted">Enable two-factor authentication to add an extra layer of security to your account.</p>
-                        <button class="btn btn-outline-primary">
-                            <i class="bi bi-shield-plus me-1"></i> Set Up 2FA
-                        </button>
-                    </div>
                 </div>
-                
+
                 <!-- Preferences Tab -->
                 <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <form method="post" asp-page-handler="UpdatePreferencesAsync">
-                                <h5 class="mb-3">Notification Preferences</h5>
-                                <div class="mb-3">
-                                    <div class="form-check form-switch">
-                                        <input asp-for="EmailNotifications" class="form-check-input" />
-                                        <label asp-for="EmailNotifications" class="form-check-label"></label>
-                                    </div>
-                                    <div class="text-muted small">Receive updates and notifications via email</div>
-                                </div>
-                                <div class="mb-3">
-                                    <div class="form-check form-switch">
-                                        <input asp-for="SmsNotifications" class="form-check-input" />
-                                        <label asp-for="SmsNotifications" class="form-check-label"></label>
-                                    </div>
-                                    <div class="text-muted small">Receive updates and notifications via SMS</div>
-                                </div>
-                                <div class="mb-3">
-                                    <div class="form-check form-switch">
-                                        <input asp-for="MarketingEmails" class="form-check-input" />
-                                        <label asp-for="MarketingEmails" class="form-check-label"></label>
-                                    </div>
-                                    <div class="text-muted small">Receive marketing emails and newsletters</div>
-                                </div>
-                                <div class="d-flex mt-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-1"></i> Save Preferences
-                                    </button>
-                                </div>
-                            </form>
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3><i class="bi bi-sliders"></i> Notification Preferences</h3>
+                            <p class="text-muted">Manage how you receive notifications and updates</p>
                         </div>
+
+                        <form method="post" asp-page-handler="UpdatePreferencesAsync">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input asp-for="EmailNotifications" class="form-check-input" />
+                                    <label asp-for="EmailNotifications" class="form-check-label"></label>
+                                </div>
+                                <div class="text-muted small">Receive community updates and notifications via email</div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input asp-for="SmsNotifications" class="form-check-input" />
+                                    <label asp-for="SmsNotifications" class="form-check-label"></label>
+                                </div>
+                                <div class="text-muted small">Receive urgent notifications via SMS</div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input asp-for="MarketingEmails" class="form-check-input" />
+                                    <label asp-for="MarketingEmails" class="form-check-label"></label>
+                                </div>
+                                <div class="text-muted small">Receive newsletters and promotional information</div>
+                            </div>
+                            <div class="d-flex mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i> Save Preferences
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -305,13 +348,35 @@
     </div>
 </div>
 
+<!-- Notification Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">Notification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center notification-content">
+                    <i class="bi bi-info-circle-fill me-3 notification-icon"></i>
+                    <p class="mb-0 notification-message">Your changes have been saved successfully.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
+    /* Root Variables */
     :root {
         /* Primary Color Palette */
         --primary-color: #4e6e4d;
-        --primary-dark: #4e6e4d;
-        --primary-light: rgba(46, 125, 50, 0.1);
-        --primary-lighter: rgba(46, 125, 50, 0.05);
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
         /* Secondary Colors */
         --secondary-color: #546e7a;
         --secondary-dark: #37474f;
@@ -331,148 +396,12 @@
         --transition-speed: 0.3s;
     }
 
-    /* Updated Navbar Styling */
-    .navbar {
-        background-color: var(--primary-color) !important;
-        backdrop-filter: blur(10px);
-        padding: 0.75rem 0;
-        transition: var(--transition-speed);
-    }
-
-    /* Profile Hero Section */
-    .profile-hero {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: var(--text-light);
-        padding: 7rem 0 4rem;
-        margin-bottom: 3rem;
-        border-radius: 0 0 var(--border-radius) var(--border-radius);
-        box-shadow: var(--card-shadow);
-    }
-
-    /* Profile Sidebar */
-    .profile-sidebar {
-        background: var(--text-light);
-        border-radius: var(--border-radius);
-        box-shadow: var(--card-shadow);
-        padding: 2rem 1.5rem;
-    }
-
-    .profile-nav .nav-link {
+    /* General Body Styling */
+    body {
+        background-color: #f9f9fa;
         color: var(--text-dark);
-        border-radius: var(--border-radius);
-        transition: var(--transition-speed);
     }
 
-    .profile-nav .nav-link:hover {
-        background-color: var(--primary-lighter);
-        color: var(--primary-color);
-    }
-
-    .profile-nav .nav-link.active {
-        background-color: var(--primary-color);
-        color: var(--text-light);
-    }
-
-    /* Content Cards */
-    .content-card {
-        background: var(--text-light);
-        border-radius: var(--border-radius);
-        box-shadow: var(--card-shadow);
-        padding: 2rem;
-    }
-
-    .content-header h3 {
-        color: var(--primary-color);
-    }
-
-    /* Form Controls */
-    .form-control {
-        border-radius: var(--border-radius);
-        transition: var(--transition-speed);
-    }
-
-    .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem var(--primary-light);
-    }
-
-    /* Buttons */
-    .btn-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        border-radius: var(--border-radius);
-        transition: var(--transition-speed);
-    }
-
-    .btn-primary:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-        transform: translateY(-2px);
-    }
-
-    .btn-outline-primary {
-        color: var(--primary-color);
-        border-color: var (--primary-color);
-        border-radius: var(--border-radius);
-    }
-
-    .btn-outline-primary:hover {
-        background-color: var(--primary-color);
-        color: var(--text-light);
-    }
-
-    /* Text Colors */
-    .text-muted {
-        color: var(--text-muted) !important;
-    }
-
-    /* Status Alerts */
-    .alert-success {
-        background-color: var(--success-color);
-        color: var(--text-light);
-    }
-
-    .alert-danger {
-        background-color: var(--danger-color);
-        color: var (--text-light);
-    }
-
-    .alert-warning {
-        background-color: var(--warning-color);
-        color: var(--text-light);
-    }
-
-    .alert-info {
-        background-color: var(--info-color);
-        color: var(--text-light);
-    }
-
-    /* Avatar Styling */
-    .avatar-circle {
-        background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
-    }
-
-    .avatar-edit-btn {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-    }
-
-    .avatar-edit-btn:hover {
-        background: var(--primary-color);
-        color: var(--text-light);
-    }
-
-    /* Security Guidelines */
-    .security-tips {
-        background-color: var(--primary-lighter);
-        border-radius: var(--border-radius);
-    }
-
-    .security-tips i {
-        color: var(--success-color);
-    }
-
-    /* Remove any duplicate or conflicting styles */
     .navbar {
         background-color: rgba(78, 110, 77, 0.95) !important;
         backdrop-filter: blur(10px);
@@ -571,89 +500,27 @@
             font-size: 1.5rem;
         }
 
-    /* Profile Management Styling */
+    /* Profile Container */
     .profile-container {
-        margin-top: 5rem;
+        margin-top: 6rem;
         padding: 2rem 0;
     }
 
-    .profile-header {
-        margin-bottom: 2rem;
-    }
-
-    .profile-card {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-
-    .profile-avatar .avatar-circle {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background-color: #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 3rem;
-        color: #ccc;
-    }
-
-    .password-info {
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-
-    .security-section {
-        margin-top: 2rem;
-    }
-
-    /* Hero Section */
-    .profile-hero {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        color: white;
-        padding: 7rem 0 4rem;
-        margin-bottom: 3rem;
-        border-radius: 0 0 30px 30px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    .hero-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    
-    .hero-subtitle {
-        font-size: 1.2rem;
-        opacity: 0.9;
-    }
-    
-    .hero-image {
-        max-height: 200px;
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
-    }
-    
-    /* Profile Container */
-    .profile-container {
-        padding-bottom: 4rem;
-    }
-    
-    /* Profile Sidebar */
+    /* Profile Sidebar Styling */
     .profile-sidebar {
         background: white;
         border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: var(--card-shadow);
         padding: 2rem 1.5rem;
     }
-    
+
     .avatar-container {
         position: relative;
         width: 120px;
         height: 120px;
-        margin: 0 auto 1rem;
+        margin: 0 auto 1.5rem;
     }
-    
+
     .avatar-circle {
         width: 120px;
         height: 120px;
@@ -664,89 +531,283 @@
         justify-content: center;
         color: white;
         font-size: 3rem;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
     }
-    
+
     .avatar-edit-btn {
         position: absolute;
         bottom: 0;
         right: 0;
-        width: 40px;
-        height: 40px;
         background: white;
-        border: 2px solid var(--primary-color);
+        border: none;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         color: var(--primary-color);
-        cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-    
-    .avatar-edit-btn:hover {
-        background: var(--primary-color);
-        color: white;
-        transform: scale(1.05);
     }
 
-    /* Add the rest of your existing styles here */
-    .profile-form label {
-        font-weight: 500;
+        .avatar-edit-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+    .user-name {
+        font-weight: 600;
         color: var(--text-dark);
-        margin-bottom: 0.5rem;
+        margin-top: 1rem;
+        font-size: 1.25rem;
     }
-    
-    .profile-form .form-control {
-        padding: 0.75rem 1rem;
-        border: 1px solid var(--border-color);
-        border-left: none;
-        font-size: 1rem;
-    }
-    
-    .profile-form .input-group-text {
-        border: 1px solid var(--border-color);
-        border-right: none;
+
+    .user-role {
         color: var(--text-muted);
+        font-size: 0.9rem;
     }
-    
-    .profile-form .btn {
-        padding: 0.75rem 2rem;
+
+    .sidebar-divider {
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        margin: 1.5rem 0;
+    }
+
+    /* Profile Navigation */
+    .profile-nav .nav-link {
+        border-radius: 8px;
+        color: var(--text-dark);
         font-weight: 500;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
     }
+
+        .profile-nav .nav-link:hover {
+            background-color: var(--primary-lighter);
+            color: var(--primary-color);
+        }
+
+        .profile-nav .nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .profile-nav .nav-link i {
+            margin-right: 0.5rem;
+        }
 
     /* Content Card Styling */
     .content-card {
         background: white;
         border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        box-shadow: var(--card-shadow);
         padding: 2rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
-    
+
     .content-header {
         margin-bottom: 2rem;
     }
-    
-    .content-header h3 {
-        color: var(--primary-color);
-        font-size: 1.75rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 0.5rem;
+
+        .content-header h3 {
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+            .content-header h3 i {
+                margin-right: 0.75rem;
+                color: var(--primary-color);
+            }
+
+        .content-header p {
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+    /* Form Elements */
+    .form-label {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .form-control {
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.15);
+        }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        color: #6c757d;
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Switch Controls */
+    .form-switch .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        background-color: rgba(78, 110, 77, 0.2);
+        border: none;
+    }
+
+        .form-switch .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+    .form-check-label {
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-left: 0.5rem;
+    }
+
+    /* Password Field Styling */
+    .toggle-password {
+        cursor: pointer;
+        background-color: white;
+        border-color: #e0e0e0;
+    }
+
+        .toggle-password:hover {
+            background-color: #f8f9fa;
+        }
+
+    .password-info {
+        background-color: var(--primary-lighter) !important;
+        border-radius: 8px;
+    }
+
+        .password-info .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .password-info li {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+            .password-info li i {
+                color: var(--primary-color);
+                margin-right: 0.5rem;
+            }
+
+    /* Notification Modal */
+    .notification-icon {
+        font-size: 1.5rem;
+    }
+
+    .notification-content {
+        padding: 0.5rem;
+    }
+
+    .modal-header.border-success {
+        border-bottom: 3px solid var(--bs-success);
+    }
+
+    .modal-header.border-danger {
+        border-bottom: 3px solid var(--bs-danger);
+    }
+
+    .modal-header.border-info {
+        border-bottom: 3px solid var(--bs-info);
+    }
+
+    .modal-header.border-warning {
+        border-bottom: 3px solid var(--bs-warning);
     }
 </style>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if there's a status message to display
+        const statusMessage = '@TempData["StatusMessage"]';
+        const statusType = '@TempData["StatusType"]';
+
+        if (statusMessage && statusMessage !== '') {
+            // Get modal elements
+            const modal = document.getElementById('notificationModal');
+            const modalTitle = modal.querySelector('.modal-title');
+            const icon = modal.querySelector('.notification-icon');
+            const message = modal.querySelector('.notification-message');
+            const header = modal.querySelector('.modal-header');
+
+            // Set the message
+            message.textContent = statusMessage;
+
+            // Set the appropriate styling based on status type
+            if (statusType === 'Error') {
+                modalTitle.textContent = 'Error';
+                icon.className = 'bi bi-exclamation-triangle-fill me-3 notification-icon text-danger';
+                header.classList.add('border-danger');
+            } else if (statusType === 'Success') {
+                modalTitle.textContent = 'Success';
+                icon.className = 'bi bi-check-circle-fill me-3 notification-icon text-success';
+                header.classList.add('border-success');
+            } else if (statusType === 'Info') {
+                modalTitle.textContent = 'Information';
+                icon.className = 'bi bi-info-circle-fill me-3 notification-icon text-info';
+                header.classList.add('border-info');
+            } else if (statusType === 'Warning') {
+                modalTitle.textContent = 'Warning';
+                icon.className = 'bi bi-exclamation-circle-fill me-3 notification-icon text-warning';
+                header.classList.add('border-warning');
+            }
+
+            // Show the modal
+            const notificationModal = new bootstrap.Modal(modal);
+            notificationModal.show();
+        }
+
+        // Check for active tab parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTab = urlParams.get('activeTab');
+        if (activeTab) {
+            const tabElement = document.querySelector(`#${activeTab}-tab`);
+            if (tabElement) {
+                const tab = new bootstrap.Tab(tabElement);
+                tab.show();
+            }
+        }
+    });
+
     // Toggle password visibility
     document.querySelectorAll('.toggle-password').forEach(button => {
         button.addEventListener('click', function() {
             const input = this.closest('.input-group').querySelector('input');
             const icon = this.querySelector('i');
-            
+
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.remove('bi-eye');

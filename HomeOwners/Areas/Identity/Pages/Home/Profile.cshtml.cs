@@ -1,27 +1,34 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using HomeOwners.Areas.Identity.Data;
+using HomeOwners.Models;
+using HomeOwners.Models.Users;
+using HomeOwners.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomeOwners.Areas.Identity.Pages.Home
 {
     public class ProfileModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        // Add your user preferences service if you have one
-        // private readonly IUserPreferencesService _preferencesService;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly HomeDbContext _context;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IUserPreferencesService _preferencesService;
 
         public ProfileModel(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
-                                                          
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            IUserPreferencesService preferencesService,
+            HomeDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            // _preferencesService = preferencesService;
+            _preferencesService = preferencesService;
+            _context = context;
         }
 
         [BindProperty]
@@ -36,6 +43,18 @@ namespace HomeOwners.Areas.Identity.Pages.Home
         [BindProperty]
         [Display(Name = "Full Name")]
         public string FullName { get; set; }
+
+        [BindProperty]
+        [Phone]
+        [Display(Name = "Phone Number")]
+        public string PhoneNumber { get; set; }
+
+        [BindProperty]
+        [Display(Name = "House Number")]
+        public string HouseNumber { get; set; }
+
+        [Display(Name = "Account Status")]
+        public string AccountStatus { get; set; }
 
         [BindProperty]
         [Display(Name = "Current Password")]
@@ -53,15 +72,15 @@ namespace HomeOwners.Areas.Identity.Pages.Home
         [DataType(DataType.Password)]
         [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
-        
+
         [Display(Name = "Email Notifications")]
         [BindProperty]
         public bool EmailNotifications { get; set; } = true;
-        
+
         [Display(Name = "SMS Notifications")]
         [BindProperty]
         public bool SmsNotifications { get; set; }
-        
+
         [Display(Name = "Marketing Emails")]
         [BindProperty]
         public bool MarketingEmails { get; set; }
@@ -76,7 +95,48 @@ namespace HomeOwners.Areas.Identity.Pages.Home
 
             Username = user.UserName;
             Email = user.Email;
-            FullName = user.FullName;
+            PhoneNumber = user.PhoneNumber;
+
+            // Instead of direct casting, query specific user types from the database
+            var userId = user.Id;
+
+            // Try to get HomeOwnerUser
+            var homeOwner = await _context.HomeOwnerUsers.FirstOrDefaultAsync(h => h.Id == userId);
+            if (homeOwner != null)
+            {
+                FullName = homeOwner.FullName;
+                HouseNumber = homeOwner.HouseNumber;
+                AccountStatus = homeOwner.AccountStatus;
+
+                // Load preferences
+                var prefs = await _preferencesService.GetUserPreferencesAsync(userId);
+                EmailNotifications = prefs.EmailNotifications;
+                SmsNotifications = prefs.SmsNotifications;
+                MarketingEmails = prefs.MarketingEmails;
+                return Page();
+            }
+
+            // Check for other user types using fully qualified name
+            var appUser = await _context.Set<HomeOwners.Models.Users.ApplicationUser>().FirstOrDefaultAsync(a => a.Id == userId);
+            if (appUser != null)
+            {
+                FullName = appUser.FullName;
+                return Page();
+            }
+
+            var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(a => a.Id == userId);
+            if (adminUser != null)
+            {
+                FullName = adminUser.FullName;
+                return Page();
+            }
+
+            var staffUser = await _context.StaffUsers.FirstOrDefaultAsync(s => s.Id == userId);
+            if (staffUser != null)
+            {
+                FullName = staffUser.FullName;
+                return Page();
+            }
 
             return Page();
         }
@@ -130,20 +190,84 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                 }
             }
 
-            if (user.FullName != FullName)
+            if (user.PhoneNumber != PhoneNumber)
             {
                 hasChanges = true;
-                user.FullName = FullName;
-                var updateResult = await _userManager.UpdateAsync(user);
-                if (!updateResult.Succeeded)
+                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, PhoneNumber);
+                if (!setPhoneResult.Succeeded)
                 {
-                    foreach (var error in updateResult.Errors)
+                    foreach (var error in setPhoneResult.Errors)
                     {
                         ModelState.AddModelError(string.Empty, error.Description);
                     }
-                    TempData["StatusMessage"] = "Error: Full name could not be updated.";
+                    TempData["StatusMessage"] = "Error: Phone number could not be updated.";
                     TempData["StatusType"] = "Error";
                     return Page();
+                }
+            }
+
+            // Update user type-specific properties
+            var userId = user.Id;
+
+            // Try to get HomeOwnerUser
+            var homeOwner = await _context.HomeOwnerUsers.FirstOrDefaultAsync(h => h.Id == userId);
+            if (homeOwner != null)
+            {
+                bool homeOwnerChanged = false;
+
+                if (homeOwner.FullName != FullName)
+                {
+                    homeOwner.FullName = FullName;
+                    homeOwnerChanged = true;
+                }
+
+                if (homeOwner.HouseNumber != HouseNumber)
+                {
+                    homeOwner.HouseNumber = HouseNumber;
+                    homeOwnerChanged = true;
+                }
+
+                if (homeOwnerChanged)
+                {
+                    hasChanges = true;
+                    _context.HomeOwnerUsers.Update(homeOwner);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                // Check for ApplicationUser
+                var appUser = await _context.Set<HomeOwners.Models.Users.ApplicationUser>().FirstOrDefaultAsync(a => a.Id == userId);
+                if (appUser != null && appUser.FullName != FullName)
+                {
+                    appUser.FullName = FullName;
+                    hasChanges = true;
+                    _context.Set<HomeOwners.Models.Users.ApplicationUser>().Update(appUser);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    // Check for AdminUser
+                    var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(a => a.Id == userId);
+                    if (adminUser != null && adminUser.FullName != FullName)
+                    {
+                        adminUser.FullName = FullName;
+                        hasChanges = true;
+                        _context.AdminUsers.Update(adminUser);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        // Check for StaffUser
+                        var staffUser = await _context.StaffUsers.FirstOrDefaultAsync(s => s.Id == userId);
+                        if (staffUser != null && staffUser.FullName != FullName)
+                        {
+                            staffUser.FullName = FullName;
+                            hasChanges = true;
+                            _context.StaffUsers.Update(staffUser);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
                 }
             }
 
@@ -159,16 +283,20 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                 TempData["StatusType"] = "Info";
             }
 
-            return RedirectToPage();
+            return RedirectToPage(new { activeTab = "personal" });
         }
 
         public async Task<IActionResult> OnPostUpdatePasswordAsync()
         {
+            // Only validate the password fields
             if (string.IsNullOrEmpty(CurrentPassword) || string.IsNullOrEmpty(NewPassword) || string.IsNullOrEmpty(ConfirmPassword))
             {
                 ModelState.AddModelError(string.Empty, "All password fields are required.");
                 TempData["StatusMessage"] = "Error: All password fields are required.";
                 TempData["StatusType"] = "Error";
+
+                // Load user data to correctly display the page when returned
+                await LoadUserDataAsync();
                 return Page();
             }
 
@@ -177,6 +305,9 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                 ModelState.AddModelError(string.Empty, "The new password and confirmation password do not match.");
                 TempData["StatusMessage"] = "Error: The new password and confirmation password do not match.";
                 TempData["StatusType"] = "Error";
+
+                // Load user data to correctly display the page when returned
+                await LoadUserDataAsync();
                 return Page();
             }
 
@@ -188,32 +319,92 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                 return Page();
             }
 
-            var changePasswordResult = await _userManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
-            if (!changePasswordResult.Succeeded)
+            try
             {
-                foreach (var error in changePasswordResult.Errors)
+                // Use Identity's password change functionality
+                var changePasswordResult = await _userManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
+                if (!changePasswordResult.Succeeded)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    foreach (var error in changePasswordResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+
+                    TempData["StatusMessage"] = "Error: Password could not be changed.";
+                    TempData["StatusType"] = "Error";
+
+                    // Load user data to correctly display the page when returned
+                    await LoadUserDataAsync();
+                    return Page();
                 }
-                
-                TempData["StatusMessage"] = "Error: Password could not be changed.";
+
+                await _signInManager.RefreshSignInAsync(user);
+
+                TempData["StatusMessage"] = "Your password has been changed successfully.";
+                TempData["StatusType"] = "Success";
+
+                // Clear password fields
+                CurrentPassword = string.Empty;
+                NewPassword = string.Empty;
+                ConfirmPassword = string.Empty;
+
+                return RedirectToPage(new { activeTab = "security" });
+            }
+            catch (Exception ex)
+            {
+                TempData["StatusMessage"] = $"Error changing password: {ex.Message}";
                 TempData["StatusType"] = "Error";
+                await LoadUserDataAsync();
                 return Page();
             }
-
-            await _signInManager.RefreshSignInAsync(user);
-            
-            TempData["StatusMessage"] = "Your password has been changed successfully.";
-            TempData["StatusType"] = "Success";
-            
-            // Clear password fields
-            CurrentPassword = string.Empty;
-            NewPassword = string.Empty;
-            ConfirmPassword = string.Empty;
-            
-            return RedirectToPage();
         }
-        
+
+        private async Task LoadUserDataAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                Username = user.UserName;
+                Email = user.Email;
+                PhoneNumber = user.PhoneNumber;
+
+                var userId = user.Id;
+
+                // Try to get HomeOwnerUser
+                var homeOwner = await _context.HomeOwnerUsers.FirstOrDefaultAsync(h => h.Id == userId);
+                if (homeOwner != null)
+                {
+                    FullName = homeOwner.FullName;
+                    HouseNumber = homeOwner.HouseNumber;
+                    AccountStatus = homeOwner.AccountStatus;
+                    return;
+                }
+
+                // Check for ApplicationUser using fully qualified name
+                var appUser = await _context.Set<HomeOwners.Models.Users.ApplicationUser>().FirstOrDefaultAsync(a => a.Id == userId);
+                if (appUser != null)
+                {
+                    FullName = appUser.FullName;
+                    return;
+                }
+
+                // Check for AdminUser
+                var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(a => a.Id == userId);
+                if (adminUser != null)
+                {
+                    FullName = adminUser.FullName;
+                    return;
+                }
+
+                // Check for StaffUser
+                var staffUser = await _context.StaffUsers.FirstOrDefaultAsync(s => s.Id == userId);
+                if (staffUser != null)
+                {
+                    FullName = staffUser.FullName;
+                }
+            }
+        }
+
         public async Task<IActionResult> OnPostUpdatePreferencesAsync()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -224,20 +415,26 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                 return Page();
             }
 
-            // Save preferences to your database
-            // You'll need to implement this based on your data model
-            // Example:
-            // await _preferencesService.SaveUserPreferencesAsync(user.Id, new UserPreferences
-            // {
-            //     EmailNotifications = EmailNotifications,
-            //     SmsNotifications = SmsNotifications,
-            //     MarketingEmails = MarketingEmails
-            // });
+            try
+            {
+                // Save preferences using the service
+                await _preferencesService.SaveUserPreferencesAsync(
+                    user.Id,
+                    EmailNotifications,
+                    SmsNotifications,
+                    MarketingEmails
+                );
 
-            TempData["StatusMessage"] = "Your preferences have been saved successfully.";
-            TempData["StatusType"] = "Success";
-            
-            return RedirectToPage();
+                TempData["StatusMessage"] = "Your preferences have been saved successfully.";
+                TempData["StatusType"] = "Success";
+            }
+            catch (Exception ex)
+            {
+                TempData["StatusMessage"] = $"Error: {ex.Message}";
+                TempData["StatusType"] = "Error";
+            }
+
+            return RedirectToPage(new { activeTab = "preferences" });
         }
     }
 }

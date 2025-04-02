@@ -19,6 +19,11 @@ namespace HomeOwners.Areas.Identity.Pages.Account
             _logger = logger;
         }
 
+        public void OnGet()
+        {
+            // Method intentionally left empty
+        }
+
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
@@ -30,6 +35,7 @@ namespace HomeOwners.Areas.Identity.Pages.Account
             }
             else
             {
+                // Make sure this is returning the correct path
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
         }

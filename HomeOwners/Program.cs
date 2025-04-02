@@ -25,8 +25,8 @@ builder.Services.AddRazorPages();
 
 // Register IEmailSender
 builder.Services.AddTransient<IEmailSender, HomeOwners.Services.NoOpEmailSender>();
-
 builder.Services.AddScoped<HomeOwners.Services.UserService>();
+builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 
 // Add authorization policies
 builder.Services.AddAuthorization(options =>

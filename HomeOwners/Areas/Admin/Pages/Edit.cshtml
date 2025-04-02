@@ -26,10 +26,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Users</a>
+                    <a class="nav-link active" asp-area="Admin" asp-page="/Users"> Users</a>
                 </li>
 
                 <li class="nav-item">
@@ -84,7 +84,7 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3">
-            <h5 class="card-title mb-0">User Information</h5>
+            <h5 class="card-title mb-0"><i class="bi bi-house-door me-2"></i>HomeOwner Information</h5>
         </div>
         <div class="card-body">
             <form method="post">
@@ -112,7 +112,7 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="col-md-6 mb-3">
                         <label asp-for="Input.Password" class="form-label">New Password</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
@@ -122,7 +122,7 @@
                         <div class="form-text text-muted mt-1"><i class="bi bi-info-circle me-1"></i> Leave blank to keep current password</div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-6 mb-3">
                         <label asp-for="Input.ConfirmPassword" class="form-label">Confirm New Password</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="bi bi-lock-fill"></i></span>
@@ -131,6 +131,56 @@
                         <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
                     </div>
                 </div>
+
+                <!-- HomeOwner specific fields -->
+                @if (Model.IsHomeOwner || Model.Input.SelectedRoles.Contains("HomeOwner"))
+                {
+                    <div class="card border-primary-light mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Input.FullName" class="form-label">Full Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-person-badge"></i></span>
+                                        <input asp-for="Input.FullName" class="form-control" placeholder="Enter full name" />
+                                    </div>
+                                    <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Input.PhoneNumber" class="form-label">Phone Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                                        <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                                    </div>
+                                    <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="Input.HouseNumber" class="form-label">House Number</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-house-door"></i></span>
+                                        <input asp-for="Input.HouseNumber" class="form-control" placeholder="Enter house number" />
+                                    </div>
+                                    <span asp-validation-for="Input.HouseNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Input.PhoneNumber" class="form-label">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                            </div>
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                        </div>
+                    </div>
+                }
 
                 <div class="mb-4">
                     <label class="form-label d-block mb-3">User Roles <span class="text-danger">*</span></label>
@@ -145,7 +195,7 @@
                                                name="Input.SelectedRoles"
                                                value="@role"
                                                id="role_@role"
-                                               @(Model.Input.SelectedRoles.Contains(role) ? "checked" : "") />
+                                        @(Model.Input.SelectedRoles.Contains(role) ? "checked" : "") />
                                         <label class="form-check-label" for="role_@role">
                                             @switch (role)
                                             {
@@ -154,6 +204,9 @@
                                                     break;
                                                 case "Staff":
                                                     <i class="bi bi-person-badge text-success me-1"></i>
+                                                    break;
+                                                case "HomeOwner":
+                                                    <i class="bi bi-house-door text-info me-1"></i>
                                                     break;
                                                 default:
                                                     <i class="bi bi-person text-primary me-1"></i>
@@ -366,14 +419,60 @@
         border-color: var(--primary-color);
     }
 
-    .btn-primary:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+    /* HomeOwner Section Styling */
+    .border-primary-light {
+        border-color: var(--primary-light) !important;
+    }
+
+    .bg-primary-light {
+        background-color: var(--primary-lighter);
     }
 </style>
 
+<script>
+    // JavaScript to show HomeOwner fields when the HomeOwner role is selected
+    document.addEventListener('DOMContentLoaded', function() {
+        var homeOwnerRoleCheckbox = document.getElementById('role_HomeOwner');
+        var homeOwnerSection = document.querySelector('.card.border-primary-light');
+
+        if (homeOwnerRoleCheckbox && homeOwnerSection) {
+            homeOwnerRoleCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    homeOwnerSection.style.display = 'block';
+                } else {
+                    homeOwnerSection.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    // Disable client-side validation for password fields if they're empty
+    $(document).ready(function() {
+        $("form").submit(function() {
+            if ($("#Input_Password").val() === "") {
+                $("#Input_Password").rules("remove", "required");
+                $("#Input_ConfirmPassword").rules("remove", "required");
+            }
+        });
+    });
+</script>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Disable client-side validation for password fields if they're empty
+        $(document).ready(function() {
+            $("form").submit(function() {
+                if ($("#Input_Password").val() === "") {
+                    $("#Input_Password").rules("remove", "required");
+                    $("#Input_ConfirmPassword").rules("remove", "required");
+                }
+            });
+        });
+    </script>
 }
-
-

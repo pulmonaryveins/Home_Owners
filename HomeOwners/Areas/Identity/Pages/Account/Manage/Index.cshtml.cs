@@ -43,10 +43,10 @@ namespace HomeOwners.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Current password")]
             public string OldPassword { get; set; }
 
-            [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "New password")]
+            [Display(Name = "New password (leave blank to keep current)")]
+            public string Password { get; set; }
             public string NewPassword { get; set; }
 
             [DataType(DataType.Password)]

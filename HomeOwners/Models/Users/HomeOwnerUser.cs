@@ -10,6 +10,7 @@ namespace HomeOwners.Models.Users
         public string HouseNumber { get; set; } = string.Empty;
         public string AccountStatus { get; set; } = "pending"; // Values: "pending", "approved", "rejected"
         public string RejectionReason { get; set; } = string.Empty;
+        public virtual UserPreferences Preferences { get; set; }
         // Note: Email address is already included in IdentityUser base class
         // Phone number is already in IdentityUser, but we'll make sure it's used
     }

@@ -12,35 +12,30 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using HomeOwners.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using HomeOwners.Models.Users;
 
 namespace HomeOwners.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IUserStore<ApplicationUser> _userStore;
-        private readonly IUserEmailStore<ApplicationUser> _emailStore;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
-            UserManager<ApplicationUser> userManager,
-            IUserStore<ApplicationUser> userStore,
-            SignInManager<ApplicationUser> signInManager,
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
             _userManager = userManager;
-            _userStore = userStore;
-            _emailStore = GetEmailStore();
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
@@ -64,6 +59,10 @@ namespace HomeOwners.Areas.Identity.Pages.Account
             public string Username { get; set; }
 
             [Required]
+            [Display(Name = "Full Name")]
+            public string FullName { get; set; }
+
+            [Required]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
@@ -78,6 +77,15 @@ namespace HomeOwners.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            [Phone]
+            [Display(Name = "Phone Number")]
+            public string PhoneNumber { get; set; }
+
+            [Required]
+            [Display(Name = "House Number")]
+            public string HouseNumber { get; set; }
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
@@ -87,12 +95,16 @@ namespace HomeOwners.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
-
-                // Set user properties from Input
-                user.UserName = Input.Username;
-                user.Email = Input.Email;
-                // other properties...
+                var user = new HomeOwnerUser
+                {
+                    UserName = Input.Username,
+                    Email = Input.Email,
+                    EmailConfirmed = true,
+                    PhoneNumber = Input.PhoneNumber,
+                    FullName = Input.FullName ?? string.Empty,
+                    HouseNumber = Input.HouseNumber,
+                    AccountStatus = "pending" // Set initial status as pending
+                };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
@@ -100,9 +112,30 @@ namespace HomeOwners.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    // Skip email confirmation and sign in user directly
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    // Add user to HomeOwner role
+                    await _userManager.AddToRoleAsync(user, "HomeOwner");
+
+                    // Send an email notification to the user
+                    if (_emailSender != null)
+                    {
+                        var emailSubject = "HomeOwners Registration - Account Pending Approval";
+                        var emailMessage = $"Dear {user.FullName},<br><br>" +
+                                          "Thank you for registering with our HomeOwners Association. " +
+                                          "Your account has been created and is pending approval by an administrator. " +
+                                          "You will receive a notification once your account has been reviewed.<br><br>" +
+                                          "Regards,<br>The HomeOwners Association Team";
+
+                        await _emailSender.SendEmailAsync(user.Email, emailSubject, emailMessage);
+                    }
+
+                    // Do not sign in the user automatically - important!
+                    // await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    // Set a success message
+                    StatusMessage = "Your account has been created and is pending approval by an administrator. You will be notified once your account has been approved.";
+
+                    // Redirect to login page with status message
+                    return RedirectToPage("./Login", new { pendingApproval = true });
                 }
 
                 foreach (var error in result.Errors)
@@ -113,29 +146,6 @@ namespace HomeOwners.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
-        }
-
-        private ApplicationUser CreateUser()
-        {
-            try
-            {
-                return Activator.CreateInstance<ApplicationUser>();
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-            }
-        }
-
-        private IUserEmailStore<ApplicationUser> GetEmailStore()
-        {
-            if (!_userManager.SupportsUserEmail)
-            {
-                throw new NotSupportedException("The default UI requires a user store with email support.");
-            }
-            return (IUserEmailStore<ApplicationUser>)_userStore;
         }
     }
 }

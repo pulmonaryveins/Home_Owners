@@ -1,0 +1,29 @@
+﻿@page
+@model HomeOwners.Areas.Identity.Pages.Account.LogoutModel
+@{
+    ViewData["Title"] = "Logout";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logging Out...</title>
+</head>
+<body>
+    <h1>Logging Out...</h1>
+    <p>You are being logged out of the system.</p>
+    <form id="logoutForm" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" style="display:none"></button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('logoutForm').submit();
+        });
+    </script>
+</body>
+</html>

@@ -95,7 +95,7 @@
                     <div class="user-avatar mb-3 mx-auto">
                         <i class="bi bi-person-circle"></i>
                     </div>
-                    <h4 class="card-title mb-1">@Model.UserDetails.UserName</h4>
+                    <h4 class="card-title mb-1">@(!string.IsNullOrEmpty(Model.FullName) ? Model.FullName : Model.UserDetails.UserName)</h4>
                     <p class="text-muted mb-3">@Model.UserDetails.Email</p>
                     
                     <div class="mb-3">
@@ -108,7 +108,7 @@
                     <div class="user-meta">
                         <div class="d-flex align-items-center justify-content-center mb-2">
                             <i class="bi bi-calendar3 me-2 text-muted"></i>
-                            <span>Joined @(Model.UserDetails.CreatedDate?.ToString("MMMM dd, yyyy") ?? "Unknown")</span>
+                            <span>Joined @(Model.CreatedDate?.ToString("MMMM dd, yyyy") ?? "Unknown")</span>
                         </div>
                         
                         <div class="d-flex align-items-center justify-content-center">
@@ -227,7 +227,7 @@
 
                         <dt class="col-sm-4 text-sm-end"><i class="bi bi-calendar me-2 text-muted"></i>Joined Date:</dt>
                         <dd class="col-sm-8">
-                            @(Model.UserDetails.CreatedDate?.ToString("MMMM dd, yyyy") ?? "Unknown")
+                            @(Model.CreatedDate?.ToString("MMMM dd, yyyy") ?? "Unknown")
                         </dd>
 
                         <dt class="col-sm-4 text-sm-end"><i class="bi bi-person-badge me-2 text-muted"></i>User Roles:</dt>

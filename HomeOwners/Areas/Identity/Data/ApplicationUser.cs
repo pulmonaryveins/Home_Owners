@@ -11,4 +11,7 @@ public class ApplicationUser : IdentityUser
 {
     // Add CreatedDate property
     public DateTime? CreatedDate { get; set; } = DateTime.Now;
+
+    // Add FullName property
+    public string FullName { get; set; } = string.Empty;
 }

@@ -9,18 +9,19 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using HomeOwners.Models.Users;
 
 namespace HomeOwners.Areas.Admin.Pages
 {
     [Authorize(Policy = "RequireAdminRole")]
     public class EditModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<EditModel> _logger;
 
         public EditModel(
-            UserManager<ApplicationUser> userManager,
+            UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<EditModel> logger)
         {
@@ -34,6 +35,8 @@ namespace HomeOwners.Areas.Admin.Pages
 
         public List<string> AvailableRoles { get; set; }
         public string UserId { get; set; }
+        public string UserType { get; set; }
+        public bool IsHomeOwner { get; set; }
 
         public class InputModel
         {
@@ -58,6 +61,17 @@ namespace HomeOwners.Areas.Admin.Pages
             public string ConfirmPassword { get; set; }
 
             public List<string> SelectedRoles { get; set; } = new List<string>();
+
+            // HomeOwner specific properties
+            [Display(Name = "Full Name")]
+            public string FullName { get; set; }
+
+            [Display(Name = "Phone Number")]
+            [Phone]
+            public string PhoneNumber { get; set; }
+
+            [Display(Name = "House Number")]
+            public string HouseNumber { get; set; }
         }
 
         private async Task<List<string>> GetAvailableRoles()
@@ -80,12 +94,57 @@ namespace HomeOwners.Areas.Admin.Pages
 
             UserId = user.Id;
 
-            Input = new InputModel
+            // Set user type based on actual type
+            if (user is AdminUser)
             {
-                Username = user.UserName,
-                Email = user.Email,
-                SelectedRoles = (await _userManager.GetRolesAsync(user)).ToList()
-            };
+                UserType = "Admin";
+                IsHomeOwner = false;
+            }
+            else if (user is StaffUser)
+            {
+                UserType = "Staff";
+                IsHomeOwner = false;
+            }
+            else if (user is HomeOwnerUser homeOwner)
+            {
+                UserType = "HomeOwner";
+                IsHomeOwner = true;
+
+                Input = new InputModel
+                {
+                    Username = user.UserName,
+                    Email = user.Email,
+                    SelectedRoles = (await _userManager.GetRolesAsync(user)).ToList(),
+                    FullName = homeOwner.FullName,
+                    PhoneNumber = homeOwner.PhoneNumber,
+                    HouseNumber = homeOwner.HouseNumber
+                };
+            }
+            else
+            {
+                UserType = "Standard";
+                IsHomeOwner = false;
+
+                Input = new InputModel
+                {
+                    Username = user.UserName,
+                    Email = user.Email,
+                    SelectedRoles = (await _userManager.GetRolesAsync(user)).ToList(),
+                    PhoneNumber = user.PhoneNumber
+                };
+            }
+
+            // If Input is not set yet (for non-HomeOwner users)
+            if (Input == null)
+            {
+                Input = new InputModel
+                {
+                    Username = user.UserName,
+                    Email = user.Email,
+                    SelectedRoles = (await _userManager.GetRolesAsync(user)).ToList(),
+                    PhoneNumber = user.PhoneNumber
+                };
+            }
 
             AvailableRoles = await GetAvailableRoles();
             return Page();
@@ -123,6 +182,15 @@ namespace HomeOwners.Areas.Admin.Pages
             // Update user properties
             user.UserName = Input.Username;
             user.Email = Input.Email;
+            user.PhoneNumber = Input.PhoneNumber;
+
+            // Update HomeOwner specific properties if applicable
+            if (user is HomeOwnerUser homeOwner)
+            {
+                homeOwner.FullName = Input.FullName;
+                homeOwner.HouseNumber = Input.HouseNumber;
+                IsHomeOwner = true;
+            }
 
             // Update the user
             var updateResult = await _userManager.UpdateAsync(user);
@@ -138,16 +206,28 @@ namespace HomeOwners.Areas.Admin.Pages
             // Update password if provided
             if (!string.IsNullOrEmpty(Input.Password))
             {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var passwordResult = await _userManager.ResetPasswordAsync(user, token, Input.Password);
-                if (!passwordResult.Succeeded)
+                // Remove the token-based approach that's causing issues
+                var removePasswordResult = await _userManager.RemovePasswordAsync(user);
+                if (!removePasswordResult.Succeeded)
                 {
-                    foreach (var error in passwordResult.Errors)
+                    foreach (var error in removePasswordResult.Errors)
                     {
                         ModelState.AddModelError(string.Empty, error.Description);
                     }
                     return Page();
                 }
+
+                var addPasswordResult = await _userManager.AddPasswordAsync(user, Input.Password);
+                if (!addPasswordResult.Succeeded)
+                {
+                    foreach (var error in addPasswordResult.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return Page();
+                }
+
+                _logger.LogInformation("Password updated for user {Username}.", user.UserName);
             }
 
             // Update roles

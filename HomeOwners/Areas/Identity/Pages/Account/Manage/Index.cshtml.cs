@@ -3,16 +3,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
-using HomeOwners.Areas.Identity.Data;
 
 namespace HomeOwners.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public IndexModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public IndexModel(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -44,10 +43,10 @@ namespace HomeOwners.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Current password")]
             public string OldPassword { get; set; }
 
-            [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "New password")]
+            [Display(Name = "New password (leave blank to keep current)")]
+            public string Password { get; set; }
             public string NewPassword { get; set; }
 
             [DataType(DataType.Password)]
@@ -63,7 +62,6 @@ namespace HomeOwners.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
-
             var id = RouteData.Values["id"]?.ToString();
             if (id == null)
             {

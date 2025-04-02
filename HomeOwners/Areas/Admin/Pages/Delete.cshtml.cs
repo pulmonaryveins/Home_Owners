@@ -8,17 +8,18 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Collections.Generic;
+using HomeOwners.Models.Users;
 
 namespace HomeOwners.Areas.Admin.Pages
 {
     [Authorize(Policy = "RequireAdminRole")]
     public class DeleteModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<DeleteModel> _logger;
 
         public DeleteModel(
-            UserManager<ApplicationUser> userManager,
+            UserManager<IdentityUser> userManager,
             ILogger<DeleteModel> logger)
         {
             _userManager = userManager;
@@ -26,9 +27,10 @@ namespace HomeOwners.Areas.Admin.Pages
         }
 
         [BindProperty]
-        public ApplicationUser User { get; set; }
+        public IdentityUser User { get; set; }
 
         public List<string> UserRoles { get; set; }
+        public string UserType { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
@@ -52,6 +54,24 @@ namespace HomeOwners.Areas.Admin.Pages
             }
 
             UserRoles = (await _userManager.GetRolesAsync(User)).ToList();
+
+            // Identify user type
+            if (User is AdminUser)
+            {
+                UserType = "Admin";
+            }
+            else if (User is StaffUser)
+            {
+                UserType = "Staff";
+            }
+            else if (User is HomeOwnerUser)
+            {
+                UserType = "HomeOwner";
+            }
+            else
+            {
+                UserType = "Standard";
+            }
 
             return Page();
         }

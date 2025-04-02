@@ -9,18 +9,19 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using HomeOwners.Models.Users; // Add this import
 
 namespace HomeOwners.Areas.Admin.Pages
 {
     [Authorize(Policy = "RequireAdminRole")]
     public class CreateModel : PageModel
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<CreateModel> _logger;
 
         public CreateModel(
-            UserManager<ApplicationUser> userManager,
+            UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<CreateModel> logger)
         {
@@ -46,6 +47,13 @@ namespace HomeOwners.Areas.Admin.Pages
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Display(Name = "Phone Number")]
+            [Phone]
+            public string PhoneNumber { get; set; }
+
+            [Display(Name = "House Number")]
+            public string HouseNumber { get; set; }
+
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
@@ -58,6 +66,9 @@ namespace HomeOwners.Areas.Admin.Pages
             public string ConfirmPassword { get; set; }
 
             public List<string> SelectedRoles { get; set; } = new List<string>();
+
+            [Display(Name = "User Type")]
+            public string UserType { get; set; } = "Standard";
         }
 
         private async Task<List<string>> GetAvailableRoles()
@@ -93,13 +104,57 @@ namespace HomeOwners.Areas.Admin.Pages
                     return Page();
                 }
 
-                var user = new ApplicationUser
+                // Create appropriate user type based on the selected roles
+                IdentityUser user;
+
+                if (Input.SelectedRoles.Contains("Admin"))
                 {
-                    UserName = Input.Username,
-                    Email = Input.Email,
-                    EmailConfirmed = true,
-                    CreatedDate = DateTime.Now
-                };
+                    user = new AdminUser
+                    {
+                        UserName = Input.Username,
+                        Email = Input.Email,
+                        EmailConfirmed = true,
+                        CreatedDate = DateTime.Now,
+                        FullName = Input.Username, // You might want to add a FullName field to your form
+                        AdminLevel = "Standard"
+                    };
+                }
+                else if (Input.SelectedRoles.Contains("Staff"))
+                {
+                    user = new StaffUser
+                    {
+                        UserName = Input.Username,
+                        Email = Input.Email,
+                        EmailConfirmed = true,
+                        CreatedDate = DateTime.Now,
+                        FullName = Input.Username,
+                        Department = "General",
+                        Position = "Staff"
+                    };
+                }
+                else if (Input.SelectedRoles.Contains("HomeOwner"))
+                {
+                    user = new HomeOwnerUser
+                    {
+                        UserName = Input.Username,
+                        Email = Input.Email,
+                        EmailConfirmed = true,
+                        CreatedDate = DateTime.Now,
+                        FullName = Input.Username,
+                        PhoneNumber = Input.PhoneNumber ?? "", // Use the input phone number
+                        HouseNumber = Input.HouseNumber ?? ""  // Use the input house number
+                    };
+                }
+                else
+                {
+                    // Default to a standard IdentityUser if no specific role
+                    user = new IdentityUser
+                    {
+                        UserName = Input.Username,
+                        Email = Input.Email,
+                        EmailConfirmed = true
+                    };
+                }
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
 

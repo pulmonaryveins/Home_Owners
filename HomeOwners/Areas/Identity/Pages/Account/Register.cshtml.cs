@@ -59,6 +59,10 @@ namespace HomeOwners.Areas.Identity.Pages.Account
             public string Username { get; set; }
 
             [Required]
+            [Display(Name = "Full Name")]
+            public string FullName { get; set; }
+
+            [Required]
             [EmailAddress]
             [Display(Name = "Email")]
             public string Email { get; set; }
@@ -74,10 +78,17 @@ namespace HomeOwners.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
 
-            [Display(Name = "Full Name")]
-            public string FullName { get; set; }
+            [Required]
+            [Phone]
+            [Display(Name = "Phone Number")]
+            public string PhoneNumber { get; set; }
+
+            [Required]
+            [Display(Name = "House Number")]
+            public string HouseNumber { get; set; }
         }
 
+        // And update the OnPostAsync method to use these fields
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -90,7 +101,9 @@ namespace HomeOwners.Areas.Identity.Pages.Account
                     UserName = Input.Username,
                     Email = Input.Email,
                     EmailConfirmed = true,
-                    FullName = Input.FullName ?? string.Empty
+                    PhoneNumber = Input.PhoneNumber,
+                    FullName = Input.FullName ?? string.Empty,
+                    HouseNumber = Input.HouseNumber
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);

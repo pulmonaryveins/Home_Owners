@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using HomeOwners.Areas.Identity.Data;
 using HomeOwners.Models.Users;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using HomeOwners.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("HomeDbContextConnection") ?? throw new InvalidOperationException("Connection string 'HomeDbContextConnection' not found.");
@@ -20,6 +22,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+// Register IEmailSender
+builder.Services.AddTransient<IEmailSender, HomeOwners.Services.NoOpEmailSender>();
 
 builder.Services.AddScoped<HomeOwners.Services.UserService>();
 
@@ -133,8 +138,8 @@ using (var scope = app.Services.CreateScope())
             Email = homeOwnerEmail,
             EmailConfirmed = true,
             FullName = "Home Owner",
-            Address = "123 Main Street",
-            PropertyId = "A101"
+            PhoneNumber = "555-123-4567",
+            HouseNumber = "123"
         };
 
         var result = await userManager.CreateAsync(homeOwnerUser, "Homeowner@123456");

@@ -110,6 +110,30 @@
                     </div>
                 </div>
 
+                <div id="homeOwnerFields" class="mt-4" style="display: none;">
+                    <h5 class="mb-3">HomeOwner Specific Information</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Input.PhoneNumber" class="form-label">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                            </div>
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Input.HouseNumber" class="form-label">House Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-house"></i></span>
+                                <input asp-for="Input.HouseNumber" class="form-control" placeholder="Enter house number" />
+                            </div>
+                            <span asp-validation-for="Input.HouseNumber" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3 mb-md-0">
                         <label asp-for="Input.Password" class="form-label">Password <span class="text-danger">*</span></label>
@@ -371,4 +395,31 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to toggle HomeOwner fields visibility
+            function toggleHomeOwnerFields() {
+                const homeOwnerCheckbox = document.querySelector('input[value="HomeOwner"]');
+                const homeOwnerFields = document.getElementById('homeOwnerFields');
+
+                if (homeOwnerCheckbox && homeOwnerFields) {
+                    if (homeOwnerCheckbox.checked) {
+                        homeOwnerFields.style.display = 'block';
+                    } else {
+                        homeOwnerFields.style.display = 'none';
+                    }
+                }
+            }
+
+            // Add event listeners to all role checkboxes
+            const roleCheckboxes = document.querySelectorAll('input[name="Input.SelectedRoles"]');
+            roleCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', toggleHomeOwnerFields);
+            });
+
+            // Initial check
+            toggleHomeOwnerFields();
+        });
+    </script>
 }

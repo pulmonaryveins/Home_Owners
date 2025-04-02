@@ -47,6 +47,13 @@ namespace HomeOwners.Areas.Admin.Pages
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Display(Name = "Phone Number")]
+            [Phone]
+            public string PhoneNumber { get; set; }
+
+            [Display(Name = "House Number")]
+            public string HouseNumber { get; set; }
+
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
@@ -134,8 +141,8 @@ namespace HomeOwners.Areas.Admin.Pages
                         EmailConfirmed = true,
                         CreatedDate = DateTime.Now,
                         FullName = Input.Username,
-                        Address = "",
-                        PropertyId = ""
+                        PhoneNumber = Input.PhoneNumber ?? "", // Use the input phone number
+                        HouseNumber = Input.HouseNumber ?? ""  // Use the input house number
                     };
                 }
                 else

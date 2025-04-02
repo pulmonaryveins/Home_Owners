@@ -7,7 +7,8 @@ namespace HomeOwners.Models.Users
     {
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public string FullName { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string PropertyId { get; set; } = string.Empty;
+        public string HouseNumber { get; set; } = string.Empty;
+        // Note: Email address is already included in IdentityUser base class
+        // Phone number is already in IdentityUser, but we'll make sure it's used
     }
 }

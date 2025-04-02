@@ -43,6 +43,9 @@ namespace HomeOwners.Areas.Admin.Pages
         public string SortField { get; set; } = "name";
         public string SortDirection { get; set; } = "asc";
 
+        public Dictionary<string, HomeOwnerUser> HomeOwnerDetails { get; set; } = new Dictionary<string, HomeOwnerUser>();
+
+
         public async Task OnGetAsync(string sortOrder, string currentFilter, string searchString, string roleFilter, int? pageIndex)
         {
             CurrentSort = sortOrder;
@@ -160,6 +163,15 @@ namespace HomeOwners.Areas.Admin.Pages
                     Roles = roles.ToList(),
                     JoinDate = joinDate
                 });
+            }
+
+            var homeOwners = await _userManager.GetUsersInRoleAsync("HomeOwner");
+            foreach (var homeOwner in homeOwners)
+            {
+                if (homeOwner is HomeOwnerUser homeOwnerUser)
+                {
+                    HomeOwnerDetails[homeOwner.Id] = homeOwnerUser;
+                }
             }
 
             // Handle date sorting in memory since we've already populated the JoinDate field

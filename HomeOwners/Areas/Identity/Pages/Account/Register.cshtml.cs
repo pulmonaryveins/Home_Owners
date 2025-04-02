@@ -88,7 +88,6 @@ namespace HomeOwners.Areas.Identity.Pages.Account
             public string HouseNumber { get; set; }
         }
 
-        // And update the OnPostAsync method to use these fields
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -103,7 +102,8 @@ namespace HomeOwners.Areas.Identity.Pages.Account
                     EmailConfirmed = true,
                     PhoneNumber = Input.PhoneNumber,
                     FullName = Input.FullName ?? string.Empty,
-                    HouseNumber = Input.HouseNumber
+                    HouseNumber = Input.HouseNumber,
+                    AccountStatus = "pending" // Set initial status as pending
                 };
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -115,8 +115,27 @@ namespace HomeOwners.Areas.Identity.Pages.Account
                     // Add user to HomeOwner role
                     await _userManager.AddToRoleAsync(user, "HomeOwner");
 
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    // Send an email notification to the user
+                    if (_emailSender != null)
+                    {
+                        var emailSubject = "HomeOwners Registration - Account Pending Approval";
+                        var emailMessage = $"Dear {user.FullName},<br><br>" +
+                                          "Thank you for registering with our HomeOwners Association. " +
+                                          "Your account has been created and is pending approval by an administrator. " +
+                                          "You will receive a notification once your account has been reviewed.<br><br>" +
+                                          "Regards,<br>The HomeOwners Association Team";
+
+                        await _emailSender.SendEmailAsync(user.Email, emailSubject, emailMessage);
+                    }
+
+                    // Do not sign in the user automatically - important!
+                    // await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    // Set a success message
+                    StatusMessage = "Your account has been created and is pending approval by an administrator. You will be notified once your account has been approved.";
+
+                    // Redirect to login page with status message
+                    return RedirectToPage("./Login", new { pendingApproval = true });
                 }
 
                 foreach (var error in result.Errors)

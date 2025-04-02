@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using HomeOwners.Models.Users;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace HomeOwners.Areas.Admin.Pages
 {
@@ -17,11 +18,16 @@ namespace HomeOwners.Areas.Admin.Pages
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IEmailSender _emailSender;
 
-        public UsersModel(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UsersModel(
+            UserManager<IdentityUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IEmailSender emailSender = null)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _emailSender = emailSender;
         }
 
         public class UserViewModel
@@ -44,6 +50,8 @@ namespace HomeOwners.Areas.Admin.Pages
         public string SortDirection { get; set; } = "asc";
 
         public Dictionary<string, HomeOwnerUser> HomeOwnerDetails { get; set; } = new Dictionary<string, HomeOwnerUser>();
+
+        public List<HomeOwnerUser> PendingHomeOwnerUsers { get; set; } = new List<HomeOwnerUser>();
 
 
         public async Task OnGetAsync(string sortOrder, string currentFilter, string searchString, string roleFilter, int? pageIndex)
@@ -165,12 +173,19 @@ namespace HomeOwners.Areas.Admin.Pages
                 });
             }
 
+            // Get all HomeOwner users
             var homeOwners = await _userManager.GetUsersInRoleAsync("HomeOwner");
             foreach (var homeOwner in homeOwners)
             {
                 if (homeOwner is HomeOwnerUser homeOwnerUser)
                 {
                     HomeOwnerDetails[homeOwner.Id] = homeOwnerUser;
+
+                    // Add pending HomeOwner users to the pending list
+                    if (homeOwnerUser.AccountStatus == "pending")
+                    {
+                        PendingHomeOwnerUsers.Add(homeOwnerUser);
+                    }
                 }
             }
 
@@ -186,6 +201,121 @@ namespace HomeOwners.Areas.Admin.Pages
 
             int pageSize = 10;
             Users = PaginatedList<UserViewModel>.Create(userViewModels.AsQueryable(), pageIndex ?? 1, pageSize);
+        }
+
+        public async Task<IActionResult> OnPostApproveUserAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["StatusType"] = "Error";
+                TempData["StatusMessage"] = "Invalid user ID.";
+                return RedirectToPage();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["StatusType"] = "Error";
+                TempData["StatusMessage"] = "User not found.";
+                return RedirectToPage();
+            }
+
+            if (user is HomeOwnerUser homeOwnerUser)
+            {
+                homeOwnerUser.AccountStatus = "approved";
+                var result = await _userManager.UpdateAsync(homeOwnerUser);
+
+                if (result.Succeeded)
+                {
+                    // Send approval email notification
+                    if (_emailSender != null)
+                    {
+                        await _emailSender.SendEmailAsync(
+                            homeOwnerUser.Email,
+                            "HomeOwners Account Approved",
+                            $"Dear {homeOwnerUser.FullName},<br><br>" +
+                            "Your account has been approved. You can now log in to the HomeOwners platform.<br><br>" +
+                            "Regards,<br>The HomeOwners Association Team"
+                        );
+                    }
+
+                    TempData["StatusType"] = "Success";
+                    TempData["StatusMessage"] = $"Account for {homeOwnerUser.UserName} was approved successfully.";
+                }
+                else
+                {
+                    TempData["StatusType"] = "Error";
+                    TempData["StatusMessage"] = "Error approving account: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                }
+            }
+            else
+            {
+                TempData["StatusType"] = "Error";
+                TempData["StatusMessage"] = "User is not a HomeOwner.";
+            }
+
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostRejectUserAsync(string userId, string rejectionReason)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["StatusType"] = "Error";
+                TempData["StatusMessage"] = "Invalid user ID.";
+                return RedirectToPage();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["StatusType"] = "Error";
+                TempData["StatusMessage"] = "User not found.";
+                return RedirectToPage();
+            }
+
+            if (user is HomeOwnerUser homeOwnerUser)
+            {
+                homeOwnerUser.AccountStatus = "rejected";
+                homeOwnerUser.RejectionReason = rejectionReason ?? "";
+                var result = await _userManager.UpdateAsync(homeOwnerUser);
+
+                if (result.Succeeded)
+                {
+                    // Send rejection email notification
+                    if (_emailSender != null)
+                    {
+                        string reasonText = string.IsNullOrEmpty(rejectionReason)
+                            ? ""
+                            : $"<br><br>Reason: {rejectionReason}";
+
+                        await _emailSender.SendEmailAsync(
+                            homeOwnerUser.Email,
+                            "HomeOwners Account Application - Not Approved",
+                            $"Dear {homeOwnerUser.FullName},<br><br>" +
+                            "We regret to inform you that your account application has not been approved at this time." +
+                            reasonText +
+                            "<br><br>If you believe this is an error, please contact the administrator." +
+                            "<br><br>Regards,<br>The HomeOwners Association Team"
+                        );
+                    }
+
+                    TempData["StatusType"] = "Success";
+                    TempData["StatusMessage"] = $"Account for {homeOwnerUser.UserName} was rejected.";
+                }
+                else
+                {
+                    TempData["StatusType"] = "Error";
+                    TempData["StatusMessage"] = "Error rejecting account: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                }
+            }
+            else
+            {
+                TempData["StatusType"] = "Error";
+                TempData["StatusMessage"] = "User is not a HomeOwner.";
+            }
+
+            return RedirectToPage();
         }
     }
 

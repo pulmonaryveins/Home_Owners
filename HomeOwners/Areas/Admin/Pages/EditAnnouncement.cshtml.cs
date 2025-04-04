@@ -45,7 +45,8 @@ namespace HomeOwners.Areas.Admin.Pages
             TempData["StatusMessage"] = "Announcement updated successfully.";
             TempData["StatusType"] = "Success";
 
-            return RedirectToPage("./Announcements");
+            // Redirect back to Announcements page
+            return RedirectToPage("/Announcement");
         }
     }
 }

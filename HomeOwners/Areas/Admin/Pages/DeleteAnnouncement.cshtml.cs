@@ -40,7 +40,7 @@ namespace HomeOwners.Areas.Admin.Pages
             TempData["StatusMessage"] = "Announcement deleted successfully.";
             TempData["StatusType"] = "Success";
 
-            return RedirectToPage("./Announcements");
+            return RedirectToPage("./Announcement");
         }
     }
 }

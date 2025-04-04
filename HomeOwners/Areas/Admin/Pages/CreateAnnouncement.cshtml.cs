@@ -1,5 +1,4 @@
-﻿// Areas/Admin/Pages/CreateAnnouncement.cshtml.cs
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using HomeOwners.Models;
 using HomeOwners.Services;
@@ -38,12 +37,19 @@ namespace HomeOwners.Areas.Admin.Pages
                 return Page();
             }
 
+            // Ensure PostedDate is set
+            if (Announcement.PostedDate == default)
+            {
+                Announcement.PostedDate = DateTime.Now;
+            }
+
             await _announcementService.CreateAnnouncementAsync(Announcement);
 
             TempData["StatusMessage"] = "Announcement created successfully.";
             TempData["StatusType"] = "Success";
 
-            return RedirectToPage("./Announcements");
+            // Redirect back to Announcements page
+            return RedirectToPage("/Announcement");
         }
     }
 }

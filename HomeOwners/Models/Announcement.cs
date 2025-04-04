@@ -15,8 +15,13 @@ namespace HomeOwners.Models
         [Required(ErrorMessage = "Content is required")]
         public string Content { get; set; }
 
+        [Display(Name = "Posted Date")]
         [DataType(DataType.DateTime)]
         public DateTime PostedDate { get; set; } = DateTime.Now;
+
+        [Display(Name = "Event Date and Time")]
+        [DataType(DataType.DateTime)]
+        public DateTime? EventDateTime { get; set; } // Nullable as not all announcements have an event
 
         [Display(Name = "Is Urgent")]
         public bool IsUrgent { get; set; }

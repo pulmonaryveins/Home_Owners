@@ -1,0 +1,63 @@
+﻿// Areas/Admin/Pages/Calendar.cshtml.cs
+using System;
+using System.Threading.Tasks;
+using HomeOwners.Models;
+using HomeOwners.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace HomeOwners.Areas.Admin.Pages
+{
+    [Authorize(Policy = "RequireAdminRole")]
+    public class CalendarModel : PageModel
+    {
+        private readonly EventService _eventService;
+
+        public CalendarModel(EventService eventService)
+        {
+            _eventService = eventService;
+        }
+
+        [BindProperty]
+        public Event Event { get; set; }
+
+        public void OnGet()
+        {
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["StatusMessage"] = "Error: Please check your input.";
+                TempData["StatusType"] = "Error";
+                return Page();
+            }
+
+            await _eventService.CreateEventAsync(Event);
+
+            TempData["StatusMessage"] = "Event created successfully.";
+            TempData["StatusType"] = "Success";
+
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostEditAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["StatusMessage"] = "Error: Please check your input.";
+                TempData["StatusType"] = "Error";
+                return Page();
+            }
+
+            await _eventService.UpdateEventAsync(Event);
+
+            TempData["StatusMessage"] = "Event updated successfully.";
+            TempData["StatusType"] = "Success";
+
+            return RedirectToPage();
+        }
+    }
+}

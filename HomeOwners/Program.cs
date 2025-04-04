@@ -28,6 +28,7 @@ builder.Services.AddTransient<IEmailSender, HomeOwners.Services.NoOpEmailSender>
 builder.Services.AddScoped<HomeOwners.Services.UserService>();
 builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 builder.Services.AddScoped<AnnouncementService>();
+builder.Services.AddScoped<EventService>();
 
 // Add authorization policies
 builder.Services.AddAuthorization(options =>

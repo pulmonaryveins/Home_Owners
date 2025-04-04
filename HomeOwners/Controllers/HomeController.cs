@@ -9,11 +9,13 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly AnnouncementService _announcementService;
+    private readonly EventService _eventService;
 
-    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService)
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService)
     {
         _logger = logger;
         _announcementService = announcementService;
+        _eventService = eventService;
     }
 
     public IActionResult Index()
@@ -33,7 +35,17 @@ public class HomeController : Controller
     public async Task<IActionResult> Annoucements()
     {
         var announcements = await _announcementService.GetActiveAnnouncementsAsync();
+        var upcomingEvents = await _eventService.GetUpcomingEventsAsync(3);
+
+        ViewBag.UpcomingEvents = upcomingEvents;
+
         return View(announcements);
+    }
+
+    public async Task<IActionResult> Calendar()
+    {
+        var events = await _eventService.GetActiveEventsAsync();
+        return View(events);
     }
 
     public IActionResult Facilities()

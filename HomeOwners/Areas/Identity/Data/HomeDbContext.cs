@@ -25,6 +25,7 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<StaffUser> StaffUsers { get; set; }
         public DbSet<HomeOwnerUser> HomeOwnerUsers { get; set; }
         public DbSet<UserPreferences> UserPreferences { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

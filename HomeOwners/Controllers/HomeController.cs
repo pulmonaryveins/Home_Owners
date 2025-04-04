@@ -1,16 +1,19 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using HomeOwners.Models;
+using HomeOwners.Services;
 
 namespace HomeOwners.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly AnnouncementService _announcementService;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService)
     {
         _logger = logger;
+        _announcementService = announcementService;
     }
 
     public IActionResult Index()
@@ -27,9 +30,10 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Annoucements()
+    public async Task<IActionResult> Annoucements()
     {
-        return View();
+        var announcements = await _announcementService.GetActiveAnnouncementsAsync();
+        return View(announcements);
     }
 
     public IActionResult Facilities()

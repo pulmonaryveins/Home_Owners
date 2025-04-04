@@ -1,5 +1,6 @@
-﻿﻿@{
-    ViewData["Title"] = "Facilities Page";
+﻿@model List<HomeOwners.Models.Announcement>
+@{
+    ViewData["Title"] = "Annoucements";
 }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -97,6 +98,7 @@
     </div>
 </nav>
 
+
 <!-- Main Content Section -->
 <div class="container announcements-section">
     <!-- Announcements and Notifications -->
@@ -109,41 +111,41 @@
 
             <!-- Announcements List -->
             <div class="announcements-list">
-                <!-- Urgent Notice -->
-                <div class="announcement-card urgent">
-                    <div class="announcement-badge">Urgent</div>
-                    <h3>Water Maintenance Schedule</h3>
-                    <p class="announcement-meta">
-                        <i class="bi bi-clock"></i> Posted 2 hours ago
-                        <span class="badge bg-danger ms-2">Important</span>
-                    </p>
-                    <p>Water supply will be temporarily suspended on March 5, 2025, from 10 AM to 4 PM due to scheduled maintenance work.</p>
-                    <div class="announcement-footer">
+                @if (Model.Any())
+                {
+                    @foreach (var announcement in Model)
+                    {
+                        <div class="announcement-card @(announcement.IsUrgent ? "urgent" : "")">
+                            @if (announcement.IsUrgent)
+                            {
+                                <div class="announcement-badge">Urgent</div>
+                            }
+                            <h3>@announcement.Title</h3>
+                            <p class="announcement-meta">
+                                <i class="bi bi-clock"></i> Posted @((DateTime.Now - announcement.PostedDate).TotalHours < 24
+                        ? ((int)(DateTime.Now - announcement.PostedDate).TotalHours) + " hours ago"
+                        : ((int)(DateTime.Now - announcement.PostedDate).TotalDays) + " days ago")
+                                <span class="badge bg-@(announcement.Category switch {
+                                    "Important" => "danger",
+                                    "Event" => "info",
+                                    "Update" => "success",
+                                    _ => "secondary"
+                                }) ms-2">@announcement.Category</span>
+                            </p>
+                            <p>@announcement.Content</p>
+                            <div class="announcement-footer">
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-info text-center py-5">
+                        <i class="bi bi-info-circle-fill display-4"></i>
+                        <h4 class="mt-3">No announcements available</h4>
+                        <p>There are currently no announcements to display.</p>
                     </div>
-                </div>
-
-                <!-- Regular Announcements -->
-                <div class="announcement-card">
-                    <h3>Monthly Community Meeting</h3>
-                    <p class="announcement-meta">
-                        <i class="bi bi-clock"></i> Posted 1 day ago
-                        <span class="badge bg-info ms-2">Event</span>
-                    </p>
-                    <p>Join us for our monthly community meeting on March 10, 2025, at 7 PM in the Function Hall.</p>
-                    <div class="announcement-footer">
-                    </div>
-                </div>
-
-                <div class="announcement-card">
-                    <h3>New Security Protocol Implementation</h3>
-                    <p class="announcement-meta">
-                        <i class="bi bi-clock"></i> Posted 3 days ago
-                        <span class="badge bg-success ms-2">Update</span>
-                    </p>
-                    <p>Starting March 15, 2025, we will be implementing new security protocols for visitor entry.</p>
-                    <div class="announcement-footer">
-                    </div>
-                </div>
+                }
             </div>
         </div>
 

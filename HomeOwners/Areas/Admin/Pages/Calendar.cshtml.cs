@@ -35,6 +35,16 @@ namespace HomeOwners.Areas.Admin.Pages
                 return Page();
             }
 
+            // Check for overlapping events before creating a new one
+            bool hasOverlap = await _eventService.HasOverlappingEventsAsync(Event.StartTime, Event.EndTime);
+            if (hasOverlap)
+            {
+                // Updated error message about event overlap
+                TempData["StatusMessage"] = "There's an ongoing event scheduled on this date and time. Please select a different time slot.";
+                TempData["StatusType"] = "Error";
+                return Page();
+            }
+
             await _eventService.CreateEventAsync(Event);
 
             TempData["StatusMessage"] = "Event created successfully.";
@@ -48,6 +58,16 @@ namespace HomeOwners.Areas.Admin.Pages
             if (!ModelState.IsValid)
             {
                 TempData["StatusMessage"] = "Error: Please check your input.";
+                TempData["StatusType"] = "Error";
+                return Page();
+            }
+
+            // Check for overlapping events before updating, excluding the current event being edited
+            bool hasOverlap = await _eventService.HasOverlappingEventsAsync(Event.StartTime, Event.EndTime, Event.Id);
+            if (hasOverlap)
+            {
+                // Updated error message about event overlap
+                TempData["StatusMessage"] = "There's an ongoing event scheduled on this date and time. Please select a different time slot.";
                 TempData["StatusType"] = "Error";
                 return Page();
             }

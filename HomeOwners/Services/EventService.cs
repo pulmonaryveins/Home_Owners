@@ -1,8 +1,10 @@
-﻿// Services/EventService.cs
+﻿// Services/EventService.cs - updated with new HasOverlappingEvents method
 using HomeOwners.Areas.Identity.Data;
 using HomeOwners.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HomeOwners.Services
@@ -45,6 +47,30 @@ namespace HomeOwners.Services
         public async Task<Event> GetEventByIdAsync(int id)
         {
             return await _context.Events.FindAsync(id);
+        }
+
+        // Check if there are any overlapping events for the given time range
+        public async Task<bool> HasOverlappingEventsAsync(DateTime startTime, DateTime endTime, int? excludeEventId = null)
+        {
+            // An event overlaps if:
+            // 1. Its start time falls within our event's timespan, OR
+            // 2. Its end time falls within our event's timespan, OR
+            // 3. It completely envelops our event's timespan
+
+            var query = _context.Events
+                .Where(e => e.IsActive &&
+                           ((e.StartTime >= startTime && e.StartTime < endTime) || // Start time falls within our range
+                           (e.EndTime > startTime && e.EndTime <= endTime) || // End time falls within our range
+                           (e.StartTime <= startTime && e.EndTime >= endTime))); // Event envelops our range
+
+            // If we're updating an existing event, exclude it from the check
+            if (excludeEventId.HasValue)
+            {
+                query = query.Where(e => e.Id != excludeEventId.Value);
+            }
+
+            // If any events match our criteria, we have an overlap
+            return await query.AnyAsync();
         }
 
         // Create new event

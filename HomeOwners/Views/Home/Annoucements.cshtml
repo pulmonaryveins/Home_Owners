@@ -230,29 +230,10 @@
                 </div>
             </div>
 
+           
             <!-- Active Polls Widget -->
-            <div class="sidebar-widget polls-widget shadow-sm">
-                <h3><i class="bi bi-bar-chart-line me-2"></i>Active Polls</h3>
-                <div class="poll-card">
-                    <h4>Community Garden Proposal</h4>
-                    <p>Would you support the creation of a community garden in the vacant lot?</p>
-                    <div class="poll-options">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="pollGarden" id="pollYes">
-                            <label class="form-check-label" for="pollYes">Yes</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="pollGarden" id="pollNo">
-                            <label class="form-check-label" for="pollNo">No</label>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary w-100 mt-3">Submit Vote</button>
-                    <p class="poll-meta">Ends in 5 days • 125 votes</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+            <partial name="_PollWidget" model="ViewBag.ActivePoll" />
+
 
 <!-- Community Forum Section -->
 <div class="container forum-section">

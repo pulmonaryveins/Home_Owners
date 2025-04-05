@@ -27,6 +27,9 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<UserPreferences> UserPreferences { get; set; }
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<Poll> Polls { get; set; }
+        public DbSet<PollOption> PollOptions { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -41,6 +44,18 @@ namespace HomeOwners.Areas.Identity.Data
                 .HasOne(p => p.User)
                 .WithOne(u => u.Preferences)
                 .HasForeignKey<UserPreferences>(p => p.UserId);
+
+
+            // Configure Poll relationships
+            builder.Entity<Poll>()
+                .HasMany(p => p.Options)
+                .WithOne(o => o.Poll)
+                .HasForeignKey(o => o.PollId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PollOption>()
+                .Property(p => p.Votes)
+                .HasDefaultValue(0);
         }
     }
 }

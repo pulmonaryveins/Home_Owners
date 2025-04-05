@@ -1,0 +1,31 @@
+﻿@model HomeOwners.ViewModels.PollViewModel
+
+<div class="sidebar-widget polls-widget shadow-sm">
+    <h3><i class="bi bi-bar-chart-line me-2"></i>Active Polls</h3>
+
+    @if (Model?.Question != null)
+    {
+        <div class="poll-card">
+            <h4>@Model.Question</h4>
+            <form asp-controller="Poll" asp-action="Vote" method="post">
+                <div class="poll-options">
+                    @if (Model.Options != null)
+                    {
+                        @foreach (var option in Model.Options)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="optionId" id="option_@option.PollOptionId" value="@option.PollOptionId" required />
+                                <label class="form-check-label" for="option_@option.PollOptionId">@option.OptionText</label>
+                            </div>
+                        }
+                    }
+                </div>
+                <button class="btn btn-primary w-100 mt-3" type="submit">Submit Vote</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <p>No active poll available.</p>
+    }
+</div>

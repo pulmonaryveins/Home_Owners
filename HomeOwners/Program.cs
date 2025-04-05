@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("HomeDbContextConnection") ?? throw new InvalidOperationException("Connection string 'HomeDbContextConnection' not found.");
 
 builder.Services.AddDbContext<HomeDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddScoped<PollService>();
+
 
 // Identity configuration with multi-user types
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>

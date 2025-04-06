@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using HomeOwners.ViewModels;
 using System;
-
+using HomeOwners.Filters;
 
 namespace HomeOwners.Controllers;
 
@@ -34,6 +34,7 @@ public class HomeController : Controller
         return View();
     }
 
+    [RequireAuthentication]
     public IActionResult Profile()
     {
         // You can add user-specific data to ViewData here if needed
@@ -43,6 +44,7 @@ public class HomeController : Controller
         return View();
     }
 
+    [RequireAuthentication]
     public async Task<IActionResult> Annoucements()
     {
         var announcements = await _announcementService.GetActiveAnnouncementsAsync();
@@ -59,6 +61,7 @@ public class HomeController : Controller
         return View(events);
     }
 
+    [RequireAuthentication]
     public async Task<IActionResult> Facilities()
     {
         var facilities = await _facilityService.GetActiveFacilitiesAsync();
@@ -145,11 +148,13 @@ public class HomeController : Controller
         return View(bookings);
     }
 
+    [RequireAuthentication]
     public IActionResult Services()
     {
         return View();
     }
 
+    [RequireAuthentication]
     public IActionResult Contact()
     {
         return View();

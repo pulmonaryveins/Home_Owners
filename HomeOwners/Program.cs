@@ -5,6 +5,7 @@ using HomeOwners.Models.Users;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using HomeOwners.Services;
 using HomeOwners.Infrastructure;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("HomeDbContextConnection") ?? throw new InvalidOperationException("Connection string 'HomeDbContextConnection' not found.");
@@ -45,6 +46,15 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireStaffRole", policy => policy.RequireRole("Staff"));
     options.AddPolicy("RequireHomeOwnerRole", policy => policy.RequireRole("HomeOwner"));
 });
+
+// Configure authentication
+builder.Services.Configure<CookieAuthenticationOptions>(
+    IdentityConstants.ApplicationScheme, 
+    options =>
+    {
+        options.LoginPath = "/Identity/Account/Login";
+        options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    });
 
 var app = builder.Build();
 

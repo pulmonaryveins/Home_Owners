@@ -35,13 +35,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/Home/Contact">Contact</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Home/MyBookings">My Bookings</a>
-                </li>
             </ul>
 
-            <!-- Profile Menu -->
+            <!-- Replace your existing nav-items-right section with this updated version -->
             <div class="nav-items-right">
+                <!-- Profile Menu -->
                 <div class="nav-item dropdown profile-menu">
                     @if (User.Identity.IsAuthenticated)
                     {
@@ -57,8 +55,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" asp-controller="Home" asp-action="MyBookings">
-                                    <i class="bi bi-calendar-check"></i> My Bookings
+                                <a class="dropdown-item" asp-controller="Home" asp-action="Favorites">
+                                    <i class="bi bi-heart"></i> Saved Properties
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -101,115 +99,164 @@
 <div class="container mt-5 pt-5">
     <div class="row">
         <div class="col-md-8 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">Book Facility</h1>
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Facilities
+                </a>
+            </div>
+            
             @if (TempData["StatusMessage"] != null)
             {
                 var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
                 <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
-                    @TempData["StatusMessage"]
+                    <div class="d-flex align-items-center">
+                        <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                        <span>@TempData["StatusMessage"]</span>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
 
             <div class="card shadow booking-card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Book @Model.FacilityName</h3>
-                </div>
-                <div class="card-body p-4">
-                    <form asp-controller="Home" asp-action="BookFacility" method="post">
-                        <input type="hidden" asp-for="FacilityId" />
-                        <input type="hidden" asp-for="UserId" />
-                        <input type="hidden" asp-for="FacilityName" />
-                        <input type="hidden" asp-for="PricePerHour" />
-
-                        <div class="facility-summary mb-4">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="mb-1">@Model.FacilityName</h5>
-                                    <p class="text-muted mb-0">₱@Model.PricePerHour.ToString("N2") per hour</p>
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Facility Summary Sidebar -->
+                        <div class="col-md-4 booking-sidebar">
+                            <div class="p-4 h-100 d-flex flex-column">
+                                <h5 class="sidebar-title">Facility Details</h5>
+                                
+                                <div class="facility-image-container mb-3">
+                                    <img src="@(string.IsNullOrEmpty(ViewBag.FacilityImage) ? "/images/placeholder.jpg" : ViewBag.FacilityImage)" 
+                                         alt="@Model.FacilityName" class="facility-image">
                                 </div>
-                                <div class="pricing-badge">
-                                    <span>₱@Model.PricePerHour.ToString("N2")</span>
+                                
+                                <h5 class="facility-title">@Model.FacilityName</h5>
+                                
+                                <div class="pricing mb-3">
+                                    <span class="price">₱@Model.PricePerHour.ToString("N2")</span>
+                                    <span class="per-hour">per hour</span>
+                                </div>
+                                
+                                @if (Model.AvailableFrom.HasValue && Model.AvailableTo.HasValue)
+                                {
+                                    <div class="availability-time mb-3">
+                                        <i class="bi bi-clock me-2"></i>
+                                        <span>
+                                            @DateTime.Today.Add(Model.AvailableFrom.Value).ToString("h:mm tt") - 
+                                            @DateTime.Today.Add(Model.AvailableTo.Value).ToString("h:mm tt")
+                                        </span>
+                                    </div>
+                                }
+                                
+                                <div class="info-box mt-auto">
+                                    <h6><i class="bi bi-info-circle me-2"></i>Booking Information</h6>
+                                    <p class="mb-0 text-muted">
+                                        Your booking request will be reviewed by the administrator. 
+                                        You will receive a confirmation once approved.
+                                    </p>
                                 </div>
                             </div>
-
-                            @if (Model.AvailableFrom.HasValue && Model.AvailableTo.HasValue)
-                            {
-                                <div class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock"></i> Available from
-                                        @DateTime.Today.Add(Model.AvailableFrom.Value).ToString("h:mm tt") to
-                                        @DateTime.Today.Add(Model.AvailableTo.Value).ToString("h:mm tt")
-                                    </small>
-                                </div>
-                            }
                         </div>
-
-                        <h5 class="form-section-title">Personal Information</h5>
-
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label asp-for="FullName" class="form-label">Full Name</label>
-                                <input asp-for="FullName" class="form-control" placeholder="Enter your full name">
-                                <span asp-validation-for="FullName" class="text-danger"></span>
+                    
+                        <!-- Booking Form -->
+                        <div class="col-md-8">
+                            <div class="p-4">
+                                <h4 class="form-title">Reservation Form</h4>
+                                
+                                <form asp-controller="Home" asp-action="BookFacility" method="post">
+                                    <input type="hidden" asp-for="FacilityId" />
+                                    <input type="hidden" asp-for="UserId" />
+                                    <input type="hidden" asp-for="FacilityName" />
+                                    <input type="hidden" asp-for="PricePerHour" />
+                                    
+                                    <div class="form-section">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-person-badge me-2"></i>Personal Information
+                                        </h5>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label asp-for="FullName" class="form-label">Full Name</label>
+                                                <input asp-for="FullName" class="form-control" placeholder="Enter your full name">
+                                                <span asp-validation-for="FullName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="ContactNumber" class="form-label">Contact Number</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                                    <input asp-for="ContactNumber" class="form-control" placeholder="Enter your contact number">
+                                                </div>
+                                                <span asp-validation-for="ContactNumber" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label asp-for="HouseNumber" class="form-label">House Number</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-house-door"></i></span>
+                                                    <input asp-for="HouseNumber" class="form-control" placeholder="Enter your house number">
+                                                </div>
+                                                <span asp-validation-for="HouseNumber" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-section">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-calendar-event me-2"></i>Booking Details
+                                        </h5>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label asp-for="BookingDate" class="form-label">Booking Date</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                                    <input asp-for="BookingDate" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                                                </div>
+                                                <span asp-validation-for="BookingDate" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="StartTime" class="form-label">Start Time</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                                    <input asp-for="StartTime" class="form-control" type="time">
+                                                </div>
+                                                <span asp-validation-for="StartTime" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label asp-for="EndTime" class="form-label">End Time</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-clock-fill"></i></span>
+                                                    <input asp-for="EndTime" class="form-control" type="time">
+                                                </div>
+                                                <span asp-validation-for="EndTime" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mb-4">
+                                            <div class="col-md-12">
+                                                <label asp-for="SpecialRequests" class="form-label">Special Requests (Optional)</label>
+                                                <textarea asp-for="SpecialRequests" class="form-control" rows="3" placeholder="Any special requirements or additional information"></textarea>
+                                                <span asp-validation-for="SpecialRequests" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                        <a asp-controller="Home" asp-action="Facilities" class="btn btn-outline-secondary">Cancel</a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-calendar-check me-2"></i>Submit Booking
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="ContactNumber" class="form-label">Contact Number</label>
-                                <input asp-for="ContactNumber" class="form-control" placeholder="Enter your contact number">
-                                <span asp-validation-for="ContactNumber" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="HouseNumber" class="form-label">House Number</label>
-                                <input asp-for="HouseNumber" class="form-control" placeholder="Enter your house number">
-                                <span asp-validation-for="HouseNumber" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <h5 class="form-section-title">Booking Details</h5>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="BookingDate" class="form-label">Booking Date</label>
-                                <input asp-for="BookingDate" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")">
-                                <span asp-validation-for="BookingDate" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="StartTime" class="form-label">Start Time</label>
-                                <input asp-for="StartTime" class="form-control" type="time">
-                                <span asp-validation-for="StartTime" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="EndTime" class="form-label">End Time</label>
-                                <input asp-for="EndTime" class="form-control" type="time">
-                                <span asp-validation-for="EndTime" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="row mb-4">
-                            <div class="col-md-12">
-                                <label asp-for="SpecialRequests" class="form-label">Special Requests (Optional)</label>
-                                <textarea asp-for="SpecialRequests" class="form-control" rows="3" placeholder="Any special requirements or additional information"></textarea>
-                                <span asp-validation-for="SpecialRequests" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="booking-summary bg-light p-3 rounded mb-4">
-                            <h6><i class="bi bi-info-circle"></i> Booking Summary</h6>
-                            <p class="mb-1 text-muted small">
-                                Your booking will be reviewed by the administrator. You will receive a notification once your request has been approved or rejected.
-                            </p>
-                        </div>
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a asp-controller="Home" asp-action="Facilities" class="btn btn-outline-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary"><i class="bi bi-calendar-check me-2"></i>Submit Booking</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -217,67 +264,314 @@
 </div>
 
 <style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+    }
+    
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-light: #f8f9fa;
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+    }
+    /* Navbar styling */
     .navbar {
-        background-color: rgba(78, 110, 77, 0.95) !important;
-        backdrop-filter: blur(10px);
+        background-color: var(--primary-color) !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
         padding: 0.75rem 0;
         transition: all 0.3s ease;
     }
 
+    .navbar-brand {
+        font-weight: 700;
+        color: white !important;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-text {
+        background: linear-gradient(45deg, #fff, #e0e0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-nav {
+        gap: 0.5rem;
+    }
+
+        .navbar-nav .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.15);
+                transform: translateY(-1px);
+            }
+
+    .profile-menu .nav-link {
+        padding: 0.5rem !important;
+        color: white !important;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+    }
+
+        .profile-menu .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        min-width: 220px;
+        margin-top: 0.5rem;
+    }
+
+    .dropdown-header {
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+
+    .dropdown-item {
+        padding: 0.6rem 1rem;
+        color: var(--text-dark);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item i {
+            font-size: 1.1rem;
+        }
+
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler i {
+            font-size: 1.5rem;
+        }
+    
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.8rem;
+        margin-bottom: 0;
+    }
+    
     .booking-card {
         border: none;
         border-radius: 12px;
         overflow: hidden;
     }
-
-    .card-header {
-        background-color: #4e6e4d !important;
-        padding: 1.25rem 1.5rem;
+    
+    /* Facility Sidebar */
+    .booking-sidebar {
+        background-color: var(--primary-light);
+        border-right: 1px solid rgba(0,0,0,0.05);
     }
-
-    .form-section-title {
-        color: #4e6e4d;
+    
+    .sidebar-title {
+        color: var(--primary-color);
         font-weight: 600;
-        margin-top: 1.5rem;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .facility-image-container {
+        width: 100%;
+        height: 140px;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+    
+    .facility-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .facility-image:hover {
+        transform: scale(1.05);
+    }
+    
+    .facility-title {
+        color: var (--text-dark);
+        font-weight: 600;
+        margin: 1rem 0 0.5rem;
+    }
+    
+    .pricing {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+    
+    .price {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .per-hour {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .availability-time {
+        display: flex;
+        align-items: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        padding: 0.5rem 0;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .info-box {
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    .info-box h6 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .info-box p {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    
+    /* Form Styling */
+    .form-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section-title {
+        color: var(--primary-dark);
+        font-weight: 600;
+        font-size: 1.1rem;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
         border-bottom: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
     }
-
-    .facility-summary {
+    
+    .form-label {
+        color: var(--text-dark);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        padding: 0.6rem 0.75rem;
+        border-color: rgba(0,0,0,0.1);
+    }
+    
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.15);
+        border-color: var(--primary-color);
+    }
+    
+    .input-group-text {
         background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 8px;
+        border-color: rgba(0,0,0,0.1);
+        color: var(--text-muted);
     }
-
-    .pricing-badge {
-        background-color: #4e6e4d;
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        font-weight: 600;
-    }
-
+    
+    /* Button Styling */
     .btn-primary {
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+        padding: 0.6rem 1.2rem;
     }
-
-        .btn-primary:hover {
-            background-color: #3d5a3c;
-            border-color: #3d5a3c;
-        }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
 </style>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Set minimum date for booking date
             let today = new Date().toISOString().split('T')[0];
             document.getElementById('BookingDate').setAttribute('min', today);
+            
+            // Add focus styles to the form controls
+            const formControls = document.querySelectorAll('.form-control');
+            formControls.forEach(control => {
+                control.addEventListener('focus', function() {
+                    this.closest('.form-group')?.classList.add('focused');
+                });
+                control.addEventListener('blur', function() {
+                    this.closest('.form-group')?.classList.remove('focused');
+                });
+            });
         });
     </script>
 }

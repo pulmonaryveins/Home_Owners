@@ -98,9 +98,72 @@
     </div>
 </nav>
 
+<div class="container facilities-section">
+    <h2 class="text-center section-title">Featured Facilities</h2>
+    <p class="lead text-center section-subtitle">Discover our premium community amenities designed for your lifestyle</p>
+
+    <div class="row featurette">
+        <div class="col-md-7">
+            <h2 class="featurette-heading">Function Hall <span class="text-body-secondary">Host your special events.</span></h2>
+            <p class="lead">Elegant venue perfect for community events, private celebrations, and gatherings. Features modern AV equipment, flexible seating arrangements, and full catering support.</p>
+        </div>
+        <div class="col-md-5">
+            <img src="/images/assets/hall.jpg" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Function Hall">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+        <div class="col-md-7 order-md-2">
+            <h2 class="featurette-heading">Swimming Pool <span class="text-body-secondary">Dive into relaxation.</span></h2>
+            <p class="lead">Resort-style pool with dedicated lap lanes and children's area. Includes lounging areas, seasonal lifeguard service, and modern changing facilities.</p>
+        </div>
+        <div class="col-md-5 order-md-1">
+            <img src="/images/assets/pool.jpeg" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Swimming Pool">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+        <div class="col-md-7">
+            <h2 class="featurette-heading">Sports Complex <span class="text-body-secondary">Stay active and healthy.</span></h2>
+            <p class="lead">Multi-purpose courts for tennis, basketball, and volleyball. Features proper lighting for evening activities, equipment rentals, and professional coaching services.</p>
+        </div>
+        <div class="col-md-5">
+            <img src="/images/assets/complex.JPG" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Sports Complex">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+    <div class="row featurette">
+        <div class="col-md-7 order-md-2">
+            <h2 class="featurette-heading">Clubhouse <span class="text-body-secondary">Your community hub.</span></h2>
+            <p class="lead">Central hub featuring a café, co-working space, and entertainment areas. Perfect for socializing, working, or just relaxing in a comfortable environment.</p>
+        </div>
+        <div class="col-md-5 order-md-1">
+            <img src="/images/assets/clubhouse.png" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Clubhouse">
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+</div>
+
 <div class="container book-amenities-section">
-    <h2 class="text-center section-title">Book Amenities</h2>
-    <p class="lead text-center section-subtitle">Reserve our premier facilities for your events and activities</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="section-title">Book Amenities</h2>
+            <p class="lead section-subtitle">Reserve our premier facilities for your events and activities</p>
+        </div>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a asp-controller="Home" asp-action="MyBookings" class="btn btn-outline-primary view-bookings-btn">
+                <i class="bi bi-calendar-check me-2"></i> View My Bookings
+            </a>
+        }
+    </div>
 
     <div class="row g-4">
         @if (Model != null && Model.Any())
@@ -170,58 +233,6 @@
     </div>
 </div>
 
-<div class="container facilities-section">
-    <h2 class="text-center section-title">Featured Facilities</h2>
-    <p class="lead text-center section-subtitle">Discover our premium community amenities designed for your lifestyle</p>
-
-    <div class="row featurette">
-        <div class="col-md-7">
-            <h2 class="featurette-heading">Function Hall <span class="text-body-secondary">Host your special events.</span></h2>
-            <p class="lead">Elegant venue perfect for community events, private celebrations, and gatherings. Features modern AV equipment, flexible seating arrangements, and full catering support.</p>
-        </div>
-        <div class="col-md-5">
-            <img src="/images/assets/hall.jpg" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Function Hall">
-        </div>
-    </div>
-
-    <hr class="featurette-divider">
-
-    <div class="row featurette">
-        <div class="col-md-7 order-md-2">
-            <h2 class="featurette-heading">Swimming Pool <span class="text-body-secondary">Dive into relaxation.</span></h2>
-            <p class="lead">Resort-style pool with dedicated lap lanes and children's area. Includes lounging areas, seasonal lifeguard service, and modern changing facilities.</p>
-        </div>
-        <div class="col-md-5 order-md-1">
-            <img src="/images/assets/pool.jpeg" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Swimming Pool">
-        </div>
-    </div>
-
-    <hr class="featurette-divider">
-
-    <div class="row featurette">
-        <div class="col-md-7">
-            <h2 class="featurette-heading">Sports Complex <span class="text-body-secondary">Stay active and healthy.</span></h2>
-            <p class="lead">Multi-purpose courts for tennis, basketball, and volleyball. Features proper lighting for evening activities, equipment rentals, and professional coaching services.</p>
-        </div>
-        <div class="col-md-5">
-            <img src="/images/assets/complex.JPG" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Sports Complex">
-        </div>
-    </div>
-
-    <hr class="featurette-divider">
-
-    <div class="row featurette">
-        <div class="col-md-7 order-md-2">
-            <h2 class="featurette-heading">Clubhouse <span class="text-body-secondary">Your community hub.</span></h2>
-            <p class="lead">Central hub featuring a café, co-working space, and entertainment areas. Perfect for socializing, working, or just relaxing in a comfortable environment.</p>
-        </div>
-        <div class="col-md-5 order-md-1">
-            <img src="/images/assets/clubhouse.png" class="featurette-image img-fluid mx-auto" width="500" height="500" alt="Clubhouse">
-        </div>
-    </div>
-
-    <hr class="featurette-divider">
-</div>
 
 <style>
     .facilities-section {
@@ -967,5 +978,30 @@
         padding: 5rem 0;
         background-color: white;
         margin-top: 2rem;
+    }
+
+    /* Added styles for the View My Bookings button */
+    .view-bookings-btn {
+        color: #4e6e4d;
+        border-color: #4e6e4d;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 0.6rem 1.2rem;
+    }
+
+    .view-bookings-btn:hover {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: #3d5a3c;
+        border-color: #3d5a3c;
+        transform: translateY(-2px);
+    }
+    
+    .section-title {
+        margin-bottom: 0.5rem;
+    }
+    
+    .section-subtitle {
+        margin-bottom: 0;
     }
 </style>

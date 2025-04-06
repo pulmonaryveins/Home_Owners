@@ -1,0 +1,159 @@
+﻿@page
+@model HomeOwners.Areas.Admin.Pages.CreateFacilityModel
+@{
+    ViewData["Title"] = "Create Facility";
+}
+
+<div class="container mt-5 pt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            @if (TempData["ErrorMsg"] != null)
+            {
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> @TempData["ErrorMsg"]
+                </div>
+            }
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Create New Facility</h1>
+                <a asp-page="./Facilities" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Facility Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label asp-for="Facility.Name" class="form-label">Name</label>
+                                    <input asp-for="Facility.Name" class="form-control" />
+                                    <span asp-validation-for="Facility.Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Facility.Description" class="form-label">Description</label>
+                                    <textarea asp-for="Facility.Description" class="form-control" rows="4"></textarea>
+                                    <span asp-validation-for="Facility.Description" class="text-danger"></span>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Facility.PricePerHour" class="form-label">Price per Hour (₱)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">₱</span>
+                                            <input asp-for="Facility.PricePerHour" class="form-control" type="number" step="0.01" />
+                                        </div>
+                                        <span asp-validation-for="Facility.PricePerHour" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Facility.Capacity" class="form-label">Capacity (optional)</label>
+                                        <input asp-for="Facility.Capacity" class="form-control" type="number" />
+                                        <span asp-validation-for="Facility.Capacity" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label asp-for="ImageFile" class="form-label">Facility Image</label>
+                                    <input type="file" asp-for="ImageFile" class="form-control" accept="image/*" onchange="previewImage(event)" />
+                                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <img id="imagePreview" src="/images/placeholder.jpg" class="img-thumbnail facility-image-preview" alt="Preview" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="mt-4 mb-3">Availability</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="Facility.AvailableFrom" class="form-label">Available From</label>
+                                <input asp-for="Facility.AvailableFrom" class="form-control" type="time" />
+                                <small class="text-muted">Time: <span id="fromTimeFormatted">--:-- --</span></small>
+                                <span asp-validation-for="Facility.AvailableFrom" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Facility.AvailableTo" class="form-label">Available To</label>
+                                <input asp-for="Facility.AvailableTo" class="form-control" type="time" />
+                                <small class="text-muted">Time: <span id="toTimeFormatted">--:-- --</span></small>
+                                <span asp-validation-for="Facility.AvailableTo" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input asp-for="Facility.IsActive" class="form-check-input" type="checkbox" checked />
+                            <label asp-for="Facility.IsActive" class="form-check-label">
+                                Active (available for booking)
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-page="./Facilities" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Create Facility</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewImage(event) {
+        var reader = new FileReader();
+        reader.onload = function() {
+            var output = document.getElementById('imagePreview');
+            output.src = reader.result;
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+
+    // Format time inputs to show AM/PM
+    function formatTimeDisplay() {
+        const fromInput = document.getElementById('Facility_AvailableFrom');
+        const toInput = document.getElementById('Facility_AvailableTo');
+
+        if (fromInput && fromInput.value) {
+            const fromTime = new Date(`2000-01-01T${fromInput.value}`);
+            document.getElementById('fromTimeFormatted').textContent = fromTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
+
+        if (toInput && toInput.value) {
+            const toTime = new Date(`2000-01-01T${toInput.value}`);
+            document.getElementById('toTimeFormatted').textContent = toTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        formatTimeDisplay();
+
+        // Update when time changes
+        document.getElementById('Facility_AvailableFrom')?.addEventListener('change', formatTimeDisplay);
+        document.getElementById('Facility_AvailableTo')?.addEventListener('change', formatTimeDisplay);
+    });
+</script>
+
+<style>
+    .facility-image-preview {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .btn-primary {
+        background-color: #4e6e4d;
+        border-color: #4e6e4d;
+    }
+
+        .btn-primary:hover {
+            background-color: #3d5a3c;
+            border-color: #3d5a3c;
+        }
+</style>

@@ -27,6 +27,7 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<UserPreferences> UserPreferences { get; set; }
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<Facility> Facilities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -41,6 +42,11 @@ namespace HomeOwners.Areas.Identity.Data
                 .HasOne(p => p.User)
                 .WithOne(u => u.Preferences)
                 .HasForeignKey<UserPreferences>(p => p.UserId);
+
+            // Configure decimal precision for Facility.PricePerHour
+            builder.Entity<Facility>()
+                .Property(f => f.PricePerHour)
+                .HasPrecision(10, 2); // 10 total digits with 2 decimal places
         }
     }
 }

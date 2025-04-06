@@ -29,6 +29,7 @@ builder.Services.AddScoped<HomeOwners.Services.UserService>();
 builder.Services.AddScoped<IUserPreferencesService, UserPreferencesService>();
 builder.Services.AddScoped<AnnouncementService>();
 builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<FacilityService>();
 
 // Add authorization policies
 builder.Services.AddAuthorization(options =>

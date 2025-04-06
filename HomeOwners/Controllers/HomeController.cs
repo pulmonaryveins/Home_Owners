@@ -10,12 +10,14 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> _logger;
     private readonly AnnouncementService _announcementService;
     private readonly EventService _eventService;
+    private readonly FacilityService _facilityService;
 
-    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService)
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService)
     {
         _logger = logger;
         _announcementService = announcementService;
         _eventService = eventService;
+        _facilityService = facilityService;
     }
 
     public IActionResult Index()
@@ -48,9 +50,10 @@ public class HomeController : Controller
         return View(events);
     }
 
-    public IActionResult Facilities()
+    public async Task<IActionResult> Facilities()
     {
-        return View();
+        var facilities = await _facilityService.GetActiveFacilitiesAsync();
+        return View(facilities);
     }
 
     public IActionResult Services()

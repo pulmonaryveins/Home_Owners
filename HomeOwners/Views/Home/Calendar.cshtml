@@ -41,7 +41,7 @@
                 </li>
             </ul>
 
-            <!-- Replace your existing nav-items-right section with this updated version -->
+             <!-- Replace your existing nav-items-right section with this updated version -->
             <div class="nav-items-right">
                 <!-- Profile Menu -->
                 <div class="nav-item dropdown profile-menu">
@@ -100,17 +100,22 @@
     </div>
 </nav>
 
-
-<div class="container calendar-container mt-5 pt-5">
-    <div class="section-header mb-4">
-        <h1 class="mb-2">Community Calendar</h1>
-        <p class="text-muted">Stay up-to-date with all community events and activities</p>
+<div class="container dashboard-container">
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">
+                <i class="bi bi-calendar-event me-2"></i>
+                Community Calendar
+            </h2>
+            <p class="text-muted mb-0 mt-1">Stay up-to-date with all community events and activities</p>
+        </div>
+        <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#requestEventModal">
+            <i class="bi bi-calendar-plus me-1"></i> Request New Event
+        </a>
     </div>
 
-    <div class="row">
-        <div class="col-lg-3 mb-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
+    <div class="card dashboard-card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
                     <h5 class="card-title mb-0">
                         <i class="bi bi-calendar-event me-2"></i> Upcoming Events
                     </h5>
@@ -159,16 +164,18 @@
                     </button>
                 </div>
             </div>
-
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
+    
+    <div class="row mb-4">
+        <div class="col-lg-3">
+            <div class="card dashboard-card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-filter-circle me-2"></i> Filter Events
+                        <i class="bi bi-filter-circle me-2"></i> Filters
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label fw-medium">Event Categories</label>
+                        <label class="form-label">Event Categories</label>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="checkbox" id="filterCommunity" checked>
                             <label class="form-check-label" for="filterCommunity">
@@ -206,34 +213,63 @@
                     </button>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-9">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-header bg-white py-3">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-calendar3 me-2"></i> Calendar of Events
+                        <i class="bi bi-info-circle me-2"></i> Legend
                     </h5>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button type="button" class="btn btn-outline-primary" id="printCalendar" title="Print Calendar">
-                            <i class="bi bi-printer"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-primary" id="downloadCalendar" title="Download Calendar">
-                            <i class="bi bi-download"></i>
-                        </button>
+                </div>
+                <div class="card-body">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #4e6e4d;"></div>
+                        <div>Community Events</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #0d6efd;"></div>
+                        <div>Sports Events</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #dc3545;"></div>
+                        <div>Meetings</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #ffc107;"></div>
+                        <div>Social Events</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #6c757d;"></div>
+                        <div>Other Events</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-9">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-calendar3 me-2"></i> Calendar of Events
+                        </h5>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="printCalendar">
+                                <i class="bi bi-printer"></i> Print
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="downloadCalendar">
+                                <i class="bi bi-download"></i> Export
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div id="homeownerCalendar"></div>
+                    <div id="homeownerCalendar" class="admin-calendar"></div>
                 </div>
             </div>
             
             <div class="mt-4 d-flex justify-content-between align-items-center">
                 <a href="@Url.Action("Annoucements")" class="btn btn-outline-primary">
                     <i class="bi bi-arrow-left me-1"></i> Back to Announcements
-                </a>
-                <a href="#" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#requestEventModal">
-                    <i class="bi bi-calendar-plus me-1"></i> Request New Event
                 </a>
             </div>
         </div>
@@ -244,8 +280,10 @@
 <div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header event-modal-header">
-                <h5 class="modal-title" id="eventDetailModalLabel">Event Details</h5>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="eventDetailModalLabel">
+                    <i class="bi bi-calendar-event me-2"></i> Event Details
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -385,17 +423,50 @@
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,listMonth'
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
                 },
                 events: '/api/events',
-                height: 700,
+                height: 'auto',
                 eventTimeFormat: {
-                    hour: '2-digit',
+                    hour: 'numeric',
                     minute: '2-digit',
                     meridiem: 'short'
                 },
                 eventClick: function(info) {
                     showEventDetails(info.event);
+                },
+                eventContent: function(arg) {
+                    let timeText = '';
+
+                    if (!arg.event.allDay) {
+                        let startFormat = arg.event.start ? new Intl.DateTimeFormat('en', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        }).format(arg.event.start) : '';
+
+                        let endFormat = arg.event.end ? new Intl.DateTimeFormat('en', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        }).format(arg.event.end) : '';
+
+                        if (startFormat && endFormat) {
+                            timeText = `${startFormat} - ${endFormat}`;
+                        }
+                    }
+
+                    return {
+                        html: `
+                            <div class="fc-event-main-frame" style="padding: 2px 4px;">
+                                <div class="fc-event-title-container">
+                                    <div class="fc-event-title fc-sticky" style="font-weight: bold;">${arg.event.title}</div>
+                                    ${timeText ? `<div class="fc-event-time" style="font-size: 0.85em;">${timeText}</div>` : ''}
+                                    ${arg.event.extendedProps.location ? `<div class="fc-event-location" style="font-size: 0.8em;"><i class="bi bi-geo-alt-fill"></i> ${arg.event.extendedProps.location}</div>` : ''}
+                                </div>
+                            </div>
+                        `
+                    };
                 },
                 eventDidMount: function(info) {
                     // Enable Bootstrap tooltips on events
@@ -413,8 +484,8 @@
             function showEventDetails(event) {
                 currentEvent = event;
                 
-                // Set modal background color
-                const modalHeader = document.querySelector('.event-modal-header');
+                // Set modal header background color
+                const modalHeader = document.querySelector('.modal-header');
                 modalHeader.style.backgroundColor = event.backgroundColor || '#4e6e4d';
                 
                 // Fill modal with event details
@@ -687,11 +758,8 @@
             
             // Show toast notification
             function showToast(message, type) {
-                const toastContainer = document.createElement('div');
-                toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-                toastContainer.style.zIndex = '11';
-                
-                const toastHTML = `
+                var toastHTML = `
+                <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
                     <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
                         <div class="d-flex">
                             <div class="toast-body">
@@ -701,30 +769,30 @@
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                         </div>
                     </div>
+                </div>
                 `;
-                
-                toastContainer.innerHTML = toastHTML;
-                document.body.appendChild(toastContainer);
-                
-                const toastElement = toastContainer.querySelector('.toast');
-                const toast = new bootstrap.Toast(toastElement, {
-                    autohide: true,
-                    delay: 5000
+
+                // Remove any existing toast container
+                const existingToast = document.querySelector('.position-fixed.bottom-0.end-0.p-3');
+                if (existingToast) {
+                    existingToast.remove();
+                }
+
+                // Add new toast to body
+                document.body.insertAdjacentHTML('beforeend', toastHTML);
+
+                // Initialize and show toast
+                var toastEl = document.querySelector('.toast');
+                var toast = new bootstrap.Toast(toastEl, {
+                    delay: 3000
                 });
-                
                 toast.show();
-                
-                // Remove toast container after hide
-                toastElement.addEventListener('hidden.bs.toast', function() {
-                    document.body.removeChild(toastContainer);
-                });
             }
         });
     </script>
 }
 
 <style>
-    /* Primary color variables */
     :root {
         --primary-color: #4e6e4d;
         --primary-dark: #3d5a3c;
@@ -733,296 +801,26 @@
         --text-light: #f8f9fa;
         --text-dark: #333;
         --text-muted: #6c757d;
-    }
-    
-    /* Calendar container styles */
-    .calendar-container {
-        padding-top: 120px;
-        padding-bottom: 3rem;
-    }
-    
-    .section-header h1 {
-        color: var(--primary-color);
-        font-weight: 600;
-        font-size: 2.25rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Calendar widget styles */
-    #homeownerCalendar {
-        min-height: 700px;
-        background-color: white;
-    }
-    
-    /* FullCalendar theme overrides */
-    .fc-theme-bootstrap5 a {
-        color: var(--primary-color);
-    }
-    
-    .fc .fc-button-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-    
-    .fc .fc-button-primary:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-    }
-    
-    .fc .fc-button-primary:disabled {
-        background-color: var(--primary-light);
-        border-color: var(--primary-light);
-    }
-    
-    .fc-h-event {
-        background-color: var(--primary-color);
-        border-color: var(--primary-dark);
-    }
-    
-    .fc-daygrid-event {
-        border-radius: 4px;
-    }
-    
-    /* Upcoming events section */
-    .upcoming-events {
-        max-height: 500px;
-        overflow-y: auto;
-    }
-    
-    .upcoming-event {
-        display: flex;
-        gap: 12px;
-        padding: 16px;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        transition: all 0.2s ease;
-    }
-    
-    .upcoming-event:hover {
-        background-color: rgba(78, 110, 77, 0.05);
-    }
-    
-    .upcoming-event:last-child {
-        border-bottom: none;
-    }
-    
-    .event-date {
-        min-width: 50px;
-        text-align: center;
-    }
-    
-    .event-date .date {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        line-height: 1;
-    }
-    
-    .event-date .month {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        font-weight: 500;
-    }
-    
-    .event-details {
-        flex: 1;
-    }
-    
-    .event-details h4 {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--text-dark);
-        margin-bottom: 0.4rem;
-    }
-    
-    .event-details p {
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        margin-bottom: 0.25rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .event-location {
-        font-style: italic;
-    }
-    
-    /* Category dot indicator */
-    .category-dot {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        margin-right: 8px;
-    }
-    
-    /* Empty state styling */
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: var(--text-muted);
-        padding: 2rem 0;
-    }
-    
-    /* Event details modal */
-    .event-modal-header {
-        background-color: var(--primary-color);
-        color: white;
-    }
-    
-    .event-details-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .event-detail-item {
-        display: flex;
-        gap: 1rem;
-    }
-    
-    .event-detail-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background-color: var(--primary-lighter);
-        color: var(--primary-color);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-    }
-    
-    .event-detail-content {
-        flex: 1;
-    }
-    
-    .event-detail-label {
-        display: block;
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        margin-bottom: 0.25rem;
-    }
-    
-    .event-detail-value {
-        color: var(--text-dark);
-        font-weight: 500;
-    }
-    
-    /* Button styles */
-    .btn-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-    
-    .btn-primary:hover, .btn-primary:focus {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-    }
-    
-    .btn-outline-primary {
-        color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-    
-    .btn-outline-primary:hover, .btn-outline-primary:focus {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-    }
-    
-    /* Improved button spacing and placement */
-    .btn-group {
-        gap: 0.5rem;
-    }
-    
-    .btn-group .btn {
-        border-radius: 4px !important;
-        padding: 0.5rem 0.75rem;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        /* Event category colors - standardized */
+        --community-color: #4e6e4d; /* Primary theme color */
+        --sports-color: #0d6efd; /* Bootstrap primary */
+        --meeting-color: #dc3545; /* Bootstrap danger */
+        --social-color: #ffc107; /* Bootstrap warning */
+        --other-color: #6c757d; /* Bootstrap secondary */
     }
 
-    
-    .card-header .btn-group {
-        margin-left: 1rem;
-    }
-    
-    .modal-footer {
-        gap: 0.75rem;
-        justify-content: flex-end;
-        padding: 1rem 1.5rem;
-    }
-    
-    .modal-footer .btn {
-        padding: 0.5rem 1.25rem;
-    }
-    
-    .mt-4.d-flex {
-        margin-top: 2rem !important;
-        padding: 0 0.5rem;
-    }
-    
-    #addToMyCalendar {
-        transition: all 0.3s ease;
-    }
-    
-    #addToMyCalendar:hover {
-        transform: translateY(-2px);
-    }
-    
-    #applyFilters {
-        transition: all 0.3s ease;
-        margin-top: 0.5rem;
-    }
-    
-    #applyFilters:hover {
-        transform: translateY(-2px);
+    body {
+        background-color: #f5f7f9;
     }
 
-    /* FullCalendar toolbar button styles */
-    .fc .fc-button {
-        background-color: var(--primary-color); /* Use primary color */
-        border-color: var(--primary-color);
-        color: white;
-        margin: 0 5px; /* Add spacing between buttons */
-        padding: 0.5rem 1rem; /* Adjust padding for better appearance */
-        border-radius: 4px; /* Rounded corners */
-        transition: all 0.3s ease;
-    }
-
-    .fc .fc-button:hover {
-        background-color: var(--primary-dark); /* Darker shade on hover */
-        border-color: var(--primary-dark);
-    }
-
-    .fc .fc-button:disabled {
-        background-color: var(--primary-light); /* Lighter shade for disabled buttons */
-        border-color: var(--primary-light);
-        color: var(--text-muted);
-    }
-
-    /* Active button styling */
-    .fc .fc-button.fc-button-active {
-        background-color: var(--primary-dark); /* Darker shade for active buttons */
-        border-color: var(--primary-dark);
-        color: white;
-    }
-
-    /* Adjust toolbar spacing */
-    .fc-toolbar {
-        margin-bottom: 1.5rem; /* Add spacing below the toolbar */
-    }
-
-    .fc-toolbar-chunk {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem; /* Add spacing between button groups */
-    }
-
+    /* Navbar styling */
     .navbar {
-        background-color: rgba(78, 110, 77, 0.95) !important;
-        backdrop-filter: blur(10px);
+        background-color: var(--primary-color) !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
         padding: 0.75rem 0;
         transition: all 0.3s ease;
     }
@@ -1041,11 +839,11 @@
     }
 
     .navbar-nav {
-        gap: 1rem;
+        gap: 0.5rem;
     }
 
     .navbar-nav .nav-link {
-        color: white !important;
+        color: var(--text-light) !important;
         font-weight: 500;
         font-size: 0.95rem;
         padding: 0.5rem 1rem !important;
@@ -1055,7 +853,7 @@
 
     .navbar-nav .nav-link:hover,
     .navbar-nav .nav-link.active {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.15);
         transform: translateY(-1px);
     }
 
@@ -1067,18 +865,9 @@
         transition: all 0.3s ease;
     }
 
-    .profile-menu .nav-link:hover {
-        transform: translateY(-2px);
-    }
-
-    .dropdown-menu {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 0.5rem;
-        min-width: 200px;
-        margin-top: 0.5rem;
-    }
+        .profile-menu .nav-link:hover {
+            transform: translateY(-2px);
+        }
 
     .dropdown-header {
         color: #666;
@@ -1104,86 +893,306 @@
         font-size: 1.1rem;
     }
 
-    /* Notification Styling */
-    .notification-menu .nav-link {
-        padding: 0.5rem !important;
-        font-size: 1.4rem;
+    /* Base button styles */
+    .btn-primary {
+        --bs-btn-color: #fff;
+        --bs-btn-bg: var(--primary-color);
+        --bs-btn-border-color: var(--primary-color);
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: var(--primary-dark);
+        --bs-btn-hover-border-color: var(--primary-dark);
+        --bs-btn-focus-shadow-rgb: 49, 132, 253;
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: var(--primary-dark);
+        --bs-btn-active-border-color: var(--primary-dark);
+        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        --bs-btn-disabled-color: #fff;
+        --bs-btn-disabled-bg: var(--primary-color);
+        --bs-btn-disabled-border-color: var(--primary-color);
+    }
+
+    /* Other button styles */
+    .btn-outline-primary {
+        --bs-btn-color: var(--primary-color);
+        --bs-btn-border-color: var(--primary-color);
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: var(--primary-color);
+        --bs-btn-hover-border-color: var(--primary-color);
+        --bs-btn-focus-shadow-rgb: 13, 110, 253;
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: var(--primary-color);
+        --bs-btn-active-border-color: var(--primary-color);
+        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        --bs-btn-disabled-color: var(--primary-color);
+        --bs-btn-disabled-bg: transparent;
+        --bs-btn-disabled-border-color: var(--primary-color);
+        --bs-gradient: none;
+    }
+
+    /* Dashboard container */
+    .dashboard-container {
+        margin-top: 6rem;
+        padding-bottom: 2rem;
+    }
+
+    .dashboard-header {
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        padding-bottom: 1rem;
+    }
+
+    .dashboard-header h2 {
+        font-weight: 600;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;
+    }
+
+    /* Card styling */
+    .dashboard-card {
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    /* Calendar specific styles */
+    .admin-calendar {
+        background-color: white;
+        padding: 1rem;
+        min-height: 700px;
+    }
+
+    /* FullCalendar theme overrides */
+    .fc-theme-bootstrap5 a {
+        color: var(--primary-color);
+    }
+
+    .fc .fc-button-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .fc .fc-button-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+
+    .fc .fc-button-primary:disabled {
+        background-color: var(--primary-light);
+        border-color: var(--primary-light);
+    }
+
+    /* Event styling */
+    .fc-h-event {
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin: 1px 0;
+        border-width: 1px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+
+    .fc-daygrid-event {
+        border-radius: 4px;
+    }
+
+    /* Event hover effect */
+    .fc-event:hover {
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    /* Make text in events more readable */
+    .fc-event-title {
+        font-weight: 500 !important;
+        padding: 2px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .fc-event-time {
+        font-size: 0.85em;
+        opacity: 0.9;
+    }
+
+    /* Legend styles */
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    /* Category dot */
+    .category-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+
+    /* Improve day cell appearance */
+    .fc-daygrid-day {
+        transition: background-color 0.2s ease;
+    }
+
+    .fc-daygrid-day:hover {
+        background-color: var(--primary-lighter);
+    }
+
+    .fc-daygrid-day-number {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    /* Today's cell highlight */
+    .fc-day-today {
+        background-color: var(--primary-light) !important;
+    }
+
+    /* Make day headers more visible */
+    .fc-col-header-cell {
+        background-color: var(--primary-color);
+    }
+
+    .fc-col-header-cell-cushion {
         color: white !important;
-        transition: all 0.3s ease;
-        position: relative;
+        font-weight: 500;
+        padding: 8px 4px;
     }
 
-    .notification-badge {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background-color: #dc3545;
-        color: white;
-        border-radius: 50%;
-        padding: 0.25rem 0.5rem;
-        font-size: 0.7rem;
-        font-weight: 600;
-        border: 2px solid #4e6e4d;
+    /* Upcoming events styling */
+    .upcoming-events {
+        max-height: 500px;
+        overflow-y: auto;
     }
 
-    .notification-dropdown {
-        min-width: 320px;
-        padding: 0.5rem;
-        margin-top: 0.7rem;
-    }
-
-    .notification-dropdown .dropdown-header {
-        color: #333;
-        font-weight: 600;
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid #eee;
-    }
-
-    .notification-dropdown .dropdown-item {
-        padding: 0.75rem 1rem;
+    .upcoming-event {
         display: flex;
-        align-items: center;
-        gap: 1rem;
-        border-radius: 6px;
-        margin: 0.2rem 0;
+        gap: 12px;
+        padding: 16px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
     }
 
-    .notification-icon {
-        width: 40px;
-        height: 40px;
-        background-color: #f8f9fa;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
+    .upcoming-event:hover {
+        background-color: rgba(78, 110, 77, 0.05);
     }
 
-    .notification-content {
+    .upcoming-event:last-child {
+        border-bottom: none;
+    }
+
+    .event-date {
+        min-width: 50px;
+        text-align: center;
+    }
+
+    .event-date .date {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1;
+    }
+
+    .event-date .month {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+
+    .event-details {
         flex: 1;
     }
 
-    .notification-text {
-        color: #333;
-        font-size: 0.9rem;
-        margin-bottom: 0.2rem;
+    .event-details h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.4rem;
     }
 
-    .dropdown-item.unread {
-        background-color: #f8f9fa;
+    .event-details p {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    /* Mobile Responsive Styling */
-    .navbar-toggler {
-        border: none;
-        padding: 0.5rem;
+    /* Modal styling */
+    .modal-header {
+        background-color: var(--primary-color);
+        color: white;
     }
 
-    .navbar-toggler:focus {
-        box-shadow: none;
+    /* Empty state styling */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--text-muted);
+        padding: 2rem 0;
     }
 
-    .navbar-toggler i {
-        font-size: 1.5rem;
+    /* Event details modal */
+    .event-details-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .event-detail-item {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .event-detail-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: var(--primary-lighter);
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .event-detail-content {
+        flex: 1;
+    }
+
+    .event-detail-label {
+        display: block;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .event-detail-value {
+        color: var(--text-dark);
+        font-weight: 500;
     }
 </style>

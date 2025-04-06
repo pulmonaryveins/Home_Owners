@@ -105,5 +105,13 @@ namespace HomeOwners.Controllers
 
             return NoContent();
         }
+
+        // GET: api/events/check-overlap
+        [HttpGet("check-overlap")]
+        public async Task<IActionResult> CheckOverlap(DateTime startTime, DateTime endTime, int? excludeEventId = null)
+        {
+            bool hasOverlap = await _eventService.HasOverlappingEventsAsync(startTime, endTime, excludeEventId);
+            return Ok(new { hasOverlap });
+        }
     }
 }

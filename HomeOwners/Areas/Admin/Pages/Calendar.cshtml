@@ -447,10 +447,46 @@
                 selectMirror: true,
                 dayMaxEvents: true,
                 height: 'auto',
+                // Improve event time display format
                 eventTimeFormat: {
-                    hour: '2-digit',
+                    hour: 'numeric',
                     minute: '2-digit',
                     meridiem: 'short'
+                },
+                // Improve event display
+                eventDisplay: 'block',
+                eventContent: function(arg) {
+                    let timeText = '';
+
+                    if (!arg.event.allDay) {
+                        let startFormat = arg.event.start ? new Intl.DateTimeFormat('en', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        }).format(arg.event.start) : '';
+
+                        let endFormat = arg.event.end ? new Intl.DateTimeFormat('en', {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        }).format(arg.event.end) : '';
+
+                        if (startFormat && endFormat) {
+                            timeText = `${startFormat} - ${endFormat}`;
+                        }
+                    }
+
+                    return {
+                        html: `
+                            <div class="fc-event-main-frame" style="padding: 2px 4px;">
+                                <div class="fc-event-title-container">
+                                    <div class="fc-event-title fc-sticky" style="font-weight: bold;">${arg.event.title}</div>
+                                    ${timeText ? `<div class="fc-event-time" style="font-size: 0.85em;">${timeText}</div>` : ''}
+                                    ${arg.event.extendedProps.location ? `<div class="fc-event-location" style="font-size: 0.8em;"><i class="bi bi-geo-alt-fill"></i> ${arg.event.extendedProps.location}</div>` : ''}
+                                </div>
+                            </div>
+                        `
+                    };
                 },
                 views: {
                     dayGrid: {
@@ -469,23 +505,23 @@
                     document.getElementById('editIsAllDay').checked = event.allDay;
                     document.getElementById('editIsActive').checked = event.extendedProps.isActive !== false;
                     document.getElementById('editIsPublic').checked = event.extendedProps.isPublic !== false;
-                    
+
                     // Format date for datetime-local input
                     var startDate = new Date(event.start);
                     var endDate = new Date(event.end || startDate);
-                    
+
                     if (event.allDay) {
                         // For all-day events, set default times
                         startDate.setHours(9, 0, 0);
                         endDate.setHours(17, 0, 0);
                     }
-                    
+
                     var startFormatted = toLocalIsoString(startDate);
                     var endFormatted = toLocalIsoString(endDate);
-                    
+
                     document.getElementById('editStartTime').value = startFormatted;
                     document.getElementById('editEndTime').value = endFormatted;
-                    
+
                     var editEventModal = new bootstrap.Modal(document.getElementById('editEventModal'));
                     editEventModal.show();
                 },
@@ -493,18 +529,18 @@
                     // Pre-fill dates when selecting a time range on the calendar
                     var startDate = info.start;
                     var endDate = info.end;
-                    
+
                     // Set default times (9 AM - 5 PM)
                     startDate.setHours(9, 0, 0);
                     endDate.setDate(endDate.getDate() - 1); // Adjust for all-day selection
                     endDate.setHours(17, 0, 0);
-                    
+
                     document.getElementById('StartTime').value = toLocalIsoString(startDate);
                     document.getElementById('EndTime').value = toLocalIsoString(endDate);
-                    
+
                     // Set "All Day" checkbox based on selection type
                     document.getElementById('IsAllDay').checked = info.allDay;
-                    
+
                     var createEventModal = new bootstrap.Modal(document.getElementById('createEventModal'));
                     createEventModal.show();
                 },
@@ -516,19 +552,19 @@
                 }
             });
             calendar.render();
-            
+
             // Helper function to convert date to local ISO string format for datetime-local input
             function toLocalIsoString(date) {
                 var tzoffset = date.getTimezoneOffset() * 60000; // offset in milliseconds
                 var localISOTime = (new Date(date.getTime() - tzoffset)).toISOString().slice(0, 16);
                 return localISOTime;
             }
-            
+
             // Handle updates when events are dragged or resized
             function updateEventDates(event) {
                 var startDate = event.start;
                 var endDate = event.end || startDate;
-                
+
                 fetch('/api/events/' + event.id, {
                     method: 'PUT',
                     headers: {
@@ -556,24 +592,24 @@
                     showToast('Failed to update event', 'danger');
                 });
             }
-            
+
             // Delete event button
             document.getElementById('deleteEventBtn').addEventListener('click', function() {
                 var eventId = document.getElementById('editEventId').value;
                 eventToDelete = eventId;
-                
+
                 // Close the edit modal
                 bootstrap.Modal.getInstance(document.getElementById('editEventModal')).hide();
-                
+
                 // Show the confirmation modal
                 var deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
                 deleteConfirmModal.show();
             });
-            
+
             // Confirm delete button
             document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
                 if (!eventToDelete) return;
-                
+
                 fetch('/api/events/' + eventToDelete, {
                     method: 'DELETE',
                     headers: {
@@ -585,10 +621,10 @@
                     if (response.ok) {
                         // Close the confirmation modal
                         bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
-                        
+
                         // Refresh calendar events
                         calendar.refetchEvents();
-                        
+
                         // Show success message
                         showToast('Event deleted successfully', 'success');
                     } else {
@@ -600,7 +636,7 @@
                     showToast('Failed to delete event', 'danger');
                 });
             });
-            
+
             // Filter functionality
             document.getElementById('applyFilters').addEventListener('click', function() {
                 // Get selected categories
@@ -610,7 +646,7 @@
                 if (document.getElementById('filterMeeting').checked) selectedCategories.push('Meeting');
                 if (document.getElementById('filterSocial').checked) selectedCategories.push('Social');
                 if (document.getElementById('filterOther').checked) selectedCategories.push('Other');
-                
+
                 // Apply filters to calendar
                 calendar.getEvents().forEach(function(event) {
                     var category = event.extendedProps.category || 'Other';
@@ -620,16 +656,16 @@
                         event.setProp('display', 'none');
                     }
                 });
-                
+
                 // Show toast
                 showToast('Filters applied', 'primary');
             });
-            
+
             // Print calendar
             document.getElementById('printCalendar').addEventListener('click', function() {
                 window.print();
             });
-            
+
             // Function to show toast messages
             function showToast(message, type) {
                 var toastHTML = `
@@ -645,16 +681,16 @@
                     </div>
                 </div>
                 `;
-                
+
                 // Remove any existing toast container
                 const existingToast = document.querySelector('.position-fixed.bottom-0.end-0.p-3');
                 if (existingToast) {
                     existingToast.remove();
                 }
-                
+
                 // Add new toast to body
                 document.body.insertAdjacentHTML('beforeend', toastHTML);
-                
+
                 // Initialize and show toast
                 var toastEl = document.querySelector('.toast');
                 var toast = new bootstrap.Toast(toastEl, {
@@ -662,6 +698,66 @@
                 });
                 toast.show();
             }
+        });
+
+        // Check for overlapping events when creating/editing
+        async function checkEventOverlap(startTime, endTime, eventId = null) {
+            try {
+                // Build query parameters
+                let url = `/api/events/check-overlap?startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`;
+                if (eventId) {
+                    url += `&excludeEventId=${eventId}`;
+                }
+
+                // Make request to API
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.hasOverlap;
+            } catch (error) {
+                console.error('Error checking for overlapping events:', error);
+                return false; // In case of error, allow the server to handle validation
+            }
+        }
+
+        // Add event listener to create form submission
+        document.getElementById('createEventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const startTime = document.getElementById('StartTime').value;
+            const endTime = document.getElementById('EndTime').value;
+
+            if (startTime && endTime) {
+                const hasOverlap = await checkEventOverlap(startTime, endTime);
+                if (hasOverlap) {
+                    // Updated overlap error message
+                    showToast('There\'s an ongoing event scheduled on this date and time. Please select a different time slot.', 'danger');
+                    return;
+                }
+            }
+
+            // If no overlap, submit the form
+            this.submit();
+        });
+
+        // Add event listener to edit form submission
+        document.getElementById('editEventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const eventId = document.getElementById('editEventId').value;
+            const startTime = document.getElementById('editStartTime').value;
+            const endTime = document.getElementById('editEndTime').value;
+
+            if (startTime && endTime) {
+                const hasOverlap = await checkEventOverlap(startTime, endTime, eventId);
+                if (hasOverlap) {
+                    // Updated overlap error message
+                    showToast('There\'s an ongoing event scheduled on this date and time. Please select a different time slot.', 'danger');
+                    return;
+                }
+            }
+
+            // If no overlap, submit the form
+            this.submit();
         });
     </script>
 }
@@ -679,45 +775,51 @@
         --warning-color: #ffc107;
         --danger-color: #dc3545;
         --info-color: #17a2b8;
+        /* Event category colors - standardized */
+        --community-color: #4e6e4d; /* Primary theme color */
+        --sports-color: #0d6efd; /* Bootstrap primary */
+        --meeting-color: #dc3545; /* Bootstrap danger */
+        --social-color: #ffc107; /* Bootstrap warning */
+        --other-color: #6c757d; /* Bootstrap secondary */
     }
 
     .modal-header {
-        background: #4e6e4d;
+        background: var(--primary-color);
     }
 
     /* Base button styles */
     .btn-primary {
         --bs-btn-color: #fff;
-        --bs-btn-bg: #4e6e4d;
-        --bs-btn-border-color: #4e6e4d;
+        --bs-btn-bg: var(--primary-color);
+        --bs-btn-border-color: var(--primary-color);
         --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #3d5a3c;
-        --bs-btn-hover-border-color: #3d5a3c;
+        --bs-btn-hover-bg: var(--primary-dark);
+        --bs-btn-hover-border-color: var(--primary-dark);
         --bs-btn-focus-shadow-rgb: 49, 132, 253;
         --bs-btn-active-color: #fff;
-        --bs-btn-active-bg: #3d5a3c;
-        --bs-btn-active-border-color: #3d5a3c;
+        --bs-btn-active-bg: var(--primary-dark);
+        --bs-btn-active-border-color: var(--primary-dark);
         --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
         --bs-btn-disabled-color: #fff;
-        --bs-btn-disabled-bg: #4e6e4d;
-        --bs-btn-disabled-border-color: #4e6e4d;
+        --bs-btn-disabled-bg: var(--primary-color);
+        --bs-btn-disabled-border-color: var(--primary-color);
     }
 
     /* Other button styles and utility classes */
     .btn-outline-primary {
-        --bs-btn-color: #4e6e4d;
-        --bs-btn-border-color: #4e6e4d;
+        --bs-btn-color: var(--primary-color);
+        --bs-btn-border-color: var(--primary-color);
         --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #4e6e4d;
-        --bs-btn-hover-border-color: #4e6e4d;
+        --bs-btn-hover-bg: var(--primary-color);
+        --bs-btn-hover-border-color: var(--primary-color);
         --bs-btn-focus-shadow-rgb: 13, 110, 253;
         --bs-btn-active-color: #fff;
-        --bs-btn-active-bg: #4e6e4d;
-        --bs-btn-active-border-color: #4e6e4d;
+        --bs-btn-active-bg: var(--primary-color);
+        --bs-btn-active-border-color: var(--primary-color);
         --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-        --bs-btn-disabled-color: #4e6e4d;
+        --bs-btn-disabled-color: var(--primary-color);
         --bs-btn-disabled-bg: transparent;
-        --bs-btn-disabled-border-color: #4e6e4d;
+        --bs-btn-disabled-border-color: var(--primary-color);
         --bs-gradient: none;
     }
 
@@ -803,6 +905,7 @@
         padding: 1rem;
     }
 
+    /* Improved Calendar Styles */
     .fc-theme-bootstrap5 a {
         color: var(--primary-color);
     }
@@ -812,26 +915,50 @@
         border-color: var(--primary-color);
     }
 
-    .fc .fc-button-primary:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-    }
+        .fc .fc-button-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
 
-    .fc .fc-button-primary:disabled {
-        background-color: var(--primary-light);
-        border-color: var(--primary-light);
-    }
+        .fc .fc-button-primary:disabled {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
 
+    /* Event Style Improvements */
     .fc-h-event {
-        background-color: var(--primary-color);
-        border-color: var(--primary-dark);
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin: 1px 0;
+        border-width: 1px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
     }
 
     .fc-daygrid-event {
         border-radius: 4px;
     }
 
-    /* Legend styles */
+    /* Add hover effect to events */
+    .fc-event:hover {
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    /* Make text in events more readable */
+    .fc-event-title {
+        font-weight: 500 !important;
+        padding: 2px 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .fc-event-time {
+        font-size: 0.85em;
+        opacity: 0.9;
+    }
+
+    /* Legend styles with consistent colors */
     .legend-item {
         display: flex;
         align-items: center;
@@ -845,6 +972,27 @@
         margin-right: 10px;
     }
 
+    /* Update colors in legend to match the CSS variables */
+    .legend-item:nth-child(1) .legend-color {
+        background-color: var(--community-color);
+    }
+
+    .legend-item:nth-child(2) .legend-color {
+        background-color: var(--sports-color);
+    }
+
+    .legend-item:nth-child(3) .legend-color {
+        background-color: var(--meeting-color);
+    }
+
+    .legend-item:nth-child(4) .legend-color {
+        background-color: var(--social-color);
+    }
+
+    .legend-item:nth-child(5) .legend-color {
+        background-color: var(--other-color);
+    }
+
     /* Category dot */
     .category-dot {
         display: inline-block;
@@ -852,5 +1000,56 @@
         height: 10px;
         border-radius: 50%;
         margin-right: 8px;
+    }
+
+    /* Update the filter checkboxes to use the CSS variables */
+    .form-check label[for="filterCommunity"] .category-dot {
+        background-color: var(--community-color);
+    }
+
+    .form-check label[for="filterSports"] .category-dot {
+        background-color: var(--sports-color);
+    }
+
+    .form-check label[for="filterMeeting"] .category-dot {
+        background-color: var(--meeting-color);
+    }
+
+    .form-check label[for="filterSocial"] .category-dot {
+        background-color: var(--social-color);
+    }
+
+    .form-check label[for="filterOther"] .category-dot {
+        background-color: var(--other-color);
+    }
+
+    /* Improve day cell appearance */
+    .fc-daygrid-day {
+        transition: background-color 0.2s ease;
+    }
+
+        .fc-daygrid-day:hover {
+            background-color: var(--primary-lighter);
+        }
+
+    .fc-daygrid-day-number {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    /* Today's cell highlight */
+    .fc-day-today {
+        background-color: var(--primary-light) !important;
+    }
+
+    /* Make day headers more visible */
+    .fc-col-header-cell {
+        background-color: var(--primary-color);
+    }
+
+    .fc-col-header-cell-cushion {
+        color: white !important;
+        font-weight: 500;
+        padding: 8px 4px;
     }
 </style>

@@ -21,6 +21,7 @@ namespace HomeOwners.Services
                 .OrderByDescending(p => p.IsActive)
                 .ToListAsync();
         }
+
         public async Task CreatePollAsync(Poll poll)
         {
             if (poll.IsActive)
@@ -45,11 +46,20 @@ namespace HomeOwners.Services
             _context.Polls.Add(poll);
             await _context.SaveChangesAsync();
         }
-        public async Task<Poll> GetPollByIdAsync(int id)
+
+        public async Task<Poll?> GetPollByIdAsync(int id)
         {
-            return await _context.Polls
-                .Include(p => p.Options)
-                .FirstOrDefaultAsync(p => p.PollId == id);
+            try
+            {
+                return await _context.Polls
+                    .Include(p => p.Options)
+                    .FirstOrDefaultAsync(p => p.PollId == id);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (logging mechanism not shown here)
+                return null;
+            }
         }
 
         public async Task UpdatePollAsync(Poll poll)

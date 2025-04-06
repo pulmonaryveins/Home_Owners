@@ -1,4 +1,3 @@
-// HomeOwners/Areas/Admin/Pages/Polls/Index.cshtml.cs
 using HomeOwners.Models;
 using HomeOwners.Services;
 using Microsoft.AspNetCore.Authorization;

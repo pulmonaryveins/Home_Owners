@@ -31,6 +31,7 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<PollOption> PollOptions { get; set; }
 
 
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

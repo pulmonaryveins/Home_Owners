@@ -79,6 +79,28 @@
 
 @section Scripts {
     <script>
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const pollOptions = document.getElementById('pollOptions');
+                const addOptionBtn = document.getElementById('addOption');
+                const form = document.getElementById('createPollForm');
+
+                // Form validation before submission
+                form.addEventListener('submit', function(e) {
+                    const options = Array.from(pollOptions.querySelectorAll('input[type="text"]'))
+                        .map(input => input.value.trim())
+                        .filter(value => value !== '');
+
+                    if (options.length < 2) {
+                        e.preventDefault();
+                        alert('Please provide at least 2 non-empty options');
+                        return false;
+                    }
+                });
+
         document.addEventListener('DOMContentLoaded', function() {
             const pollOptions = document.getElementById('pollOptions');
             const addOptionBtn = document.getElementById('addOption');

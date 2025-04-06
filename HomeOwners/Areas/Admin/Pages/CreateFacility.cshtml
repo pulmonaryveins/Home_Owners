@@ -6,98 +6,166 @@
 
 <div class="container mt-5 pt-3">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-10">
             @if (TempData["ErrorMsg"] != null)
             {
-                <div class="alert alert-danger">
-                    <strong>Error:</strong> @TempData["ErrorMsg"]
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Error:</strong> @TempData["ErrorMsg"]
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
+            
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>Create New Facility</h1>
+                <h1 class="page-title">Create New Facility</h1>
                 <a asp-page="./Facilities" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Back to List
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
                 </a>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Facility Details</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    <label asp-for="Facility.Name" class="form-label">Name</label>
-                                    <input asp-for="Facility.Name" class="form-control" />
-                                    <span asp-validation-for="Facility.Name" class="text-danger"></span>
+            <div class="card shadow-sm facility-card">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Form Instructions Sidebar -->
+                        <div class="col-lg-4 facility-sidebar">
+                            <div class="p-4 h-100 d-flex flex-column">
+                                <h5 class="sidebar-title">
+                                    <i class="bi bi-info-circle me-2"></i>Facility Creation
+                                </h5>
+                                
+                                <div class="text-center mt-3 mb-4">
+                                    <img id="imagePreview" src="/images/placeholder.jpg" 
+                                        class="img-thumbnail facility-image" alt="Preview" />
                                 </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="Facility.Description" class="form-label">Description</label>
-                                    <textarea asp-for="Facility.Description" class="form-control" rows="4"></textarea>
-                                    <span asp-validation-for="Facility.Description" class="text-danger"></span>
+                                
+                                <div class="info-box mt-auto">
+                                    <h6><i class="bi bi-lightbulb me-2"></i>Tips</h6>
+                                    <p class="mb-2 text-muted">
+                                        Upload a high-quality image to showcase your facility.
+                                    </p>
+                                    <p class="mb-2 text-muted">
+                                        Provide a detailed description to help users understand the facility.
+                                    </p>
+                                    <p class="mb-0 text-muted">
+                                        Set reasonable pricing and availability hours to maximize bookings.
+                                    </p>
                                 </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Facility Creation Form -->
+                        <div class="col-lg-8">
+                            <div class="p-4">
+                                <h4 class="form-title">Facility Details</h4>
+                                
+                                <form method="post" enctype="multipart/form-data">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label asp-for="Facility.PricePerHour" class="form-label">Price per Hour (₱)</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">₱</span>
-                                            <input asp-for="Facility.PricePerHour" class="form-control" type="number" step="0.01" />
+                                    <div class="form-section">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-building me-2"></i>Basic Information
+                                        </h5>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="Facility.Name" class="form-label">Facility Name</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                                <input asp-for="Facility.Name" class="form-control" placeholder="Enter facility name" />
+                                            </div>
+                                            <span asp-validation-for="Facility.Name" class="text-danger"></span>
                                         </div>
-                                        <span asp-validation-for="Facility.PricePerHour" class="text-danger"></span>
+
+                                        <div class="mb-3">
+                                            <label asp-for="Facility.Description" class="form-label">Description</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                                <textarea asp-for="Facility.Description" class="form-control" rows="4" 
+                                                    placeholder="Describe the facility and its features"></textarea>
+                                            </div>
+                                            <span asp-validation-for="Facility.Description" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="Facility.PricePerHour" class="form-label">Price per Hour (₱)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">₱</span>
+                                                    <input asp-for="Facility.PricePerHour" class="form-control" type="number" step="0.01" 
+                                                        placeholder="0.00" />
+                                                </div>
+                                                <span asp-validation-for="Facility.PricePerHour" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label asp-for="Facility.Capacity" class="form-label">Capacity (optional)</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-people"></i></span>
+                                                    <input asp-for="Facility.Capacity" class="form-control" type="number" 
+                                                        placeholder="Maximum number of people" />
+                                                </div>
+                                                <span asp-validation-for="Facility.Capacity" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="ImageFile" class="form-label">Facility Image</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-image"></i></span>
+                                                <input type="file" asp-for="ImageFile" class="form-control" accept="image/*" 
+                                                    onchange="previewImage(event)" />
+                                            </div>
+                                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                                            <small class="text-muted">Recommended size: 800x600 pixels</small>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label asp-for="Facility.Capacity" class="form-label">Capacity (optional)</label>
-                                        <input asp-for="Facility.Capacity" class="form-control" type="number" />
-                                        <span asp-validation-for="Facility.Capacity" class="text-danger"></span>
+
+                                    <div class="form-section">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-clock me-2"></i>Availability Schedule
+                                        </h5>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="Facility.AvailableFrom" class="form-label">Available From</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-hourglass-top"></i></span>
+                                                    <input asp-for="Facility.AvailableFrom" class="form-control" type="time" />
+                                                </div>
+                                                <small class="text-muted">Time: <span id="fromTimeFormatted">--:-- --</span></small>
+                                                <span asp-validation-for="Facility.AvailableFrom" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label asp-for="Facility.AvailableTo" class="form-label">Available To</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-hourglass-bottom"></i></span>
+                                                    <input asp-for="Facility.AvailableTo" class="form-control" type="time" />
+                                                </div>
+                                                <small class="text-muted">Time: <span id="toTimeFormatted">--:-- --</span></small>
+                                                <span asp-validation-for="Facility.AvailableTo" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-check mb-4">
+                                            <input asp-for="Facility.IsActive" class="form-check-input" type="checkbox" checked />
+                                            <label asp-for="Facility.IsActive" class="form-check-label">
+                                                <i class="bi bi-toggle-on me-1"></i>Active (available for booking)
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label asp-for="ImageFile" class="form-label">Facility Image</label>
-                                    <input type="file" asp-for="ImageFile" class="form-control" accept="image/*" onchange="previewImage(event)" />
-                                    <span asp-validation-for="ImageFile" class="text-danger"></span>
-                                </div>
-                                <div class="text-center mt-3">
-                                    <img id="imagePreview" src="/images/placeholder.jpg" class="img-thumbnail facility-image-preview" alt="Preview" />
-                                </div>
-                            </div>
-                        </div>
 
-                        <h5 class="mt-4 mb-3">Availability</h5>
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label asp-for="Facility.AvailableFrom" class="form-label">Available From</label>
-                                <input asp-for="Facility.AvailableFrom" class="form-control" type="time" />
-                                <small class="text-muted">Time: <span id="fromTimeFormatted">--:-- --</span></small>
-                                <span asp-validation-for="Facility.AvailableFrom" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="Facility.AvailableTo" class="form-label">Available To</label>
-                                <input asp-for="Facility.AvailableTo" class="form-control" type="time" />
-                                <small class="text-muted">Time: <span id="toTimeFormatted">--:-- --</span></small>
-                                <span asp-validation-for="Facility.AvailableTo" class="text-danger"></span>
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                        <a asp-page="./Facilities" class="btn btn-outline-secondary me-md-2">
+                                            <i class="bi bi-x me-1"></i>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle me-1"></i>Create Facility
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-
-                        <div class="form-check mb-4">
-                            <input asp-for="Facility.IsActive" class="form-check-input" type="checkbox" checked />
-                            <label asp-for="Facility.IsActive" class="form-check-label">
-                                Active (available for booking)
-                            </label>
-                        </div>
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a asp-page="./Facilities" class="btn btn-outline-secondary me-md-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Create Facility</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,19 +209,160 @@
 </script>
 
 <style>
-    .facility-image-preview {
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+    }
+    
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.8rem;
+        margin-bottom: 0;
+    }
+    
+    .facility-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+    }
+    
+    /* Sidebar Styling */
+    .facility-sidebar {
+        background-color: var(--primary-light);
+        border-right: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .sidebar-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .facility-image {
         width: 100%;
         height: 200px;
         object-fit: cover;
+        transition: transform 0.3s ease;
+        border-radius: 8px;
+        border: 2px solid rgba(78, 110, 77, 0.2);
     }
-
+    
+    .info-box {
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        border-left: 3px solid var(--primary-color);
+    }
+    
+    .info-box h6 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .info-box p {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    
+    /* Form Styling */
+    .form-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section-title {
+        color: var(--primary-dark);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-label {
+        color: var(--text-dark);
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .form-control {
+        padding: 0.6rem 0.75rem;
+        border-color: rgba(0,0,0,0.1);
+        border-radius: 6px;
+    }
+    
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.15);
+        border-color: var(--primary-color);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: rgba(0,0,0,0.1);
+        color: var(--text-muted);
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    /* Button Styling */
     .btn-primary {
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
     }
-
-        .btn-primary:hover {
-            background-color: #3d5a3c;
-            border-color: #3d5a3c;
-        }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #ced4da;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    /* Alert Styling */
+    .alert {
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+    
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
 </style>

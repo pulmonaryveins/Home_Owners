@@ -13,10 +13,12 @@ namespace HomeOwners.Areas.Admin.Pages
     public class FacilitiesModel : PageModel
     {
         private readonly FacilityService _facilityService;
+        private readonly BookingService _bookingService;
 
-        public FacilitiesModel(FacilityService facilityService)
+        public FacilitiesModel(FacilityService facilityService, BookingService bookingService)
         {
             _facilityService = facilityService;
+            _bookingService = bookingService;
         }
 
         public List<Facility> Facilities { get; set; }
@@ -24,6 +26,10 @@ namespace HomeOwners.Areas.Admin.Pages
         public async Task OnGetAsync()
         {
             Facilities = await _facilityService.GetAllFacilitiesAsync();
+
+            // Get pending bookings count for the badge
+            var pendingBookingsCount = await _bookingService.GetPendingBookingsAsync();
+            ViewData["PendingBookingsCount"] = pendingBookingsCount?.Count ?? 0;
         }
     }
 }

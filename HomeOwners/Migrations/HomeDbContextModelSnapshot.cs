@@ -60,6 +60,59 @@ namespace HomeOwners.Migrations
                     b.ToTable("Announcements");
                 });
 
+            modelBuilder.Entity("HomeOwners.Models.Booking", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("BookingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan>("EndTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("FacilityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HouseNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SpecialRequests")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("StartTime")
+                        .HasColumnType("time");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacilityId");
+
+                    b.ToTable("Bookings");
+                });
+
             modelBuilder.Entity("HomeOwners.Models.Event", b =>
                 {
                     b.Property<int>("Id")
@@ -449,6 +502,17 @@ namespace HomeOwners.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.ToTable("StaffUsers", (string)null);
+                });
+
+            modelBuilder.Entity("HomeOwners.Models.Booking", b =>
+                {
+                    b.HasOne("HomeOwners.Models.Facility", "Facility")
+                        .WithMany()
+                        .HasForeignKey("FacilityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Facility");
                 });
 
             modelBuilder.Entity("HomeOwners.Models.UserPreferences", b =>

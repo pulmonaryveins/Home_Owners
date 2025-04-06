@@ -1,0 +1,101 @@
+﻿@page
+@model HomeOwners.Areas.Admin.Pages.Polls.IndexModel
+@{
+    ViewData["Title"] = "Manage Polls";
+}
+
+<div class="container dashboard-container">
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">
+                <i class="bi bi-bar-chart-fill me-2"></i>
+                Manage Polls
+            </h2>
+            <p class="text-muted mb-0">Create and manage community polls</p>
+        </div>
+        <a asp-page="./Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Create New Poll
+        </a>
+    </div>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        <div class="alert @(TempData["StatusType"]?.ToString() == "Error" ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi @(TempData["StatusType"]?.ToString() == "Error" ? "bi-exclamation-triangle" : "bi-check-circle") me-2"></i>
+                <span>@TempData["StatusMessage"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (Model.Polls.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Options</th>
+                                <th>Status</th>
+                                <th>Total Votes</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var poll in Model.Polls)
+                            {
+                                <tr>
+                                    <td>@poll.Question</td>
+                                    <td>@poll.Options.Count options</td>
+                                    <td>
+                                        @if (poll.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>@poll.Options.Sum(o => o.Votes) votes</td>
+                                    <td>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a asp-page="./Edit" asp-route-id="@poll.PollId"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form method="post" asp-page-handler="ToggleActive"
+                                                  asp-route-id="@poll.PollId" class="d-inline">
+                                                <button type="submit" class="btn btn-sm @(poll.IsActive ? "btn-outline-warning" : "btn-outline-success")"
+                                                        title="@(poll.IsActive ? "Deactivate" : "Activate")">
+                                                    <i class="bi @(poll.IsActive ? "bi-pause-fill" : "bi-play-fill")"></i>
+                                                </button>
+                                            </form>
+                                            <a asp-page="./Delete" asp-route-id="@poll.PollId"
+                                               class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-bar-chart display-1 text-muted"></i>
+                    <p class="mt-3 mb-3">No polls have been created yet</p>
+                    <a asp-page="./Create" class="btn btn-primary">
+                        Create your first poll
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,5 +1,4 @@
-﻿// HomeOwners/Models/Poll.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HomeOwners.Models
 {
@@ -11,7 +10,7 @@ namespace HomeOwners.Models
         public string Question { get; set; }
 
         [Required(ErrorMessage = "At least two options are required")]
-        public virtual List<PollOption> Options { get; set; } = new List<PollOption>();
+        public List<PollOption> Options { get; set; } = new List<PollOption>();
 
         public bool IsActive { get; set; }
     }
@@ -25,6 +24,6 @@ namespace HomeOwners.Models
 
         public int Votes { get; set; }
         public int PollId { get; set; }
-        public virtual Poll Poll { get; set; }
+        public Poll Poll { get; set; }
     }
 }

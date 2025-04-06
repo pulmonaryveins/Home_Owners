@@ -1,4 +1,3 @@
-// HomeOwners/Areas/Admin/Pages/Polls/Create.cshtml.cs
 using HomeOwners.Models;
 using HomeOwners.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -34,21 +33,22 @@ namespace HomeOwners.Areas.Admin.Pages.Polls
                 return Page();
             }
 
-            // Filter out empty options
-            Poll.Options = Poll.Options.Where(o => !string.IsNullOrWhiteSpace(o.OptionText)).ToList();
-
-            if (Poll.Options.Count < 2)
-            {
-                ModelState.AddModelError(string.Empty, "A poll must have at least 2 options.");
-                return Page();
-            }
-
             try
             {
-                // Initialize votes to 0 for each option
-                foreach (var option in Poll.Options)
+                // Remove empty options and set votes to 0
+                Poll.Options = Poll.Options
+                    .Where(o => !string.IsNullOrWhiteSpace(o.OptionText))
+                    .Select(o => new PollOption
+                    {
+                        OptionText = o.OptionText,
+                        Votes = 0
+                    })
+                    .ToList();
+
+                if (Poll.Options.Count < 2)
                 {
-                    option.Votes = 0;
+                    ModelState.AddModelError(string.Empty, "A poll must have at least 2 options.");
+                    return Page();
                 }
 
                 await _pollService.CreatePollAsync(Poll);

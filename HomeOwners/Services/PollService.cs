@@ -21,18 +21,35 @@ namespace HomeOwners.Services
                 .OrderByDescending(p => p.IsActive)
                 .ToListAsync();
         }
+        public async Task CreatePollAsync(Poll poll)
+        {
+            if (poll.IsActive)
+            {
+                // Deactivate all other polls if this one is active
+                var activePolls = await _context.Polls
+                    .Where(p => p.IsActive)
+                    .ToListAsync();
 
+                foreach (var activePoll in activePolls)
+                {
+                    activePoll.IsActive = false;
+                }
+            }
+
+            // Ensure the poll options are properly linked
+            foreach (var option in poll.Options)
+            {
+                option.Poll = poll;
+            }
+
+            _context.Polls.Add(poll);
+            await _context.SaveChangesAsync();
+        }
         public async Task<Poll> GetPollByIdAsync(int id)
         {
             return await _context.Polls
                 .Include(p => p.Options)
                 .FirstOrDefaultAsync(p => p.PollId == id);
-        }
-
-        public async Task CreatePollAsync(Poll poll)
-        {
-            _context.Polls.Add(poll);
-            await _context.SaveChangesAsync();
         }
 
         public async Task UpdatePollAsync(Poll poll)

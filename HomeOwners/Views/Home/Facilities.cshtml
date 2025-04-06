@@ -109,35 +109,49 @@
             {
                 <div class="col-md-4">
                     <div class="amenity-card">
-                        <img src="@(string.IsNullOrEmpty(facility.ImageUrl) ? "/images/placeholder.jpg" : facility.ImageUrl)"
-                             class="amenity-image" alt="@facility.Name">
+                        <div class="amenity-image-container">
+                            <img src="@(string.IsNullOrEmpty(facility.ImageUrl) ? "/images/placeholder.jpg" : facility.ImageUrl)"
+                                 class="amenity-image" alt="@facility.Name">
+                            @if (facility.IsActive)
+                            {
+                                <div class="amenity-badge">Available</div>
+                            }
+                            else
+                            {
+                                <div class="amenity-badge unavailable">Not Available</div>
+                            }
+                        </div>
                         <div class="amenity-content">
                             <h3>@facility.Name</h3>
-                            <p>@facility.Description</p>
+                            <p class="amenity-description">@facility.Description</p>
                             <div class="amenity-details">
                                 <div class="amenity-info">
                                     <span class="price">₱@facility.PricePerHour.ToString("N0")</span>
                                     <span class="duration">per hour</span>
                                 </div>
-                                @if (facility.Capacity.HasValue)
-                                {
-                                    <div class="capacity">
-                                        <i class="bi bi-people"></i>
-                                        <span>Up to @facility.Capacity people</span>
-                                    </div>
-                                }
-                                @if (facility.AvailableFrom.HasValue && facility.AvailableTo.HasValue)
-                                {
-                                    <div class="capacity">
-                                        <i class="bi bi-clock"></i>
-                                        <span>
-                                            @DateTime.Today.Add(facility.AvailableFrom.Value).ToString("h:mm tt") -
-                                            @DateTime.Today.Add(facility.AvailableTo.Value).ToString("h:mm tt")
-                                        </span>
-                                    </div>
-                                }
+                                <div class="amenity-specs">
+                                    @if (facility.Capacity.HasValue)
+                                    {
+                                        <div class="spec-item">
+                                            <i class="bi bi-people-fill"></i>
+                                            <span>Up to @facility.Capacity people</span>
+                                        </div>
+                                    }
+                                    @if (facility.AvailableFrom.HasValue && facility.AvailableTo.HasValue)
+                                    {
+                                        <div class="spec-item">
+                                            <i class="bi bi-clock-fill"></i>
+                                            <span>
+                                                @DateTime.Today.Add(facility.AvailableFrom.Value).ToString("h:mm tt") -
+                                                @DateTime.Today.Add(facility.AvailableTo.Value).ToString("h:mm tt")
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
                             </div>
-                            <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#bookingModal">Book Now</button>
+                            <a asp-controller="Home" asp-action="BookFacility" asp-route-id="@facility.Id" class="btn btn-primary w-100 book-btn">
+                                <i class="bi bi-calendar-check me-2"></i>Book Now
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -146,9 +160,11 @@
         else
         {
             <div class="col-12 text-center py-5">
-                <i class="bi bi-emoji-frown display-1 text-muted"></i>
-                <h3 class="mt-3">No Facilities Available</h3>
-                <p class="text-muted">Check back soon for new facilities.</p>
+                <div class="no-facilities-container">
+                    <i class="bi bi-calendar-x display-1 text-muted"></i>
+                    <h3 class="mt-3">No Facilities Available</h3>
+                    <p class="text-muted">Check back soon for new facilities.</p>
+                </div>
             </div>
         }
     </div>
@@ -406,11 +422,11 @@
         transition: all 0.3s ease;
     }
 
-    .social-link:hover {
-        background-color: white;
-        color: #4e6e4d;
-        transform: translateY(-3px);
-    }
+        .social-link:hover {
+            background-color: white;
+            color: #4e6e4d;
+            transform: translateY(-3px);
+        }
 
     .footer-section h5 {
         color: white;
@@ -425,21 +441,21 @@
         margin: 0;
     }
 
-    .footer-links li {
-        margin-bottom: 0.8rem;
-    }
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
 
-    .footer-links a {
-        color: white;
-        opacity: 0.9;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
+        .footer-links a {
+            color: white;
+            opacity: 0.9;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
 
-    .footer-links a:hover {
-        opacity: 1;
-        padding-left: 5px;
-    }
+            .footer-links a:hover {
+                opacity: 1;
+                padding-left: 5px;
+            }
 
     .newsletter-form .form-control {
         background: rgba(255, 255, 255, 0.1);
@@ -448,9 +464,9 @@
         padding: 0.75rem;
     }
 
-    .newsletter-form .form-control::placeholder {
-        color: rgba(255, 255, 255, 0.7);
-    }
+        .newsletter-form .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
 
     .newsletter-form .btn {
         background-color: white;
@@ -460,10 +476,10 @@
         font-weight: 600;
     }
 
-    .newsletter-form .btn:hover {
-        background-color: rgba(255, 255, 255, 0.9);
-        color: #4e6e4d;
-    }
+        .newsletter-form .btn:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #4e6e4d;
+        }
 
     .contact-info {
         margin-top: 2rem;
@@ -476,15 +492,15 @@
         align-items: flex-start;
     }
 
-    .contact-item i {
-        font-size: 1.2rem;
-        opacity: 0.9;
-    }
+        .contact-item i {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
 
-    .contact-item span {
-        opacity: 0.9;
-        line-height: 1.4;
-    }
+        .contact-item span {
+            opacity: 0.9;
+            line-height: 1.4;
+        }
 
     .footer-divider {
         border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -501,11 +517,11 @@
         gap: 0.5rem;
     }
 
-    .back-to-top:hover {
-        color: white;
-        opacity: 1;
-        transform: translateY(-2px);
-    }
+        .back-to-top:hover {
+            color: white;
+            opacity: 1;
+            transform: translateY(-2px);
+        }
 </style>
 
 <style>
@@ -533,20 +549,20 @@
         gap: 1rem;
     }
 
-    .navbar-nav .nav-link {
-        color: white !important;
-        font-weight: 500;
-        font-size: 0.95rem;
-        padding: 0.5rem 1rem !important;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-    }
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
 
-    .navbar-nav .nav-link:hover,
-    .navbar-nav .nav-link.active {
-        background-color: rgba(255, 255, 255, 0.1);
-        transform: translateY(-1px);
-    }
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.1);
+                transform: translateY(-1px);
+            }
 
     /* Profile Menu Styling */
     .profile-menu .nav-link {
@@ -556,9 +572,9 @@
         transition: all 0.3s ease;
     }
 
-    .profile-menu .nav-link:hover {
-        transform: translateY(-2px);
-    }
+        .profile-menu .nav-link:hover {
+            transform: translateY(-2px);
+        }
 
     .dropdown-menu {
         border: none;
@@ -584,14 +600,14 @@
         gap: 0.5rem;
     }
 
-    .dropdown-item:hover {
-        background-color: rgba(78, 110, 77, 0.1);
-        color: #4e6e4d;
-    }
+        .dropdown-item:hover {
+            background-color: rgba(78, 110, 77, 0.1);
+            color: #4e6e4d;
+        }
 
-    .dropdown-item i {
-        font-size: 1.1rem;
-    }
+        .dropdown-item i {
+            font-size: 1.1rem;
+        }
 
     /* Mobile Responsive Styling */
     .navbar-toggler {
@@ -599,13 +615,13 @@
         padding: 0.5rem;
     }
 
-    .navbar-toggler:focus {
-        box-shadow: none;
-    }
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
 
-    .navbar-toggler i {
-        font-size: 1.5rem;
-    }
+        .navbar-toggler i {
+            font-size: 1.5rem;
+        }
 
     #carouselExampleIndicators {
         margin-top: 0;
@@ -621,12 +637,12 @@
         height: 70vh;
     }
 
-    .carousel-item img {
-        object-fit: cover;
-        height: 100%;
-        width: 100%;
-        filter: brightness(0.7); /* Darken the image slightly */
-    }
+        .carousel-item img {
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
+            filter: brightness(0.7); /* Darken the image slightly */
+        }
 
     .carousel-caption {
         position: absolute;
@@ -641,16 +657,16 @@
         background: transparent;
     }
 
-    .carousel-caption h1 {
-        font-size: 4rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
+        .carousel-caption h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
 
-    .carousel-caption p {
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-    }
+        .carousel-caption p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+        }
 
     .carousel-buttons {
         display: flex;
@@ -659,21 +675,21 @@
         margin-top: 1.5rem;
     }
 
-    .carousel-buttons .btn {
-        padding: 0.5rem 1.5rem;
-        border-radius: 4px;
-        font-weight: 500;
-    }
+        .carousel-buttons .btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
 
     .btn-primary {
         background-color: #4e6e4d;
         border-color: #4e6e4d;
     }
 
-    .btn-primary:hover {
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
-    }
+        .btn-primary:hover {
+            background-color: #4e6e4d;
+            border-color: #4e6e4d;
+        }
 
     .btn-light {
         color: #333;
@@ -685,17 +701,17 @@
         bottom: 2rem;
     }
 
-    .carousel-indicators button {
-        width: 12px;
-        height: 12px;
-        margin: 0 5px;
-        background-color: rgba(255, 255, 255, 0.5);
-        border: none;
-    }
+        .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            margin: 0 5px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: none;
+        }
 
-    .carousel-indicators button.active {
-        background-color: #fff;
-    }
+            .carousel-indicators button.active {
+                background-color: #fff;
+            }
 
     .carousel-control-prev,
     .carousel-control-next {
@@ -718,18 +734,18 @@
         padding: 0 1.5rem;
     }
 
-    .marketing .col-lg-4 h2 {
-        color: #4e6e4d;
-        font-weight: 600;
-        font-size: 1.8rem;
-        margin: 1.5rem 0 1rem;
-    }
+        .marketing .col-lg-4 h2 {
+            color: #4e6e4d;
+            font-weight: 600;
+            font-size: 1.8rem;
+            margin: 1.5rem 0 1rem;
+        }
 
-    .marketing .col-lg-4 p {
-        color: #666;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
+        .marketing .col-lg-4 p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
 
     .marketing .rounded-circle {
         background-color: #4e6e4d;
@@ -741,60 +757,102 @@
         transform: scale(1.05);
     }
 
-
-    .book-amenities-section {
-        padding: 5rem 0;
-        background: white;
-    }
-
     .amenity-card {
         background: white;
-        border-radius: 12px;
+        border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.07);
         transition: all 0.3s ease;
         height: 100%;
+        position: relative;
+        border: none;
     }
 
-    .amenity-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        .amenity-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+    .amenity-image-container {
+        position: relative;
+        overflow: hidden;
     }
 
     .amenity-image {
         width: 100%;
-        height: 200px;
+        height: 220px;
         object-fit: cover;
+        transition: all 0.5s ease;
     }
+
+    .amenity-card:hover .amenity-image {
+        transform: scale(1.05);
+    }
+
+    .amenity-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: rgba(72, 187, 120, 0.9);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 30px;
+    }
+
+        .amenity-badge.unavailable {
+            background-color: rgba(229, 62, 62, 0.9);
+        }
 
     .amenity-content {
-        padding: 1.5rem;
+        padding: 1.8rem;
     }
 
-    .amenity-content h3 {
-        color: #4e6e4d;
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
+        .amenity-content h3 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+    .amenity-rating {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: #f6ad55;
+        font-size: 0.9rem;
     }
 
-    .amenity-content p {
-        color: #666;
+    .rating-count {
+        color: #a0aec0;
+        margin-left: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .amenity-description {
+        color: #718096;
         font-size: 0.95rem;
         line-height: 1.6;
         margin-bottom: 1.5rem;
         min-height: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
     }
 
     .amenity-details {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.8rem;
     }
 
     .amenity-info {
         display: flex;
         align-items: baseline;
         gap: 0.5rem;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
     }
 
     .price {
@@ -804,57 +862,86 @@
     }
 
     .duration {
-        color: #666;
-        font-size: 0.9rem;
+        color: #a0aec0;
+        font-size: 0.85rem;
     }
 
-    .capacity {
+    .amenity-specs {
+        background-color: #f7fafc;
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+    .spec-item {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        color: #666;
+        gap: 0.75rem;
+        color: #4a5568;
         font-size: 0.9rem;
+        margin-bottom: 0.75rem;
     }
 
-    .capacity i {
-        color: #4e6e4d;
-        font-size: 1.1rem;
-    }
+        .spec-item:last-child {
+            margin-bottom: 0;
+        }
 
-    .amenity-card .btn-primary {
+        .spec-item i {
+            color: #4e6e4d;
+            font-size: 1rem;
+        }
+
+    .book-btn {
         background-color: #4e6e4d;
         border-color: #4e6e4d;
-        padding: 0.75rem;
-        font-weight: 500;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        border-radius: 10px;
         transition: all 0.3s ease;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
     }
 
-    .amenity-card .btn-primary:hover {
-        background-color: #3d5a3c;
-        border-color: #3d5a3c;
-        transform: translateY(-2px);
+        .book-btn:hover {
+            background-color: #3d5a3c;
+            border-color: #3d5a3c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 110, 77, 0.3);
+        }
+
+    .no-facilities-container {
+        padding: 3rem;
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
     .section-title {
-        color: #4e6e4d;
-        font-weight: 500;
-        font-size: 3.5rem;
+        color: #2d3748;
+        font-weight: 600;
+        font-size: 2.75rem;
         margin-bottom: 1rem;
+        padding-top: 2rem;
     }
 
     .section-subtitle {
-        color: #666;
+        color: #718096;
         margin-bottom: 3rem;
         max-width: 700px;
         margin-left: auto;
         margin-right: auto;
+        font-size: 1.1rem;
+        line-height: 1.6;
     }
 </style>
 
 <style>
     .facilities-section {
         padding: 5rem 0;
-        margin-top: 76px; 
+        margin-top: 76px;
         background-color: white;
     }
 
@@ -878,29 +965,7 @@
 
     .book-amenities-section {
         padding: 5rem 0;
-        background-color: #f8f9fa;
+        background-color: white;
         margin-top: 2rem;
     }
 </style>
-
-@*
-    IF IMPLEMENTAN UG DATABASE KANI GAMITON
-<div class="container mt-5">
-    <h1 class="text-center">Available Properties</h1>
-    <div class="row">
-        @foreach (var property in Model.Properties)
-        {
-            <div class="col-md-4">
-                <div class="card mb-4 shadow-sm">
-                    <img src="@property.ImageUrl" class="card-img-top" alt="@property.Name">
-                    <div class="card-body">
-                        <h5 class="card-title">@property.Name</h5>
-                        <p class="card-text">@property.Description</p>
-                        <p class="card-text"><strong>Price:</strong> @property.Price</p>
-                        <a href="/Home/PropertyDetails/@property.Id" class="btn btn-primary">View Details</a>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-*@

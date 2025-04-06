@@ -1,0 +1,283 @@
+﻿@model HomeOwners.ViewModels.BookingViewModel
+@{
+    ViewData["Title"] = "Book Facility";
+}
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">Neighborly</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Home/Facilities">Facilities</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Services">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Annoucements">Annoucements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/MyBookings">My Bookings</a>
+                </li>
+            </ul>
+
+            <!-- Profile Menu -->
+            <div class="nav-items-right">
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-header">@User.Identity.Name</li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Home" asp-action="MyBookings">
+                                    <i class="bi bi-calendar-check"></i> My Bookings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 pt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            @if (TempData["StatusMessage"] != null)
+            {
+                var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+                <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
+                    @TempData["StatusMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow booking-card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Book @Model.FacilityName</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-controller="Home" asp-action="BookFacility" method="post">
+                        <input type="hidden" asp-for="FacilityId" />
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="FacilityName" />
+                        <input type="hidden" asp-for="PricePerHour" />
+
+                        <div class="facility-summary mb-4">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="mb-1">@Model.FacilityName</h5>
+                                    <p class="text-muted mb-0">₱@Model.PricePerHour.ToString("N2") per hour</p>
+                                </div>
+                                <div class="pricing-badge">
+                                    <span>₱@Model.PricePerHour.ToString("N2")</span>
+                                </div>
+                            </div>
+
+                            @if (Model.AvailableFrom.HasValue && Model.AvailableTo.HasValue)
+                            {
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> Available from
+                                        @DateTime.Today.Add(Model.AvailableFrom.Value).ToString("h:mm tt") to
+                                        @DateTime.Today.Add(Model.AvailableTo.Value).ToString("h:mm tt")
+                                    </small>
+                                </div>
+                            }
+                        </div>
+
+                        <h5 class="form-section-title">Personal Information</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label asp-for="FullName" class="form-label">Full Name</label>
+                                <input asp-for="FullName" class="form-control" placeholder="Enter your full name">
+                                <span asp-validation-for="FullName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ContactNumber" class="form-label">Contact Number</label>
+                                <input asp-for="ContactNumber" class="form-control" placeholder="Enter your contact number">
+                                <span asp-validation-for="ContactNumber" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="HouseNumber" class="form-label">House Number</label>
+                                <input asp-for="HouseNumber" class="form-control" placeholder="Enter your house number">
+                                <span asp-validation-for="HouseNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <h5 class="form-section-title">Booking Details</h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="BookingDate" class="form-label">Booking Date</label>
+                                <input asp-for="BookingDate" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                                <span asp-validation-for="BookingDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="StartTime" class="form-label">Start Time</label>
+                                <input asp-for="StartTime" class="form-control" type="time">
+                                <span asp-validation-for="StartTime" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="EndTime" class="form-label">End Time</label>
+                                <input asp-for="EndTime" class="form-control" type="time">
+                                <span asp-validation-for="EndTime" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <label asp-for="SpecialRequests" class="form-label">Special Requests (Optional)</label>
+                                <textarea asp-for="SpecialRequests" class="form-control" rows="3" placeholder="Any special requirements or additional information"></textarea>
+                                <span asp-validation-for="SpecialRequests" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="booking-summary bg-light p-3 rounded mb-4">
+                            <h6><i class="bi bi-info-circle"></i> Booking Summary</h6>
+                            <p class="mb-1 text-muted small">
+                                Your booking will be reviewed by the administrator. You will receive a notification once your request has been approved or rejected.
+                            </p>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-controller="Home" asp-action="Facilities" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-calendar-check me-2"></i>Submit Booking</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .navbar {
+        background-color: rgba(78, 110, 77, 0.95) !important;
+        backdrop-filter: blur(10px);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .booking-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: #4e6e4d !important;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .form-section-title {
+        color: #4e6e4d;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .facility-summary {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .pricing-badge {
+        background-color: #4e6e4d;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        background-color: #4e6e4d;
+        border-color: #4e6e4d;
+    }
+
+        .btn-primary:hover {
+            background-color: #3d5a3c;
+            border-color: #3d5a3c;
+        }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date for booking date
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('BookingDate').setAttribute('min', today);
+        });
+    </script>
+}

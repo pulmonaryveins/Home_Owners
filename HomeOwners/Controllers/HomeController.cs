@@ -2,6 +2,11 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using HomeOwners.Models;
 using HomeOwners.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using HomeOwners.ViewModels;
+using System;
+
 
 namespace HomeOwners.Controllers;
 
@@ -11,13 +16,17 @@ public class HomeController : Controller
     private readonly AnnouncementService _announcementService;
     private readonly EventService _eventService;
     private readonly FacilityService _facilityService;
+    private readonly BookingService _bookingService;
 
-    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService)
+
+
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService)
     {
         _logger = logger;
         _announcementService = announcementService;
         _eventService = eventService;
         _facilityService = facilityService;
+        _bookingService = bookingService;
     }
 
     public IActionResult Index()
@@ -54,6 +63,86 @@ public class HomeController : Controller
     {
         var facilities = await _facilityService.GetActiveFacilitiesAsync();
         return View(facilities);
+    }
+
+    [Authorize] // Ensure user is logged in
+    public async Task<IActionResult> BookFacility(int id)
+    {
+        var facility = await _facilityService.GetFacilityByIdAsync(id);
+        if (facility == null)
+        {
+            return NotFound();
+        }
+
+        var model = new BookingViewModel
+        {
+            FacilityId = facility.Id,
+            FacilityName = facility.Name,
+            PricePerHour = facility.PricePerHour,
+            AvailableFrom = facility.AvailableFrom,
+            AvailableTo = facility.AvailableTo,
+            BookingDate = DateTime.Today,
+            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> BookFacility(BookingViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            // Convert the view model to a booking entity
+            var booking = new Booking
+            {
+                FacilityId = model.FacilityId,
+                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                FullName = model.FullName,
+                ContactNumber = model.ContactNumber,
+                HouseNumber = model.HouseNumber,
+                BookingDate = model.BookingDate,
+                StartTime = model.StartTime,
+                EndTime = model.EndTime,
+                SpecialRequests = model.SpecialRequests,
+                CreatedDate = DateTime.Now,
+                Status = BookingStatus.Pending
+            };
+
+            await _bookingService.CreateBookingAsync(booking);
+
+            TempData["StatusMessage"] = "Your booking request has been submitted and is pending approval.";
+            TempData["StatusType"] = "Success";
+
+            return RedirectToAction("MyBookings");
+        }
+
+        // If we got this far, something failed, redisplay form
+        var facility = await _facilityService.GetFacilityByIdAsync(model.FacilityId);
+        model.FacilityName = facility?.Name;
+        model.PricePerHour = facility?.PricePerHour ?? 0;
+
+        return View(model);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> MyBookings()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var bookings = await _bookingService.GetBookingsByUserIdAsync(userId);
+        var allBookings = await _bookingService.GetAllBookingsAsync();
+
+        ViewBag.AllBookings = allBookings;
+        return View(bookings);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> AllBookings()
+    {
+        var bookings = await _bookingService.GetAllBookingsAsync();
+        return View(bookings);
     }
 
     public IActionResult Services()

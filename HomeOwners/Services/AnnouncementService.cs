@@ -32,6 +32,47 @@ namespace HomeOwners.Services
                 .ToListAsync();
         }
 
+        public async Task<(List<Announcement> Items, int TotalCount)> GetAnnouncementsAsync(
+        string searchString, string categoryFilter, string sortOrder, int pageIndex, int pageSize)
+        {
+            // Implement filtering, sorting and pagination
+            var query = _context.Announcements.AsQueryable();
+
+            // Apply filters
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(a => a.Title.Contains(searchString) ||
+                                        a.Content.Contains(searchString));
+            }
+
+            if (!string.IsNullOrEmpty(categoryFilter))
+            {
+                query = query.Where(a => a.Category == categoryFilter);
+            }
+
+            // Apply sorting
+            query = sortOrder switch
+            {
+                "date" => query.OrderBy(a => a.PostedDate),
+                "date_desc" => query.OrderByDescending(a => a.PostedDate),
+                "title" => query.OrderBy(a => a.Title),
+                "title_desc" => query.OrderByDescending(a => a.Title),
+                _ => query.OrderByDescending(a => a.PostedDate) // default sort
+            };
+
+            // Get total count
+            int totalCount = await query.CountAsync();
+
+            // Apply pagination
+            var items = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+
         public async Task<Announcement> GetAnnouncementByIdAsync(int id)
         {
             return await _context.Announcements.FindAsync(id);

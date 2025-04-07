@@ -29,27 +29,22 @@
                     <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" asp-area="Admin" asp-page="/Users"> Users</a>
+                    <a class="nav-link active" asp-area="Admin" asp-page="/Users">Users</a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Services</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Services</a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Facilities"> Facilities</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Facilities">Facilities</a>
                 </li>
-
                 <li class="nav-item">
                     <a class="nav-link" asp-area="Admin" asp-page="/Calendar">Calendar</a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Announcement"> Annoucements</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Announcement">Announcements</a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Reports</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Reports</a>
                 </li>
             </ul>
 
@@ -61,13 +56,20 @@
                     <span class="d-none d-lg-inline">@User.Identity?.Name</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
-                          asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="dropdown-item">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
+                    <li>
+                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                            <i class="bi bi-gear"></i> Profile Settings
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                            asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dropdown-item">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </div>
@@ -75,25 +77,28 @@
     </div>
 </nav>
 
-<div class="container dashboard-container">
-    <div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
+<div class="container mt-5 pt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-0">
+            <h1 class="page-title">
                 <i class="bi bi-people-fill me-2"></i>
                 User Management
-            </h2>
+            </h1>
             <p class="text-muted mb-0 mt-1">Manage all system users in one place</p>
         </div>
         <a asp-page="./Create" class="btn btn-primary">
-            <i class="bi bi-person-plus"></i> Create New User
+            <i class="bi bi-person-plus me-2"></i> Create New User
         </a>
     </div>
 
     @if (TempData["StatusMessage"] != null)
     {
-        <div class="alert @(TempData["StatusType"]?.ToString() == "Error" ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
-            <i class="bi @(TempData["StatusType"]?.ToString() == "Error" ? "bi-exclamation-triangle" : "bi-check-circle")"></i>
-            @TempData["StatusMessage"]
+        var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+        <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                <span>@TempData["StatusMessage"]</span>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -101,7 +106,7 @@
     <!-- Pending Approval Section -->
     @if (Model.PendingHomeOwnerUsers.Any())
     {
-        <div class="card dashboard-card shadow-sm mb-4">
+        <div class="card shadow-sm mb-4">
             <div class="card-header bg-warning-subtle py-3">
                 <h3 class="card-title mb-0 d-flex align-items-center">
                     <i class="bi bi-clock-history me-2"></i>
@@ -113,12 +118,12 @@
                 <table class="table table-hover user-table mb-0">
                     <thead>
                         <tr>
-                            <th class="border-0">User</th>
-                            <th class="border-0">Full Name</th>
-                            <th class="border-0">Contact</th>
-                            <th class="border-0">House Number</th>
-                            <th class="border-0">Registration Date</th>
-                            <th class="border-0 text-end">Actions</th>
+                            <th>User</th>
+                            <th>Full Name</th>
+                            <th>Contact</th>
+                            <th>House Number</th>
+                            <th>Registration Date</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -141,18 +146,18 @@
                                 <td>@user.HouseNumber</td>
                                 <td>@user.CreatedDate.ToString("MMM dd, yyyy")</td>
                                 <td>
-                                    <div class="action-buttons d-flex justify-content-end gap-1">
-                                        <form method="post" asp-page-handler="ApproveUser" asp-route-userId="@user.Id">
-                                            <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip"
+                                    <div class="action-buttons">
+                                        <form method="post" asp-page-handler="ApproveUser" asp-route-userId="@user.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success action-btn" data-bs-toggle="tooltip"
                                                     title="Approve User" onclick="return confirm('Are you sure you want to approve this user?')">
                                                 <i class="bi bi-check-lg"></i> Approve
                                             </button>
                                         </form>
-                                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                        <button type="button" class="btn btn-sm btn-danger action-btn" data-bs-toggle="modal"
                                                 data-bs-target="#rejectModal" data-userid="@user.Id">
                                             <i class="bi bi-x-lg"></i> Reject
                                         </button>
-                                        <a asp-page="./Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary">
+                                        <a asp-page="./Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-secondary action-btn">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     </div>
@@ -165,7 +170,7 @@
         </div>
     }
 
-    <div class="card dashboard-card shadow-sm">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <div class="row g-3 align-items-center">
                 <div class="col-md-6">
@@ -253,13 +258,13 @@
             <table class="table table-hover user-table mb-0">
                 <thead>
                     <tr>
-                        <th class="border-0">User</th>
-                        <th class="border-0">Full Name</th>
-                        <th class="border-0">Contact</th>
-                        <th class="border-0">House Number</th>
-                        <th class="border-0">Roles</th>
-                        <th class="border-0">Status</th>
-                        <th class="border-0 text-end">Actions</th>
+                        <th>User</th>
+                        <th>Full Name</th>
+                        <th>Contact</th>
+                        <th>House Number</th>
+                        <th>Roles</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -324,9 +329,12 @@
                                     @if (user.Roles.Contains("HomeOwner") && Model.HomeOwnerDetails.ContainsKey(user.Id))
                                     {
                                         string status = Model.HomeOwnerDetails[user.Id].AccountStatus ?? "approved";
-                                        string badgeClass = status == "pending" ? "bg-warning text-dark" :
-                                        status == "approved" ? "bg-success" : "bg-danger";
-                                        <span class="badge @badgeClass">@status</span>
+                                        <span class="status-badge @(status == "pending" ? "pending" :
+                                                                  status == "approved" ? "active" : "inactive")">
+                                            <i class="bi @(status == "pending" ? "bi-hourglass-split" : 
+                                                        status == "approved" ? "bi-check-circle" : "bi-x-circle") me-1"></i>
+                                            @status
+                                        </span>
                                     }
                                     else
                                     {
@@ -334,14 +342,14 @@
                                     }
                                 </td>
                                 <td>
-                                    <div class="action-buttons d-flex justify-content-end gap-1">
-                                        <a asp-page="./Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="View Details">
+                                    <div class="action-buttons">
+                                        <a asp-page="./Details" asp-route-id="@user.Id" class="btn btn-sm btn-outline-info action-btn" data-bs-toggle="tooltip" title="View Details">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a asp-page="./Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Edit User">
+                                        <a asp-page="./Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="tooltip" title="Edit User">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <a asp-page="./Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Delete User">
+                                        <a asp-page="./Delete" asp-route-id="@user.Id" class="btn btn-sm btn-outline-danger action-btn" data-bs-toggle="tooltip" title="Delete User">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                         @if (user.Roles.Contains("HomeOwner") && Model.HomeOwnerDetails.ContainsKey(user.Id) &&
@@ -349,17 +357,15 @@
                                         {
                                             @if (Model.HomeOwnerDetails[user.Id].AccountStatus == "approved")
                                             {
-                                                <form method="post" asp-page-handler="RejectUser" asp-route-userId="@user.Id" class="d-inline">
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                                                            data-bs-target="#rejectModal" data-userid="@user.Id">
-                                                        <i class="bi bi-x-lg"></i>
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn btn-sm btn-outline-danger action-btn" data-bs-toggle="modal"
+                                                        data-bs-target="#rejectModal" data-userid="@user.Id" title="Reject User">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
                                             }
                                             else
                                             {
                                                 <form method="post" asp-page-handler="ApproveUser" asp-route-userId="@user.Id" class="d-inline">
-                                                    <button type="submit" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip"
+                                                    <button type="submit" class="btn btn-sm btn-outline-success action-btn" data-bs-toggle="tooltip"
                                                             title="Approve User" onclick="return confirm('Are you sure you want to approve this user?')">
                                                         <i class="bi bi-check-lg"></i>
                                                     </button>
@@ -377,8 +383,11 @@
                             <td colspan="7" class="text-center py-4">
                                 <div class="empty-state">
                                     <i class="bi bi-search fs-1 text-muted"></i>
-                                    <p class="mt-2 mb-0">No users found matching your criteria</p>
-                                    <a asp-page="./Users" class="btn btn-sm btn-outline-primary mt-3">Clear Filters</a>
+                                    <h5 class="mt-3">No users found</h5>
+                                    <p class="text-muted mb-3">@(string.IsNullOrEmpty(Model.CurrentFilter) ? "No users match your filter criteria" : "No users match your search criteria")</p>
+                                    <a asp-page="./Users" class="btn btn-outline-primary">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Clear Filters
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -464,7 +473,9 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="rejectModalLabel">Reject User Account</h5>
+                <h5 class="modal-title" id="rejectModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Reject User Account
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" asp-page-handler="RejectUser">
@@ -477,8 +488,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Reject Account</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-x-lg me-2"></i>Reject Account
+                    </button>
                 </div>
             </form>
         </div>
@@ -500,99 +513,7 @@
         --info-color: #17a2b8;
     }
 
-    /* Base button styles */
-    .btn-primary {
-        --bs-btn-color: #fff;
-        --bs-btn-bg: #4e6e4d;
-        --bs-btn-border-color: #4e6e4d;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #3d5a3c;
-        --bs-btn-hover-border-color: #3d5a3c;
-        --bs-btn-focus-shadow-rgb: 49, 132, 253;
-        --bs-btn-active-color: #fff;
-        --bs-btn-active-bg: #3d5a3c;
-        --bs-btn-active-border-color: #3d5a3c;
-        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-        --bs-btn-disabled-color: #fff;
-        --bs-btn-disabled-bg: #4e6e4d;
-        --bs-btn-disabled-border-color: #4e6e4d;
-    }
-
-    /* Button styles */
-    .btn-success {
-        --bs-btn-color: #fff;
-        --bs-btn-bg: #28a745;
-        --bs-btn-border-color: #28a745;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #218838;
-        --bs-btn-hover-border-color: #1e7e34;
-    }
-
-    .btn-danger {
-        --bs-btn-color: #fff;
-        --bs-btn-bg: #dc3545;
-        --bs-btn-border-color: #dc3545;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #c82333;
-        --bs-btn-hover-border-color: #bd2130;
-    }
-
-    /* Other button styles and utility classes */
-    .btn-outline-primary {
-        --bs-btn-color: #4e6e4d;
-        --bs-btn-border-color: #4e6e4d;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #4e6e4d;
-        --bs-btn-hover-border-color: #4e6e4d;
-        --bs-btn-focus-shadow-rgb: 13, 110, 253;
-        --bs-btn-active-color: #fff;
-        --bs-btn-active-bg: #4e6e4d;
-        --bs-btn-active-border-color: #4e6e4d;
-        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-        --bs-btn-disabled-color: #4e6e4d;
-        --bs-btn-disabled-bg: transparent;
-        --bs-btn-disabled-border-color: #4e6e4d;
-        --bs-gradient: none;
-    }
-
-    .btn-outline-success {
-        --bs-btn-color: #28a745;
-        --bs-btn-border-color: #28a745;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #28a745;
-        --bs-btn-hover-border-color: #28a745;
-    }
-
-    .btn-outline-danger {
-        --bs-btn-color: #dc3545;
-        --bs-btn-border-color: #dc3545;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #dc3545;
-        --bs-btn-hover-border-color: #dc3545;
-    }
-
-    .btn-outline-info {
-        --bs-btn-color: #4e6e4d;
-        --bs-btn-border-color: #4e6e4d;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #4e6e4d;
-        --bs-btn-hover-border-color: #4e6e4d;
-        --bs-btn-focus-shadow-rgb: 13, 202, 240;
-        --bs-btn-active-color: #fff;
-        --bs-btn-active-bg: #4e6e4d;
-        --bs-btn-active-border-color: #4e6e4d;
-        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-        --bs-btn-disabled-color: #4e6e4d;
-        --bs-btn-disabled-bg: transparent;
-        --bs-btn-disabled-border-color: #4e6e4d;
-        --bs-gradient: none;
-    }
-
-    .text-primary {
-        --bs-text-opacity: 1;
-        color: #4e6e4d !important;
-    }
-
+    /* Base styling */
     body {
         background-color: #f5f7f9;
     }
@@ -622,22 +543,22 @@
         gap: 0.5rem;
     }
 
-        .navbar-nav .nav-link {
-            color: var(--text-light) !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem !important;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
+    .navbar-nav .nav-link {
+        color: var(--text-light) !important;
+        font-weight: 500;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem !important;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
 
-            .navbar-nav .nav-link:hover,
-            .navbar-nav .nav-link.active {
-                background-color: rgba(255, 255, 255, 0.15);
-                transform: translateY(-1px);
-            }
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+    }
 
     .profile-menu .nav-link {
         padding: 0.5rem !important;
@@ -646,10 +567,11 @@
         border-radius: 4px;
     }
 
-        .profile-menu .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
+    .profile-menu .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
 
+    /* Dropdown styling */
     .dropdown-menu {
         border: none;
         border-radius: 8px;
@@ -675,54 +597,51 @@
         transition: all 0.2s ease;
     }
 
-        .dropdown-item:hover {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
-        }
+    .dropdown-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
 
-        .dropdown-item i {
-            font-size: 1.1rem;
-        }
+    .dropdown-item i {
+        font-size: 1.1rem;
+    }
 
-    .navbar-toggler {
+    .dropdown-item.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .dropdown-item:active {
+        background-color: var(--primary-color);
+    }
+
+    /* Page header styling */
+    .page-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 1.75rem;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Card styling */
+    .card {
         border: none;
-        padding: 0.5rem;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
 
-        .navbar-toggler:focus {
-            box-shadow: none;
-        }
-
-        .navbar-toggler i {
-            font-size: 1.5rem;
-        }
-
-    .dashboard-container {
-        margin-top: 6rem;
-        padding-bottom: 2rem;
+    .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
     }
 
-    .dashboard-header {
-        margin-bottom: 1.5rem;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
-        padding-bottom: 1rem;
-    }
-
-        .dashboard-header h2 {
-            font-weight: 600;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-        }
-
-        /* Additional Custom Styles */
-        .dashboard-header h2 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-        }
-
+    /* Search form styling */
     .search-form .form-control {
         border-right: 0;
+        padding: 0.6rem 0.75rem;
     }
 
     .search-form .btn {
@@ -731,58 +650,80 @@
         padding-right: 1rem;
     }
 
+    .search-form .form-control:focus {
+        box-shadow: none;
+        border-color: var(--primary-color);
+    }
+
+    .search-form .input-group-text {
+        background-color: white;
+        color: var(--text-muted);
+        border-right: none;
+    }
+
+    /* Table styling */
     .user-table {
         margin: 0;
     }
 
-        .user-table th {
-            font-weight: 600;
-            color: var(--text-dark);
-            background-color: var(--primary-lighter);
-            padding: 1rem;
-            white-space: nowrap;
-        }
+    .user-table thead th {
+        background-color: #f9fafb;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 0.75rem 1rem;
+    }
 
-        .user-table td {
-            padding: 0.75rem 1rem;
-            vertical-align: middle;
-        }
+    .user-table td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+    }
 
-        .user-table tr {
-            transition: background-color 0.15s ease;
-        }
+    .user-table tr {
+        transition: background-color 0.15s ease;
+    }
 
-            .user-table tr:hover {
-                background-color: var(--primary-lighter);
-            }
+    .user-table tr:hover {
+        background-color: var(--primary-lighter);
+    }
 
-    .user-info .avatar {
-        width: 32px;
-        height: 32px;
+    /* Avatar styling */
+    .user-avatar {
+        width: 36px;
+        height: 36px;
         background-color: var(--primary-light);
-        border-radius: 50%;
-        display: flex;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+
+    /* Status badges */
+    .status-badge {
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        color: var(--primary-color);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
     }
 
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: flex-end;
+    .status-badge.active {
+        background-color: rgba(72, 187, 120, 0.1);
+        color: #48bb78;
     }
 
-        .action-buttons .btn {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-        }
-
-    .badge.bg-primary-light {
-        background-color: var(--primary-light);
-        color: var(--primary-color);
+    .status-badge.inactive {
+        background-color: rgba(229, 62, 62, 0.1);
+        color: #e53e3e;
     }
 
+    .status-badge.pending {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    /* Role badges */
     .admin-badge {
         background-color: rgba(220, 53, 69, 0.1);
         color: #dc3545;
@@ -803,6 +744,24 @@
         color: #6c757d;
     }
 
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .action-btn {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Pagination styling */
     .pagination {
         gap: 0.25rem;
     }
@@ -832,6 +791,61 @@
         border-color: var(--primary-lighter);
     }
 
+    /* Button styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #ced4da;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Alert styling */
+    .alert {
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+
+    .alert-success {
+        border-left-color: #28a745;
+    }
+
+    /* Empty state styling */
     .empty-state {
         padding: 2rem 0;
         display: flex;
@@ -840,35 +854,28 @@
         color: var(--text-muted);
     }
 
-    .search-form .form-control:focus {
-        box-shadow: none;
-        border-color: var(--primary-color);
-    }
-
-    .search-form .input-group-text {
-        color: var(--text-muted);
-    }
-
-    .dropdown-item.active {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .dropdown-item:active {
-        background-color: var(--primary-color);
-    }
-
-    /* Status badges */
+    /* Warning subtle background */
     .bg-warning-subtle {
         background-color: #fff8e1;
     }
 
-    .user-avatar {
-        width: 36px;
-        height: 36px;
-        background-color: var(--primary-light);
-        color: var(--primary-color);
-        font-size: 1.2rem;
+    /* Improve navbar toggler */
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: none;
+    }
+
+    .navbar-toggler i {
+        font-size: 1.5rem;
+    }
+
+    /* Card shadow consistency */
+    .card.shadow-sm {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
     }
 </style>
 

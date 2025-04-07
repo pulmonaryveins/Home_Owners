@@ -55,45 +55,54 @@
                     <span class="d-none d-lg-inline">@User.Identity?.Name</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
-                          asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="dropdown-item">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
+                    <li>
+                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                            <i class="bi bi-gear"></i> Profile Settings
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                              asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="dropdown-item">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
                 </ul>
             </div>
         </div>
     </div>
 </nav>
 
-<div class="container dashboard-container">
-    <div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
+<div class="container mt-5 pt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-0">
+            <h1 class="page-title">
                 <i class="bi bi-megaphone-fill me-2"></i>
-                Announcements
-            </h2>
+                Announcements Management
+            </h1>
             <p class="text-muted mb-0 mt-1">Manage community announcements and notifications</p>
         </div>
         <a asp-page="./CreateAnnouncement" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Create New Announcement
+            <i class="bi bi-plus-lg me-2"></i> Create New Announcement
         </a>
     </div>
 
     @if (TempData["StatusMessage"] != null)
     {
-        <div class="alert @(TempData["StatusType"]?.ToString() == "Error" ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+        var statusType = TempData["StatusType"]?.ToString() == "Error" ? "danger" : "success";
+        <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
             <div class="d-flex align-items-center">
-                <i class="bi @(TempData["StatusType"]?.ToString() == "Error" ? "bi-exclamation-triangle" : "bi-check-circle") me-2"></i>
+                <i class="bi @(statusType == "danger" ? "bi-exclamation-triangle" : "bi-check-circle") me-2"></i>
                 <span>@TempData["StatusMessage"]</span>
             </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <div class="card dashboard-card shadow-sm">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <div class="row g-3 align-items-center">
                 <div class="col-md-6">
@@ -104,7 +113,7 @@
                             </span>
                             <input type="text"
                                    name="searchString"
-                                   value=""
+                                   value="@(ViewData["CurrentFilter"]?.ToString())"
                                    class="form-control border-start-0"
                                    placeholder="Search announcements..."
                                    aria-label="Search announcements" />
@@ -121,14 +130,14 @@
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false">
                             <i class="bi bi-filter"></i>
-                            <span class="ms-1">Filter by Category</span>
+                            <span class="ms-1">@(ViewData["CategoryFilter"]?.ToString() ?? "All Categories")</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-list-ul"></i> All Categories</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle"></i> Important</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-calendar-event"></i> Event</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-arrow-clockwise"></i> Update</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-chat-text"></i> General</a></li>
+                            <li><a class="dropdown-item" asp-page="./Announcement" asp-route-categoryFilter=""><i class="bi bi-list-ul"></i> All Categories</a></li>
+                            <li><a class="dropdown-item" asp-page="./Announcement" asp-route-categoryFilter="Important"><i class="bi bi-info-circle"></i> Important</a></li>
+                            <li><a class="dropdown-item" asp-page="./Announcement" asp-route-categoryFilter="Event"><i class="bi bi-calendar-event"></i> Event</a></li>
+                            <li><a class="dropdown-item" asp-page="./Announcement" asp-route-categoryFilter="Update"><i class="bi bi-arrow-clockwise"></i> Update</a></li>
+                            <li><a class="dropdown-item" asp-page="./Announcement" asp-route-categoryFilter="General"><i class="bi bi-chat-text"></i> General</a></li>
                         </ul>
                     </div>
 
@@ -142,22 +151,26 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item @(ViewData["SortField"]?.ToString() == "date" && ViewData["SortDirection"]?.ToString() == "desc" ? "active" : "")" 
+                                   asp-page="./Announcement" asp-route-sortOrder="date_desc" asp-route-currentFilter="@ViewData["CurrentFilter"]" asp-route-categoryFilter="@ViewData["CategoryFilter"]">
                                     <i class="bi bi-calendar-date"></i> Newest First
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item @(ViewData["SortField"]?.ToString() == "date" && ViewData["SortDirection"]?.ToString() == "asc" ? "active" : "")"
+                                   asp-page="./Announcement" asp-route-sortOrder="date" asp-route-currentFilter="@ViewData["CurrentFilter"]" asp-route-categoryFilter="@ViewData["CategoryFilter"]">
                                     <i class="bi bi-calendar-date"></i> Oldest First
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item @(ViewData["SortField"]?.ToString() == "title" && ViewData["SortDirection"]?.ToString() == "asc" ? "active" : "")"
+                                   asp-page="./Announcement" asp-route-sortOrder="title" asp-route-currentFilter="@ViewData["CurrentFilter"]" asp-route-categoryFilter="@ViewData["CategoryFilter"]">
                                     <i class="bi bi-sort-alpha-down"></i> Title (A-Z)
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item @(ViewData["SortField"]?.ToString() == "title" && ViewData["SortDirection"]?.ToString() == "desc" ? "active" : "")"
+                                   asp-page="./Announcement" asp-route-sortOrder="title_desc" asp-route-currentFilter="@ViewData["CurrentFilter"]" asp-route-categoryFilter="@ViewData["CategoryFilter"]">
                                     <i class="bi bi-sort-alpha-up"></i> Title (Z-A)
                                 </a>
                             </li>
@@ -168,15 +181,15 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table table-hover user-table mb-0">
+            <table class="table table-hover announcements-table mb-0">
                 <thead>
                     <tr>
-                        <th class="border-0">Title</th>
-                        <th class="border-0">Category</th>
-                        <th class="border-0">Posted Date</th>
-                        <th class="border-0">Status</th>
-                        <th class="border-0">Priority</th>
-                        <th class="border-0 text-end">Actions</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Posted Date</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -186,16 +199,17 @@
                         {
                             <tr class="align-middle">
                                 <td>
-                                    <div class="fw-medium text-truncate" style="max-width: 300px;">@announcement.Title</div>
+                                    <div class="announcement-title">
+                                        <div class="fw-medium">@announcement.Title</div>
+                                        <div class="small text-muted announcement-excerpt">
+                                            @(announcement.Content != null && announcement.Content.Length > 60 
+                                              ? announcement.Content.Substring(0, 60) + "..." 
+                                              : announcement.Content)
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
-                                    <span class="badge rounded-pill
-                                          @(announcement.Category switch {
-                                              "Important" => "bg-danger",
-                                              "Event" => "bg-info",
-                                              "Update" => "bg-success",
-                                              _ => "bg-secondary"
-                                          })">
+                                    <span class="category-badge @announcement.Category.ToLower()">
                                         <i class="bi @(announcement.Category switch {
                                                 "Important" => "bi-info-circle",
                                                 "Event" => "bi-calendar-event",
@@ -208,32 +222,45 @@
                                 <td>
                                     @if (announcement.IsActive)
                                     {
-                                        <span class="badge rounded-pill bg-success">Active</span>
+                                        <span class="status-badge active">
+                                            <i class="bi bi-check-circle me-1"></i>Active
+                                        </span>
                                     }
                                     else
                                     {
-                                        <span class="badge rounded-pill bg-secondary">Inactive</span>
+                                        <span class="status-badge inactive">
+                                            <i class="bi bi-x-circle me-1"></i>Inactive
+                                        </span>
                                     }
                                 </td>
                                 <td>
                                     @if (announcement.IsUrgent)
                                     {
-                                        <span class="badge rounded-pill bg-danger">Urgent</span>
+                                        <span class="priority-badge urgent">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>Urgent
+                                        </span>
                                     }
                                     else
                                     {
-                                        <span class="badge rounded-pill bg-light text-dark">Normal</span>
+                                        <span class="priority-badge normal">
+                                            <i class="bi bi-dash-circle me-1"></i>Normal
+                                        </span>
                                     }
                                 </td>
                                 <td>
-                                    <div class="action-buttons d-flex justify-content-end gap-1">
-                                        <a asp-page="./EditAnnouncement" asp-route-id="@announcement.Id" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Edit Announcement">
+                                    <div class="action-buttons">
+                                        <a asp-page="./EditAnnouncement" asp-route-id="@announcement.Id" 
+                                           class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="tooltip" 
+                                           title="Edit Announcement">
                                             <i class="bi bi-pencil"></i>
                                         </a>
 
-                                        <a asp-page="./DeleteAnnouncement" asp-route-id="@announcement.Id" class="btn btn-sm btn-outline-danger">
+                                        <button type="button" class="btn btn-sm btn-outline-danger action-btn"
+                                                data-bs-toggle="modal" data-bs-target="#deleteAnnouncementModal"
+                                                data-announcement-id="@announcement.Id" data-announcement-title="@announcement.Title"
+                                                title="Delete Announcement">
                                             <i class="bi bi-trash"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -244,11 +271,24 @@
                         <tr>
                             <td colspan="6" class="text-center py-5">
                                 <div class="empty-state">
-                                    <i class="bi bi-megaphone display-1 text-muted"></i>
-                                    <p class="mt-3 mb-3">No announcements found</p>
-                                    <a asp-page="./CreateAnnouncement" class="btn btn-sm btn-primary mt-2">
-                                        Create your first announcement
-                                    </a>
+                                    <i class="bi bi-megaphone display-4 text-muted"></i>
+                                    <h5 class="mt-3">No announcements found</h5>
+                                    <p class="text-muted mb-3">@(string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()) && string.IsNullOrEmpty(ViewData["CategoryFilter"]?.ToString()) 
+                                        ? "Add your first announcement to get started" 
+                                        : "No announcements match your search criteria")</p>
+                                    
+                                    @if (string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()) && string.IsNullOrEmpty(ViewData["CategoryFilter"]?.ToString()))
+                                    {
+                                        <a asp-page="./CreateAnnouncement" class="btn btn-primary">
+                                            <i class="bi bi-plus-lg me-2"></i> Create Your First Announcement
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-page="./Announcement" class="btn btn-outline-secondary">
+                                            <i class="bi bi-arrow-counterclockwise me-2"></i> Clear Filters
+                                        </a>
+                                    }
                                 </div>
                             </td>
                         </tr>
@@ -262,21 +302,63 @@
             <div class="card-footer bg-white border-0 py-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <small class="text-muted">
-                        Showing 1-@Model.Announcements.Count of @Model.Announcements.Count announcements
+                        Showing @((Model.PageIndex - 1) * Model.PageSize + 1) - 
+                        @(Math.Min(Model.PageIndex * Model.PageSize, Model.TotalCount)) 
+                        of @Model.TotalCount announcements
                     </small>
                     <nav aria-label="Page navigation">
                         <ul class="pagination mb-0">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                            @{
+                                var prevDisabled = Model.PageIndex <= 1 ? "disabled" : "";
+                                var nextDisabled = Model.PageIndex >= Model.TotalPages ? "disabled" : "";
+                            }
+                            <li class="page-item @prevDisabled">
+                                <a class="page-link" asp-page="./Announcement"
+                                   asp-route-pageIndex="1"
+                                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                   asp-route-categoryFilter="@ViewData["CategoryFilter"]">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item @prevDisabled">
+                                <a class="page-link" asp-page="./Announcement"
+                                   asp-route-pageIndex="@(Model.PageIndex - 1)"
+                                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                   asp-route-categoryFilter="@ViewData["CategoryFilter"]">
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
                             </li>
-                            <li class="page-item active">
-                                <a class="page-link" href="#">1</a>
-                            </li>
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#">
+
+                            @for (var i = Math.Max(1, Model.PageIndex - 2);
+                               i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
+                            {
+                                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                                    <a class="page-link" asp-page="./Announcement"
+                                       asp-route-pageIndex="@i"
+                                       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                                       asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                       asp-route-categoryFilter="@ViewData["CategoryFilter"]">@i</a>
+                                </li>
+                            }
+
+                            <li class="page-item @nextDisabled">
+                                <a class="page-link" asp-page="./Announcement"
+                                   asp-route-pageIndex="@(Model.PageIndex + 1)"
+                                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                   asp-route-categoryFilter="@ViewData["CategoryFilter"]">
                                     <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item @nextDisabled">
+                                <a class="page-link" asp-page="./Announcement"
+                                   asp-route-pageIndex="@Model.TotalPages"
+                                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                                   asp-route-categoryFilter="@ViewData["CategoryFilter"]">
+                                    <i class="bi bi-chevron-double-right"></i>
                                 </a>
                             </li>
                         </ul>
@@ -292,18 +374,22 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteAnnouncementModalLabel">Confirm Deletion</h5>
+                <h5 class="modal-title" id="deleteAnnouncementModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this announcement? This action cannot be undone.</p>
-                <p class="mb-0 fw-medium text-danger">This will permanently remove the announcement from the system.</p>
+                <p>Are you sure you want to delete the announcement <strong id="announcementTitle"></strong>?</p>
+                <p class="mb-0 text-danger fw-medium">This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form method="post" id="deleteForm" asp-page-handler="Delete">
-                    <input type="hidden" id="announcementId" name="id" value="" />
-                    <button type="submit" class="btn btn-danger">Delete Announcement</button>
+                    <input type="hidden" id="announcementIdInput" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Delete Announcement
+                    </button>
                 </form>
             </div>
         </div>
@@ -323,94 +409,6 @@
         --warning-color: #ffc107;
         --danger-color: #dc3545;
         --info-color: #17a2b8;
-    }
-
-    /* Base button styles */
-    .btn-primary {
-        --bs-btn-color: #fff;
-        --bs-btn-bg: #4e6e4d;
-        --bs-btn-border-color: #4e6e4d;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #3d5a3c;
-        --bs-btn-hover-border-color: #3d5a3c;
-        --bs-btn-focus-shadow-rgb: 49, 132, 253;
-        --bs-btn-active-color: #fff;
-        --bs-btn-active-bg: #3d5a3c;
-        --bs-btn-active-border-color: #3d5a3c;
-        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-        --bs-btn-disabled-color: #fff;
-        --bs-btn-disabled-bg: #4e6e4d;
-        --bs-btn-disabled-border-color: #4e6e4d;
-    }
-
-    /* Button styles */
-    .btn-success {
-        --bs-btn-color: #fff;
-        --bs-btn-bg: #28a745;
-        --bs-btn-border-color: #28a745;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #218838;
-        --bs-btn-hover-border-color: #1e7e34;
-    }
-
-    .btn-danger {
-        --bs-btn-color: #fff;
-        --bs-btn-bg: #dc3545;
-        --bs-btn-border-color: #dc3545;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #c82333;
-        --bs-btn-hover-border-color: #bd2130;
-    }
-
-    /* Other button styles and utility classes */
-    .btn-outline-primary {
-        --bs-btn-color: #4e6e4d;
-        --bs-btn-border-color: #4e6e4d;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #4e6e4d;
-        --bs-btn-hover-border-color: #4e6e4d;
-        --bs-btn-focus-shadow-rgb: 13, 110, 253;
-        --bs-btn-active-color: #fff;
-        --bs-btn-active-bg: #4e6e4d;
-        --bs-btn-active-border-color: #4e6e4d;
-        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-        --bs-btn-disabled-color: #4e6e4d;
-        --bs-btn-disabled-bg: transparent;
-        --bs-btn-disabled-border-color: #4e6e4d;
-        --bs-gradient: none;
-    }
-
-    .btn-outline-success {
-        --bs-btn-color: #28a745;
-        --bs-btn-border-color: #28a745;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #28a745;
-        --bs-btn-hover-border-color: #28a745;
-    }
-
-    .btn-outline-danger {
-        --bs-btn-color: #dc3545;
-        --bs-btn-border-color: #dc3545;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #dc3545;
-        --bs-btn-hover-border-color: #dc3545;
-    }
-
-    .btn-outline-info {
-        --bs-btn-color: #4e6e4d;
-        --bs-btn-border-color: #4e6e4d;
-        --bs-btn-hover-color: #fff;
-        --bs-btn-hover-bg: #4e6e4d;
-        --bs-btn-hover-border-color: #4e6e4d;
-        --bs-btn-focus-shadow-rgb: 13, 202, 240;
-        --bs-btn-active-color: #fff;
-        --bs-btn-active-bg: #4e6e4d;
-        --bs-btn-active-border-color: #4e6e4d;
-        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
-        --bs-btn-disabled-color: #4e6e4d;
-        --bs-btn-disabled-bg: transparent;
-        --bs-btn-disabled-border-color: #4e6e4d;
-        --bs-gradient: none;
     }
 
     body {
@@ -442,22 +440,22 @@
         gap: 0.5rem;
     }
 
-        .navbar-nav .nav-link {
-            color: var(--text-light) !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem !important;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
+    .navbar-nav .nav-link {
+        color: var(--text-light) !important;
+        font-weight: 500;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem !important;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
 
-            .navbar-nav .nav-link:hover,
-            .navbar-nav .nav-link.active {
-                background-color: rgba(255, 255, 255, 0.15);
-                transform: translateY(-1px);
-            }
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+    }
 
     .profile-menu .nav-link {
         padding: 0.5rem !important;
@@ -466,10 +464,11 @@
         border-radius: 4px;
     }
 
-        .profile-menu .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
+    .profile-menu .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
 
+    /* Dropdown styling */
     .dropdown-menu {
         border: none;
         border-radius: 8px;
@@ -495,49 +494,51 @@
         transition: all 0.2s ease;
     }
 
-        .dropdown-item:hover {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
-        }
+    .dropdown-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
 
-        .dropdown-item i {
-            font-size: 1.1rem;
-        }
+    .dropdown-item i {
+        font-size: 1.1rem;
+    }
 
-    .navbar-toggler {
+    .dropdown-item.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .dropdown-item:active {
+        background-color: var(--primary-color);
+    }
+
+    /* Page header styling */
+    .page-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 1.75rem;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Card styling */
+    .card {
         border: none;
-        padding: 0.5rem;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
 
-        .navbar-toggler:focus {
-            box-shadow: none;
-        }
-
-        .navbar-toggler i {
-            font-size: 1.5rem;
-        }
-
-    .dashboard-container {
-        margin-top: 6rem;
-        padding-bottom: 2rem;
+    .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
     }
 
-    .dashboard-header {
-        margin-bottom: 1.5rem;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
-        padding-bottom: 1rem;
-    }
-
-        .dashboard-header h2 {
-            font-weight: 600;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            font-size: 1.5rem;
-        }
-
+    /* Search form styling */
     .search-form .form-control {
         border-right: 0;
+        padding: 0.6rem 0.75rem;
     }
 
     .search-form .btn {
@@ -546,47 +547,145 @@
         padding-right: 1rem;
     }
 
-    .user-table {
+    .search-form .form-control:focus {
+        box-shadow: none;
+        border-color: var(--primary-color);
+    }
+
+    .search-form .input-group-text {
+        background-color: white;
+        color: var(--text-muted);
+        border-right: none;
+    }
+
+    /* Table styling */
+    .announcements-table {
         margin: 0;
     }
 
-        .user-table th {
-            font-weight: 600;
-            color: var(--text-dark);
-            background-color: var(--primary-lighter);
-            padding: 1rem;
-            white-space: nowrap;
-        }
+    .announcements-table thead th {
+        background-color: #f9fafb;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 0.75rem 1rem;
+    }
 
-        .user-table td {
-            padding: 0.75rem 1rem;
-            vertical-align: middle;
-        }
+    .announcements-table td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+    }
 
-        .user-table tr {
-            transition: background-color 0.15s ease;
-        }
+    .announcements-table tr {
+        transition: background-color 0.15s ease;
+    }
 
-            .user-table tr:hover {
-                background-color: var(--primary-lighter);
-            }
+    .announcements-table tr:hover {
+        background-color: var(--primary-lighter);
+    }
 
+    /* Announcement title and excerpt */
+    .announcement-title {
+        max-width: 300px;
+    }
+
+    .announcement-excerpt {
+        margin-top: 0.25rem;
+        font-size: 0.85rem;
+        color: #718096;
+        line-height: 1.4;
+    }
+
+    /* Category badges */
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .category-badge.important {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .category-badge.event {
+        background-color: rgba(23, 162, 184, 0.1);
+        color: #17a2b8;
+    }
+
+    .category-badge.update {
+        background-color: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+
+    .category-badge.general {
+        background-color: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+    }
+
+    /* Status badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-badge.active {
+        background-color: rgba(72, 187, 120, 0.1);
+        color: #48bb78;
+    }
+
+    .status-badge.inactive {
+        background-color: rgba(160, 174, 192, 0.1);
+        color: #a0aec0;
+    }
+
+    /* Priority badges */
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .priority-badge.urgent {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .priority-badge.normal {
+        background-color: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+    }
+
+    /* Action buttons */
     .action-buttons {
         display: flex;
         gap: 0.5rem;
         justify-content: flex-end;
     }
 
-        .action-buttons .btn {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-        }
-
-    .badge {
-        font-weight: 500;
-        padding: 0.35em 0.65em;
+    .action-btn {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        transition: all 0.2s ease;
     }
 
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Pagination styling */
     .pagination {
         gap: 0.25rem;
     }
@@ -616,6 +715,61 @@
         border-color: var(--primary-lighter);
     }
 
+    /* Button styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #ced4da;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Alert styling */
+    .alert {
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+
+    .alert-success {
+        border-left-color: #28a745;
+    }
+
+    /* Empty state styling */
     .empty-state {
         padding: 2rem 0;
         display: flex;
@@ -624,22 +778,38 @@
         color: var(--text-muted);
     }
 
-    .search-form .form-control:focus {
+    /* Modal styling */
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .modal-title {
+        color: var(--text-dark);
+        font-weight: 600;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Fix navbar toggler */
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+    .navbar-toggler:focus {
         box-shadow: none;
-        border-color: var(--primary-color);
     }
 
-    .search-form .input-group-text {
-        color: var(--text-muted);
-    }
-
-    .dropdown-item.active {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .dropdown-item:active {
-        background-color: var(--primary-color);
+    .navbar-toggler i {
+        font-size: 1.5rem;
     }
 </style>
 
@@ -647,8 +817,25 @@
     // Initialize tooltips and handle modal data
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+        
+        // Handle delete modal
+        var deleteModal = document.getElementById('deleteAnnouncementModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget;
+                var announcementId = button.getAttribute('data-announcement-id');
+                var announcementTitle = button.getAttribute('data-announcement-title');
+                
+                var idInput = document.getElementById('announcementIdInput');
+                var titleSpan = document.getElementById('announcementTitle');
+                
+                idInput.value = announcementId;
+                titleSpan.textContent = announcementTitle;
+            });
+        }
+    });
 </script>

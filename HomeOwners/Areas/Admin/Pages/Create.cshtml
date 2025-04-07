@@ -4,204 +4,176 @@
     ViewData["Title"] = "Create User";
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
-
-<nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
-        <!-- Logo -->
-        <a class="navbar-brand" asp-area="Admin" asp-page="/Dashboard">
-            <span class="brand-text">ADMIN DASHBOARD</span>
-        </a>
-
-        <!-- Mobile Toggle Button -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarNav" aria-controls="navbarNav"
-                aria-expanded="false" aria-label="Toggle navigation">
-            <i class="bi bi-list text-white"></i>
-        </button>
-
-        <!-- Navigation Items -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Users</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Services</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Facilities</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Calendar">Calendar</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Annoucements</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Reports</a>
-                </li>
-            </ul>
-
-            <!-- Profile Menu -->
-            <div class="nav-item dropdown profile-menu">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle me-1"></i>
-                    <span class="d-none d-lg-inline">@User.Identity?.Name</span>
+<div class="container mt-5 pt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            @if (TempData["ErrorMsg"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Error:</strong> @TempData["ErrorMsg"]
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">
+                    <i class="bi bi-person-plus me-2"></i>Create New User
+                </h1>
+                <a asp-page="./Users" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
-                          asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="dropdown-item">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
-                    </li>
-                </ul>
             </div>
-        </div>
-    </div>
-</nav>
 
-<div class="container dashboard-container">
-    <div class="page-header d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1"><i class="bi bi-person-plus me-2"></i>Create User</h2>
-            <p class="text-muted mb-0">Add a new user to the system</p>
-        </div>
-        <a asp-page="./Users" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to List
-        </a>
-    </div>
+            <div class="card shadow-sm user-card">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <div class="col-12">
+                            <div class="p-4">
+                                <form method="post">
+                                    <div asp-validation-summary="All" class="text-danger mb-4 validation-summary"></div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-            <h5 class="card-title mb-0">User Information</h5>
-        </div>
-        <div class="card-body">
-            <form method="post">
-                <div asp-validation-summary="All" class="text-danger mb-4 alert alert-danger py-2"></div>
+                                    <div class="form-section">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-person me-2"></i>Account Information
+                                        </h5>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label asp-for="Input.Username" class="form-label">Username <span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                                    <input asp-for="Input.Username" class="form-control" placeholder="Enter username" />
+                                                </div>
+                                                <span asp-validation-for="Input.Username" class="text-danger small"></span>
+                                            </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Input.Username" class="form-label">Username <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-                            <input asp-for="Input.Username" class="form-control" placeholder="Enter username" />
-                        </div>
-                        <span asp-validation-for="Input.Username" class="text-danger small"></span>
-                    </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label asp-for="Input.Email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                                    <input asp-for="Input.Email" class="form-control" placeholder="Enter email address" />
+                                                </div>
+                                                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                                            </div>
+                                        </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Input.Email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-                            <input asp-for="Input.Email" class="form-control" placeholder="Enter email address" />
-                        </div>
-                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
-                    </div>
-                </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="Input.Password" class="form-label">Password <span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                                    <input asp-for="Input.Password" class="form-control" placeholder="Enter password" />
+                                                </div>
+                                                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                                            </div>
 
-                <div id="homeOwnerFields" class="mt-4" style="display: none;">
-                    <h5 class="mb-3">HomeOwner Specific Information</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.PhoneNumber" class="form-label">Phone Number</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
-                                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Enter phone number" />
-                            </div>
-                            <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Input.HouseNumber" class="form-label">House Number</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="bi bi-house"></i></span>
-                                <input asp-for="Input.HouseNumber" class="form-control" placeholder="Enter house number" />
-                            </div>
-                            <span asp-validation-for="Input.HouseNumber" class="text-danger small"></span>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="row mb-3">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        <label asp-for="Input.Password" class="form-label">Password <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-                            <input asp-for="Input.Password" class="form-control" placeholder="Enter password" />
-                        </div>
-                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="bi bi-lock-fill"></i></span>
-                            <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="Confirm password" />
-                        </div>
-                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label d-block mb-3">User Roles <span class="text-danger">*</span></label>
-                    <div class="role-selection p-3 border rounded bg-light">
-                        <div class="row g-3">
-                            @foreach (var role in Model.AvailableRoles)
-                            {
-                                <div class="col-md-4 col-sm-6">
-                                    <div class="form-check custom-role-check">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               name="Input.SelectedRoles"
-                                               value="@role"
-                                               id="role_@role" />
-                                        <label class="form-check-label" for="role_@role">
-                                            @switch (role)
-                                            {
-                                                case "Admin":
-                                                    <i class="bi bi-shield-lock text-danger me-1"></i>
-                                                    break;
-                                                case "Staff":
-                                                    <i class="bi bi-person-badge text-success me-1"></i>
-                                                    break;
-                                                default:
-                                                    <i class="bi bi-person text-primary me-1"></i>
-                                                    break;
-                                            }
-                                            @role
-                                        </label>
+                                            <div class="col-md-6">
+                                                <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                                    <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="Confirm password" />
+                                                </div>
+                                                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            }
+
+                                    <div class="form-section">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-shield-lock me-2"></i>Roles & Permissions
+                                        </h5>
+                                        
+                                        <div class="mb-4">
+                                            <label class="form-label">User Roles <span class="text-danger">*</span></label>
+                                            <div class="role-selection p-3 border rounded">
+                                                <div class="row g-3">
+                                                    @foreach (var role in Model.AvailableRoles)
+                                                    {
+                                                        <div class="col-md-3 col-sm-6">
+                                                            <div class="form-check custom-role-check">
+                                                                <input class="form-check-input"
+                                                                       type="checkbox"
+                                                                       name="Input.SelectedRoles"
+                                                                       value="@role"
+                                                                       id="role_@role" />
+                                                                <label class="form-check-label" for="role_@role">
+                                                                    @switch (role)
+                                                                    {
+                                                                        case "Admin":
+                                                                            <i class="bi bi-shield-lock text-danger me-1"></i>
+                                                                            break;
+                                                                        case "Staff":
+                                                                            <i class="bi bi-person-badge text-warning me-1"></i>
+                                                                            break;
+                                                                        case "HomeOwner":
+                                                                            <i class="bi bi-house-door text-info me-1"></i>
+                                                                            break;
+                                                                        default:
+                                                                            <i class="bi bi-person text-primary me-1"></i>
+                                                                            break;
+                                                                    }
+                                                                    @role
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="homeOwnerFields" class="form-section" style="display: none;">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-house-door me-2"></i>HomeOwner Information
+                                        </h5>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label asp-for="Input.FullName" class="form-label">Full Name</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                                                    <input asp-for="Input.FullName" class="form-control" placeholder="Enter full name" />
+                                                </div>
+                                                <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label asp-for="Input.PhoneNumber" class="form-label">Phone Number</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                                                </div>
+                                                <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                                            </div>
+
+                                            <div class="col-md-4 mb-3">
+                                                <label asp-for="Input.HouseNumber" class="form-label">House Number</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-house"></i></span>
+                                                    <input asp-for="Input.HouseNumber" class="form-control" placeholder="Enter house number" />
+                                                </div>
+                                                <span asp-validation-for="Input.HouseNumber" class="text-danger small"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                        <a asp-page="./Users" class="btn btn-outline-secondary me-md-2">
+                                            <i class="bi bi-x me-1"></i>Cancel
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-person-plus me-1"></i>Create User
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <hr class="my-4" />
-
-                <div class="d-flex justify-content-end gap-2">
-                    <a asp-page="./Users" class="btn btn-light">Cancel</a>
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-person-plus me-2"></i> Create User
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -211,219 +183,171 @@
         --primary-color: #4e6e4d;
         --primary-dark: #3d5a3c;
         --primary-light: rgba(78, 110, 77, 0.1);
-        --primary-lighter: rgba(78, 110, 77, 0.05);
-        --text-light: #f8f9fa;
         --text-dark: #333;
         --text-muted: #6c757d;
-        --success-color: #28a745;
-        --warning-color: #ffc107;
-        --danger-color: #dc3545;
-        --info-color: #17a2b8;
     }
-
+    
     body {
-        background-color: #f9f9f9;
+        background-color: #f5f7f9;
     }
-
-    .navbar {
-        background-color: var(--primary-color) !important;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        padding: 0.75rem 0;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand {
-        font-weight: 700;
-        color: white !important;
-        font-size: 1.5rem;
-        letter-spacing: 1px;
-    }
-
-    .brand-text {
-        background: linear-gradient(45deg, #fff, #e0e0e0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .navbar-nav {
-        gap: 0.5rem;
-    }
-
-        .navbar-nav .nav-link {
-            color: var(--text-light) !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem !important;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-
-            .navbar-nav .nav-link:hover,
-            .navbar-nav .nav-link.active {
-                background-color: rgba(255, 255, 255, 0.15);
-                transform: translateY(-1px);
-            }
-
-    .profile-menu .nav-link {
-        padding: 0.5rem !important;
-        color: white !important;
-        transition: all 0.3s ease;
-        border-radius: 4px;
-    }
-
-        .profile-menu .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
-
-    .dropdown-menu {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 0.5rem;
-        min-width: 220px;
-        margin-top: 0.5rem;
-    }
-
-    .dropdown-header {
-        color: var(--text-muted);
+    
+    .page-title {
+        color: var(--primary-color);
         font-weight: 600;
-        padding: 0.5rem 1rem;
-    }
-
-    .dropdown-item {
-        padding: 0.6rem 1rem;
-        color: var(--text-dark);
-        border-radius: 4px;
+        font-size: 1.8rem;
+        margin-bottom: 0;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s ease;
     }
-
-        .dropdown-item:hover {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
-        }
-
-        .dropdown-item i {
-            font-size: 1.1rem;
-        }
-
-    .navbar-toggler {
+    
+    .user-card {
         border: none;
-        padding: 0.5rem;
-    }
-
-        .navbar-toggler:focus {
-            box-shadow: none;
-        }
-
-        .navbar-toggler i {
-            font-size: 1.5rem;
-        }
-
-    .dashboard-container {
-        margin-top: 6rem;
-        padding-bottom: 2rem;
-    }
-
-    .dashboard-header {
-        margin-bottom: 1.5rem;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
-        padding-bottom: 1rem;
-    }
-
-        .dashboard-header h2 {
-            font-weight: 600;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-        }
-
-    /* Page Header Styles */
-    .page-header h2 {
-        color: var(--primary-color);
-        font-size: 1.75rem;
-        font-weight: 600;
-    }
-
-    /* Custom Role Selection */
-    .role-selection {
-        background-color: rgba(248, 249, 250, 0.7);
-    }
-
-    .custom-role-check .form-check-label {
-        display: flex;
-        align-items: center;
-        font-weight: 500;
-    }
-
-    .form-label {
-        font-weight: 500;
-        color: var(--text-dark);
-    }
-
-    .input-group-text {
-        color: var(--primary-color);
-    }
-
-    /* Card Styling */
-    .card {
-        border-radius: 10px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
     }
-
-    .card-header {
-        border-bottom: 1px solid rgba(0,0,0,0.05);
+    
+    /* Form Styling */
+    .form-section {
+        margin-bottom: 2rem;
     }
-
-    .card-title {
-        color: var(--primary-color);
+    
+    .form-section-title {
+        color: var(--primary-dark);
         font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
     }
-
-    /* Button Styles */
-    .btn-primary {
+    
+    .form-label {
+        color: var(--text-dark);
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .form-control {
+        padding: 0.6rem 0.75rem;
+        border-color: rgba(0,0,0,0.1);
+        border-radius: 6px;
+    }
+    
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.15);
+        border-color: var(--primary-color);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: rgba(0,0,0,0.1);
+        color: var(--text-muted);
+    }
+    
+    .form-check-input:checked {
         background-color: var(--primary-color);
         border-color: var(--primary-color);
     }
-
+    
+    /* Role Selection */
+    .role-selection {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        border-color: rgba(0,0,0,0.1);
+    }
+    
+    .custom-role-check {
+        margin-bottom: 0.5rem;
+    }
+    
+    .custom-role-check .form-check-label {
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Button Styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
     .btn-primary:hover {
         background-color: var(--primary-dark);
         border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #ced4da;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    /* Alert Styling */
+    .alert {
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+    
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+    
+    /* Validation Summary */
+    .validation-summary {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        background-color: rgba(220, 53, 69, 0.05);
+        border-left: 4px solid #dc3545;
     }
 </style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             // Function to toggle HomeOwner fields visibility
             function toggleHomeOwnerFields() {
                 const homeOwnerCheckbox = document.querySelector('input[value="HomeOwner"]');
                 const homeOwnerFields = document.getElementById('homeOwnerFields');
 
                 if (homeOwnerCheckbox && homeOwnerFields) {
-                    if (homeOwnerCheckbox.checked) {
-                        homeOwnerFields.style.display = 'block';
-                    } else {
-                        homeOwnerFields.style.display = 'none';
-                    }
+                    homeOwnerFields.style.display = homeOwnerCheckbox.checked ? 'block' : 'none';
                 }
             }
 
-            // Add event listeners to all role checkboxes
-            const roleCheckboxes = document.querySelectorAll('input[name="Input.SelectedRoles"]');
-            roleCheckboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', toggleHomeOwnerFields);
-            });
+            // Add event listeners to HomeOwner checkbox
+            const homeOwnerCheckbox = document.querySelector('input[value="HomeOwner"]');
+            if (homeOwnerCheckbox) {
+                homeOwnerCheckbox.addEventListener('change', toggleHomeOwnerFields);
+            }
 
             // Initial check
             toggleHomeOwnerFields();
+            
+            // Disable client-side validation for password fields if they're empty
+            $("form").submit(function() {
+                if ($("#Input_Password").val() === "") {
+                    $("#Input_Password").rules("remove", "required");
+                    $("#Input_ConfirmPassword").rules("remove", "required");
+                }
+            });
         });
     </script>
 }

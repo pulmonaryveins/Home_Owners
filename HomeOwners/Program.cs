@@ -148,26 +148,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // Create sample HomeOwner user
-    string homeOwnerEmail = "homeowner@example.com";
-    if (await userManager.FindByEmailAsync(homeOwnerEmail) == null)
-    {
-        var homeOwnerUser = new HomeOwnerUser
-        {
-            UserName = "homeowner",
-            Email = homeOwnerEmail,
-            EmailConfirmed = true,
-            FullName = "Home Owner",
-            PhoneNumber = "555-123-4567",
-            HouseNumber = "123"
-        };
-
-        var result = await userManager.CreateAsync(homeOwnerUser, "Homeowner@123456");
-        if (result.Succeeded)
-        {
-            await userManager.AddToRoleAsync(homeOwnerUser, "HomeOwner");
-        }
-    }
 }
 
 app.Run();

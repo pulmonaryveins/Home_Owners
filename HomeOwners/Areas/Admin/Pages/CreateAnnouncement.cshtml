@@ -4,161 +4,135 @@
     ViewData["Title"] = "Create Announcement";
 }
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container">
-        <!-- Logo -->
-        <a class="navbar-brand" asp-area="Admin" asp-page="/Dashboard">
-            <span class="brand-text">ADMIN DASHBOARD</span>
-        </a>
-
-        <!-- Mobile Toggle Button -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarNav" aria-controls="navbarNav"
-                aria-expanded="false" aria-label="Toggle navigation">
-            <i class="bi bi-list text-white"></i>
-        </button>
-
-        <!-- Navigation Items -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mx-auto">
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Users</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Services</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Facilities</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Calendar">Calendar</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link active" asp-area="Admin" asp-page="/Announcement">Announcements</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Reports</a>
-                </li>
-            </ul>
-
-            <!-- Profile Menu -->
-            <div class="nav-item dropdown profile-menu">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle me-1"></i>
-                    <span class="d-none d-lg-inline">@User.Identity?.Name</span>
+<div class="container mt-5 pt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            @if (TempData["ErrorMsg"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Error:</strong> @TempData["ErrorMsg"]
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">
+                    <i class="bi bi-megaphone me-2"></i>Create New Announcement
+                </h1>
+                <a asp-page="./Announcement" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
-                          asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="dropdown-item">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
-                </ul>
             </div>
-        </div>
-    </div>
-</nav>
 
-<div class="container dashboard-container">
-    <div class="page-header d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1"><i class="bi bi-megaphone-fill me-2"></i>Create Announcement</h2>
-            <p class="text-muted mb-0">Create a new announcement for the community</p>
-        </div>
-        <a asp-page="/Announcement" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to List
-        </a>
-    </div>
+            <div class="card shadow-sm announcement-card">
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4 validation-summary"></div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-4">
-            <form method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-4 alert alert-danger py-2"></div>
-
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <label asp-for="Announcement.Title" class="form-label fw-medium">Title <span class="text-danger">*</span></label>
-                        <input asp-for="Announcement.Title" class="form-control form-control-lg" placeholder="Enter announcement title" />
-                        <span asp-validation-for="Announcement.Title" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-12">
-                        <label asp-for="Announcement.Content" class="form-label fw-medium">Content <span class="text-danger">*</span></label>
-                        <textarea asp-for="Announcement.Content" class="form-control" rows="6" placeholder="Enter announcement content"></textarea>
-                        <span asp-validation-for="Announcement.Content" class="text-danger"></span>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label asp-for="Announcement.Category" class="form-label fw-medium">Category</label>
-                        <select asp-for="Announcement.Category" class="form-select">
-                            <option value="">-- Select Category --</option>
-                            <option value="Important">Important</option>
-                            <option value="Event">Event</option>
-                            <option value="Update">Update</option>
-                            <option value="General">General</option>
-                        </select>
-                        <span asp-validation-for="Announcement.Category" class="text-danger"></span>
-                    </div>
-                    <div class="col-md-6">
-                        <label asp-for="Announcement.PostedDate" class="form-label fw-medium">Posted Date</label>
-                        <input asp-for="Announcement.PostedDate" class="form-control" type="datetime-local" />
-                        <span asp-validation-for="Announcement.PostedDate" class="text-danger"></span>
-                        <div class="form-text">Leave empty to use current date and time</div>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-6" id="eventDateTimeField">
-                        <label asp-for="Announcement.EventDateTime" class="form-label fw-medium">Event Date & Time</label>
-                        <input asp-for="Announcement.EventDateTime" class="form-control" type="datetime-local" />
-                        <span asp-validation-for="Announcement.EventDateTime" class="text-danger"></span>
-                        <div class="form-text">Required for Event category announcements</div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-0 bg-light h-100">
-                            <div class="card-body">
-                                <h5 class="card-title h6 mb-3 fw-semibold">Announcement Options</h5>
-                                <div class="form-check form-switch mb-3">
-                                    <input asp-for="Announcement.IsUrgent" class="form-check-input" type="checkbox" role="switch">
-                                    <label asp-for="Announcement.IsUrgent" class="form-check-label">Mark as Urgent</label>
-                                    <div class="form-text">Highlight this announcement as requiring immediate attention</div>
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-info-circle me-2"></i>Announcement Details
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <label asp-for="Announcement.Title" class="form-label">Title <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-type-h1"></i></span>
+                                    <input asp-for="Announcement.Title" class="form-control" placeholder="Enter announcement title" />
                                 </div>
-                                <div class="form-check form-switch">
-                                    <input asp-for="Announcement.IsActive" class="form-check-input" type="checkbox" role="switch" checked>
-                                    <label asp-for="Announcement.IsActive" class="form-check-label">Active</label>
-                                    <div class="form-text">Make this announcement visible to users immediately</div>
+                                <span asp-validation-for="Announcement.Title" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Announcement.Content" class="form-label">Content <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+                                    <textarea asp-for="Announcement.Content" class="form-control" rows="5" 
+                                        placeholder="Enter announcement content"></textarea>
+                                </div>
+                                <span asp-validation-for="Announcement.Content" class="text-danger small"></span>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Announcement.Category" class="form-label">Category <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                        <select asp-for="Announcement.Category" class="form-select">
+                                            <option value="">-- Select Category --</option>
+                                            <option value="Important">Important</option>
+                                            <option value="Event">Event</option>
+                                            <option value="Update">Update</option>
+                                            <option value="General">General</option>
+                                        </select>
+                                    </div>
+                                    <span asp-validation-for="Announcement.Category" class="text-danger small"></span>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label asp-for="Announcement.ExpiryDate" class="form-label">Expiry Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                        <input asp-for="Announcement.ExpiryDate" class="form-control" type="date" />
+                                    </div>
+                                    <span asp-validation-for="Announcement.ExpiryDate" class="text-danger small"></span>
+                                    <small class="text-muted">Leave blank for no expiration</small>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <hr class="my-4" />
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-sliders me-2"></i>Display Settings
+                            </h5>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="Announcement.IsActive" class="form-check-input" type="checkbox" checked />
+                                        <label asp-for="Announcement.IsActive" class="form-check-label">
+                                            <i class="bi bi-eye me-1"></i> Active (visible to users)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="Announcement.IsUrgent" class="form-check-input" type="checkbox" />
+                                        <label asp-for="Announcement.IsUrgent" class="form-check-label">
+                                            <i class="bi bi-exclamation-triangle me-1"></i> Mark as Urgent
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label asp-for="Announcement.TargetAudience" class="form-label">Target Audience</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-people"></i></span>
+                                    <select asp-for="Announcement.TargetAudience" class="form-select">
+                                        <option value="All">All Users</option>
+                                        <option value="HomeOwners">Home Owners Only</option>
+                                        <option value="Staff">Staff Only</option>
+                                    </select>
+                                </div>
+                                <span asp-validation-for="Announcement.TargetAudience" class="text-danger small"></span>
+                            </div>
+                        </div>
 
-                <div class="d-flex justify-content-end gap-2">
-                    <a asp-page="/Announcement" class="btn btn-light px-4">
-                        <i class="bi bi-x-lg me-1"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-save me-1"></i> Create Announcement
-                    </button>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-page="./Announcement" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-x me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Create Announcement
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -168,144 +142,68 @@
         --primary-color: #4e6e4d;
         --primary-dark: #3d5a3c;
         --primary-light: rgba(78, 110, 77, 0.1);
-        --primary-lighter: rgba(78, 110, 77, 0.05);
-        --text-light: #f8f9fa;
         --text-dark: #333;
         --text-muted: #6c757d;
-        --success-color: #28a745;
-        --warning-color: #ffc107;
-        --danger-color: #dc3545;
-        --info-color: #17a2b8;
     }
-
+    
     body {
-        background-color: #f9f9f9;
+        background-color: #f5f7f9;
     }
-
-    /* Navbar styling */
-    .navbar {
-        background-color: var(--primary-color) !important;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-        padding: 0.75rem 0;
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand {
-        font-weight: 700;
-        color: white !important;
-        font-size: 1.5rem;
-        letter-spacing: 1px;
-    }
-
-    .brand-text {
-        background: linear-gradient(45deg, #fff, #e0e0e0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .navbar-nav {
-        gap: 0.5rem;
-    }
-
-        .navbar-nav .nav-link {
-            color: var(--text-light) !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem !important;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-
-            .navbar-nav .nav-link:hover,
-            .navbar-nav .nav-link.active {
-                background-color: rgba(255, 255, 255, 0.15);
-                transform: translateY(-1px);
-            }
-
-    .profile-menu .nav-link {
-        padding: 0.5rem !important;
-        color: white !important;
-        transition: all 0.3s ease;
-        border-radius: 4px;
-    }
-
-        .profile-menu .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
-
-    .dropdown-menu {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 0.5rem;
-        min-width: 220px;
-        margin-top: 0.5rem;
-    }
-
-    .dropdown-header {
-        color: var(--text-muted);
+    
+    .page-title {
+        color: var(--primary-color);
         font-weight: 600;
-        padding: 0.5rem 1rem;
-    }
-
-    .dropdown-item {
-        padding: 0.6rem 1rem;
-        color: var(--text-dark);
-        border-radius: 4px;
+        font-size: 1.8rem;
+        margin-bottom: 0;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s ease;
     }
-
-        .dropdown-item:hover {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
-        }
-
-        .dropdown-item i {
-            font-size: 1.1rem;
-        }
-
-    .navbar-toggler {
+    
+    .announcement-card {
         border: none;
-        padding: 0.5rem;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
     }
-
-        .navbar-toggler:focus {
-            box-shadow: none;
-        }
-
-        .navbar-toggler i {
-            font-size: 1.5rem;
-        }
-
-    .dashboard-container {
-        margin-top: 6rem;
-        padding-bottom: 2rem;
+    
+    /* Form Styling */
+    .form-section {
+        margin-bottom: 2rem;
     }
-
-    .page-header h2 {
-        color: var(--primary-color);
-        font-size: 1.75rem;
+    
+    .form-section-title {
+        color: var(--primary-dark);
         font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
     }
-
-    .btn-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
+    
+    .form-label {
+        color: var(--text-dark);
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
     }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-            border-color: var(--primary-dark);
-        }
+    
+    .form-control, .form-select {
+        padding: 0.6rem 0.75rem;
+        border-color: rgba(0,0,0,0.1);
+        border-radius: 6px;
+    }
     
     .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.15);
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.25);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: rgba(0,0,0,0.1);
+        color: var(--text-muted);
     }
     
     .form-check-input:checked {
@@ -313,48 +211,55 @@
         border-color: var(--primary-color);
     }
     
-    .form-check-input:focus {
+    /* Button Styling */
+    .btn-primary {
+        background-color: var(--primary-color);
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.25);
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
     }
     
     .btn-outline-secondary {
-        color: var(--text-dark);
-        border-color: #dee2e6;
+        color: var(--text-muted);
+        border-color: #ced4da;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
     }
     
     .btn-outline-secondary:hover {
         background-color: #f8f9fa;
         color: var(--primary-color);
-        border-color: #dee2e6;
+        border-color: var(--primary-color);
+    }
+    
+    /* Alert Styling */
+    .alert {
+        border-radius: 8px;
+        border-left: 4px solid;
+    }
+    
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+    
+    /* Validation Summary */
+    .validation-summary {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        background-color: rgba(220, 53, 69, 0.05);
+        border-left: 4px solid #dc3545;
     }
 </style>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
-    <script>
-        // Show/hide event date field based on category selection
-        document.addEventListener('DOMContentLoaded', function() {
-            const categorySelect = document.querySelector('select[name="Announcement.Category"]');
-            const eventDateField = document.getElementById('eventDateTimeField');
-
-            function toggleEventDateField() {
-                if (categorySelect.value === 'Event') {
-                    eventDateField.style.display = 'block';
-                    document.querySelector('input[name="Announcement.EventDateTime"]').setAttribute('required', 'required');
-                } else {
-                    eventDateField.style.display = 'block';
-                    document.querySelector('input[name="Announcement.EventDateTime"]').removeAttribute('required');
-                }
-            }
-
-            categorySelect.addEventListener('change', toggleEventDateField);
-
-            // Initial check
-            toggleEventDateField();
-        });
-    </script>
+    <partial name="_ValidationScriptsPartial" />
 }

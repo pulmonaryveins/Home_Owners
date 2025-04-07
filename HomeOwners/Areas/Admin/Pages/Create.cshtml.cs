@@ -47,6 +47,9 @@ namespace HomeOwners.Areas.Admin.Pages
             [Display(Name = "Email")]
             public string Email { get; set; }
 
+            [Display(Name = "Full Name")]
+            public string FullName { get; set; }
+
             [Display(Name = "Phone Number")]
             [Phone]
             public string PhoneNumber { get; set; }
@@ -115,7 +118,7 @@ namespace HomeOwners.Areas.Admin.Pages
                         Email = Input.Email,
                         EmailConfirmed = true,
                         CreatedDate = DateTime.Now,
-                        FullName = Input.Username, // You might want to add a FullName field to your form
+                        FullName = Input.FullName ?? Input.Username, // Use fullname if provided
                         AdminLevel = "Standard"
                     };
                 }
@@ -127,7 +130,7 @@ namespace HomeOwners.Areas.Admin.Pages
                         Email = Input.Email,
                         EmailConfirmed = true,
                         CreatedDate = DateTime.Now,
-                        FullName = Input.Username,
+                        FullName = Input.FullName ?? Input.Username, // Use fullname if provided
                         Department = "General",
                         Position = "Staff"
                     };
@@ -140,7 +143,7 @@ namespace HomeOwners.Areas.Admin.Pages
                         Email = Input.Email,
                         EmailConfirmed = true,
                         CreatedDate = DateTime.Now,
-                        FullName = Input.Username,
+                        FullName = Input.FullName ?? Input.Username, // Use the full name if provided, otherwise fallback to username
                         PhoneNumber = Input.PhoneNumber ?? "", // Use the input phone number
                         HouseNumber = Input.HouseNumber ?? ""  // Use the input house number
                     };

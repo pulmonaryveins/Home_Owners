@@ -23,6 +23,13 @@ namespace HomeOwners.Models
         [DataType(DataType.DateTime)]
         public DateTime? EventDateTime { get; set; } // Nullable as not all announcements have an event
 
+        [Display(Name = "Expiry Date")]
+        [DataType(DataType.Date)]
+        public DateTime? ExpiryDate { get; set; } // Add this property
+
+        [Display(Name = "Target Audience")]
+        public string TargetAudience { get; set; } = "All"; // Add this property
+
         [Display(Name = "Is Urgent")]
         public bool IsUrgent { get; set; }
 

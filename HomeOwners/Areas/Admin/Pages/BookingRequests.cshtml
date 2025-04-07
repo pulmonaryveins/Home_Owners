@@ -77,7 +77,13 @@
 
 <div class="container mt-5 pt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title">Facility Bookings</h1>
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-calendar-check me-2"></i>
+                Facility Bookings
+            </h1>
+            <p class="text-muted mb-0 mt-1">Manage all facility reservation requests and bookings</p>
+        </div>
         <div>
             <a href="javascript:history.back()" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back
@@ -101,7 +107,8 @@
         <div class="card-header bg-white py-3">
             <ul class="nav nav-pills card-header-pills" id="bookingTabs">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#pending-tab" data-bs-toggle="tab">
+                    <a class="nav-link @(string.IsNullOrEmpty(Model.TabFilter) || Model.TabFilter == "pending" ? "active" : "")" 
+                       href="#pending-tab" data-bs-toggle="tab">
                         <i class="bi bi-hourglass me-1"></i>
                         Pending Requests
                         @if (Model.PendingBookings.Count > 0)
@@ -111,169 +118,505 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#all-tab" data-bs-toggle="tab">
+                    <a class="nav-link @(Model.TabFilter == "all" ? "active" : "")" href="#all-tab" data-bs-toggle="tab">
                         <i class="bi bi-calendar-check me-1"></i>
                         All Reservations
                     </a>
                 </li>
             </ul>
         </div>
-        <div class="card-body p-0">
-            <div class="tab-content">
-                <div class="tab-pane fade show active" id="pending-tab">
-                    <div class="table-responsive">
-                        <table class="table table-hover booking-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Facility</th>
-                                    <th>Requester</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Contact</th>
-                                    <th>Requested On</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model.PendingBookings != null && Model.PendingBookings.Any())
+        
+        <div class="tab-content">
+            <div class="tab-pane fade @(string.IsNullOrEmpty(Model.TabFilter) || Model.TabFilter == "pending" ? "show active" : "")" id="pending-tab">
+                <div class="card-body border-bottom">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <form method="get" class="search-form">
+                                <input type="hidden" name="tabFilter" value="pending" />
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text"
+                                           name="searchString"
+                                           value="@Model.CurrentFilter"
+                                           class="form-control border-start-0"
+                                           placeholder="Search by name or facility..."
+                                           aria-label="Search bookings" />
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="d-none d-md-inline">Search</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-md-end">
+                            <div class="dropdown">
+                                <button type="button"
+                                        class="btn btn-outline-secondary dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="bi bi-sort-alpha-down"></i>
+                                    <span class="ms-1 d-none d-md-inline">Sort by</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "date" && Model.SortDirection == "desc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="date_desc" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" asp-route-tabFilter="pending">
+                                            <i class="bi bi-calendar-date"></i> Newest First
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "date" && Model.SortDirection == "asc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="date" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" asp-route-tabFilter="pending">
+                                            <i class="bi bi-calendar-date"></i> Oldest First
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "name" && Model.SortDirection == "asc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="name" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" asp-route-tabFilter="pending">
+                                            <i class="bi bi-sort-alpha-down"></i> Name (A-Z)
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "name" && Model.SortDirection == "desc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="name_desc" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" asp-route-tabFilter="pending">
+                                            <i class="bi bi-sort-alpha-up"></i> Name (Z-A)
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover booking-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Facility</th>
+                                <th>Requester</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Contact</th>
+                                <th>Requested On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.PendingBookings != null && Model.PendingBookings.Any())
+                            {
+                                @foreach (var booking in Model.PendingBookings)
                                 {
-                                    @foreach (var booking in Model.PendingBookings)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
+                                                     alt="@booking.Facility?.Name" class="booking-thumbnail me-3">
+                                                <span class="facility-name">@booking.Facility?.Name</span>
+                                            </div>
+                                        </td>
+                                        <td><span class="fw-medium">@booking.FullName</span></td>
+                                        <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                        <td><span class="time-badge">@DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")</span></td>
+                                        <td>@booking.ContactNumber</td>
+                                        <td><span class="text-muted">@booking.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <form method="post" asp-page-handler="Approve" asp-route-id="@booking.Id">
+                                                    <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Approve Booking">
+                                                        <i class="bi bi-check-lg"></i> Approve
+                                                    </button>
+                                                </form>
+                                                <form method="post" asp-page-handler="Reject" asp-route-id="@booking.Id">
+                                                    <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Reject Booking">
+                                                        <i class="bi bi-x-lg"></i> Reject
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="bi bi-calendar-check display-4 text-muted"></i>
+                                            <h5 class="mt-3">No pending requests</h5>
+                                            <p class="text-muted">There are no booking requests waiting for approval</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                
+                @if (Model.PendingBookings != null && Model.PendingBookings.Count > 0)
+                {
+                    <div class="card-footer bg-white border-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Showing @((Model.PendingPageIndex - 1) * Model.PageSize + 1) -
+                                @(Math.Min(Model.PendingPageIndex * Model.PageSize, Model.PendingTotalCount))
+                                of @Model.PendingTotalCount bookings
+                            </small>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination mb-0">
+                                    @{
+                                        var prevDisabled = Model.PendingPageIndex <= 1 ? "disabled" : "";
+                                        var nextDisabled = Model.PendingPageIndex >= Model.PendingTotalPages ? "disabled" : "";
+                                    }
+                                    <li class="page-item @prevDisabled">
+                                        <a class="page-link" asp-page="./BookingRequests" 
+                                           asp-route-pendingPageIndex="1"
+                                           asp-route-currentFilter="@Model.CurrentFilter"
+                                           asp-route-sortOrder="@Model.CurrentSort"
+                                           asp-route-tabFilter="pending">
+                                            <i class="bi bi-chevron-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item @prevDisabled">
+                                        <a class="page-link" asp-page="./BookingRequests"
+                                           asp-route-pendingPageIndex="@(Model.PendingPageIndex - 1)"
+                                           asp-route-currentFilter="@Model.CurrentFilter"
+                                           asp-route-sortOrder="@Model.CurrentSort"
+                                           asp-route-tabFilter="pending">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    
+                                    @for (var i = Math.Max(1, Model.PendingPageIndex - 2);
+                                        i <= Math.Min(Model.PendingTotalPages, Model.PendingPageIndex + 2); i++)
                                     {
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
-                                                         alt="@booking.Facility?.Name" class="booking-thumbnail me-3">
-                                                    <span class="facility-name">@booking.Facility?.Name</span>
-                                                </div>
-                                            </td>
-                                            <td><span class="fw-medium">@booking.FullName</span></td>
-                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
-                                            <td><span class="time-badge">@DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")</span></td>
-                                            <td>@booking.ContactNumber</td>
-                                            <td><span class="text-muted">@booking.CreatedDate.ToString("MMM dd, yyyy")</span></td>
-                                            <td>
+                                        <li class="page-item @(i == Model.PendingPageIndex ? "active" : "")">
+                                            <a class="page-link" asp-page="./BookingRequests"
+                                               asp-route-pendingPageIndex="@i"
+                                               asp-route-currentFilter="@Model.CurrentFilter"
+                                               asp-route-sortOrder="@Model.CurrentSort"
+                                               asp-route-tabFilter="pending">@i</a>
+                                        </li>
+                                    }
+                                    
+                                    <li class="page-item @nextDisabled">
+                                        <a class="page-link" asp-page="./BookingRequests"
+                                           asp-route-pendingPageIndex="@(Model.PendingPageIndex + 1)"
+                                           asp-route-currentFilter="@Model.CurrentFilter"
+                                           asp-route-sortOrder="@Model.CurrentSort"
+                                           asp-route-tabFilter="pending">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item @nextDisabled">
+                                        <a class="page-link" asp-page="./BookingRequests"
+                                           asp-route-pendingPageIndex="@Model.PendingTotalPages"
+                                           asp-route-currentFilter="@Model.CurrentFilter"
+                                           asp-route-sortOrder="@Model.CurrentSort"
+                                           asp-route-tabFilter="pending">
+                                            <i class="bi bi-chevron-double-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="tab-pane fade @(Model.TabFilter == "all" ? "show active" : "")" id="all-tab">
+                <div class="card-body border-bottom">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <form method="get" class="search-form">
+                                <input type="hidden" name="tabFilter" value="all" />
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text"
+                                           name="searchString"
+                                           value="@Model.CurrentFilter"
+                                           class="form-control border-start-0"
+                                           placeholder="Search by name or facility..."
+                                           aria-label="Search bookings" />
+                                    <button type="submit" class="btn btn-primary">
+                                        <span class="d-none d-md-inline">Search</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-md-end gap-2">
+                            <div class="dropdown">
+                                <button type="button"
+                                        class="btn btn-outline-primary dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="bi bi-filter"></i>
+                                    <span class="ms-1">@(Model.StatusFilter ?? "All Statuses")</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" asp-page="./BookingRequests" asp-route-statusFilter="" asp-route-tabFilter="all"><i class="bi bi-grid-3x3-gap"></i> All Statuses</a></li>
+                                    <li><a class="dropdown-item" asp-page="./BookingRequests" asp-route-statusFilter="Pending" asp-route-tabFilter="all"><i class="bi bi-hourglass"></i> Pending</a></li>
+                                    <li><a class="dropdown-item" asp-page="./BookingRequests" asp-route-statusFilter="Approved" asp-route-tabFilter="all"><i class="bi bi-check-circle"></i> Approved</a></li>
+                                    <li><a class="dropdown-item" asp-page="./BookingRequests" asp-route-statusFilter="Completed" asp-route-tabFilter="all"><i class="bi bi-trophy"></i> Completed</a></li>
+                                    <li><a class="dropdown-item" asp-page="./BookingRequests" asp-route-statusFilter="Rejected" asp-route-tabFilter="all"><i class="bi bi-x-circle"></i> Rejected</a></li>
+                                </ul>
+                            </div>
+                            
+                            <div class="dropdown">
+                                <button type="button"
+                                        class="btn btn-outline-secondary dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="bi bi-sort-alpha-down"></i>
+                                    <span class="ms-1 d-none d-md-inline">Sort by</span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "date" && Model.SortDirection == "desc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="date_desc" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" 
+                                           asp-route-statusFilter="@Model.StatusFilter" 
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-calendar-date"></i> Newest First
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "date" && Model.SortDirection == "asc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="date" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" 
+                                           asp-route-statusFilter="@Model.StatusFilter" 
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-calendar-date"></i> Oldest First
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "name" && Model.SortDirection == "asc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="name" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" 
+                                           asp-route-statusFilter="@Model.StatusFilter" 
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-sort-alpha-down"></i> Name (A-Z)
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "name" && Model.SortDirection == "desc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="name_desc" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" 
+                                           asp-route-statusFilter="@Model.StatusFilter" 
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-sort-alpha-up"></i> Name (Z-A)
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "bookingDate" && Model.SortDirection == "asc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="bookingDate" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" 
+                                           asp-route-statusFilter="@Model.StatusFilter" 
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-calendar-event"></i> Booking Date (Ascending)
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item @(Model.SortField == "bookingDate" && Model.SortDirection == "desc" ? "active" : "")" 
+                                           asp-page="./BookingRequests" asp-route-sortOrder="bookingDate_desc" 
+                                           asp-route-currentFilter="@Model.CurrentFilter" 
+                                           asp-route-statusFilter="@Model.StatusFilter" 
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-calendar-event"></i> Booking Date (Descending)
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover booking-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Facility</th>
+                                <th>Requester</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Contact</th>
+                                <th>Requested On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.AllBookings != null && Model.AllBookings.Any())
+                            {
+                                @foreach (var booking in Model.AllBookings)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
+                                                     alt="@booking.Facility?.Name" class="booking-thumbnail me-3">
+                                                <span class="facility-name">@booking.Facility?.Name</span>
+                                            </div>
+                                        </td>
+                                        <td><span class="fw-medium">@booking.FullName</span></td>
+                                        <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                        <td><span class="time-badge">@DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")</span></td>
+                                        <td>
+                                            @if (booking.Status == BookingStatus.Pending)
+                                            {
+                                                <span class="status-badge pending">
+                                                    <i class="bi bi-hourglass"></i> Pending
+                                                </span>
+                                            }
+                                            else if (booking.Status == BookingStatus.Approved)
+                                            {
+                                                <span class="status-badge approved">
+                                                    <i class="bi bi-check-circle"></i> Approved
+                                                </span>
+                                            }
+                                            else if (booking.Status == BookingStatus.Completed)
+                                            {
+                                                <span class="status-badge completed">
+                                                    <i class="bi bi-trophy"></i> Completed
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status-badge rejected">
+                                                    <i class="bi bi-x-circle"></i> Rejected
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>@booking.ContactNumber</td>
+                                        <td><span class="text-muted">@booking.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                        <td>
+                                            @if (booking.Status == BookingStatus.Approved)
+                                            {
+                                                <form method="post" asp-page-handler="MarkComplete" asp-route-id="@booking.Id">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Mark as Completed">
+                                                        <i class="bi bi-check-circle"></i> Mark Complete
+                                                    </button>
+                                                </form>
+                                            }
+                                            else if (booking.Status == BookingStatus.Pending)
+                                            {
                                                 <div class="d-flex gap-2">
                                                     <form method="post" asp-page-handler="Approve" asp-route-id="@booking.Id">
-                                                        <button type="submit" class="btn btn-sm btn-success">
-                                                            <i class="bi bi-check-lg"></i> Approve
+                                                        <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Approve Booking">
+                                                            <i class="bi bi-check-lg"></i>
                                                         </button>
                                                     </form>
                                                     <form method="post" asp-page-handler="Reject" asp-route-id="@booking.Id">
-                                                        <button type="submit" class="btn btn-sm btn-danger">
-                                                            <i class="bi bi-x-lg"></i> Reject
+                                                        <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Reject Booking">
+                                                            <i class="bi bi-x-lg"></i>
                                                         </button>
                                                     </form>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="7" class="text-center py-5">
-                                            <div class="empty-state">
-                                                <i class="bi bi-calendar-check display-4 text-muted"></i>
-                                                <h5 class="mt-3">No pending requests</h5>
-                                                <p class="text-muted">There are no booking requests waiting for approval</p>
-                                            </div>
+                                            }
                                         </td>
                                     </tr>
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="all-tab">
-                    <div class="table-responsive">
-                        <table class="table table-hover booking-table mb-0">
-                            <thead>
+                            }
+                            else
+                            {
                                 <tr>
-                                    <th>Facility</th>
-                                    <th>Requester</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                    <th>Contact</th>
-                                    <th>Requested On</th>
-                                    <th>Actions</th>
+                                    <td colspan="8" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="bi bi-calendar-x display-4 text-muted"></i>
+                                            <h5 class="mt-3">No reservations found</h5>
+                                            <p class="text-muted">@(string.IsNullOrEmpty(Model.CurrentFilter) ? "There are no booking records in the system yet" : "No bookings match your search criteria")</p>
+                                            @if (!string.IsNullOrEmpty(Model.CurrentFilter) || !string.IsNullOrEmpty(Model.StatusFilter))
+                                            {
+                                                <a asp-page="./BookingRequests" asp-route-tabFilter="all" class="btn btn-outline-secondary">
+                                                    <i class="bi bi-arrow-counterclockwise me-2"></i> Clear Filters
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model.AllBookings != null && Model.AllBookings.Any())
-                                {
-                                    @foreach (var booking in Model.AllBookings)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
-                                                         alt="@booking.Facility?.Name" class="booking-thumbnail me-3">
-                                                    <span class="facility-name">@booking.Facility?.Name</span>
-                                                </div>
-                                            </td>
-                                            <td><span class="fw-medium">@booking.FullName</span></td>
-                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
-                                            <td><span class="time-badge">@DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")</span></td>
-                                            <td>
-                                                @if (booking.Status == BookingStatus.Pending)
-                                                {
-                                                    <span class="status-badge pending">
-                                                        <i class="bi bi-hourglass"></i> Pending
-                                                    </span>
-                                                }
-                                                else if (booking.Status == BookingStatus.Approved)
-                                                {
-                                                    <span class="status-badge approved">
-                                                        <i class="bi bi-check-circle"></i> Approved
-                                                    </span>
-                                                }
-                                                else if (booking.Status == BookingStatus.Completed)
-                                                {
-                                                    <span class="status-badge completed">
-                                                        <i class="bi bi-trophy"></i> Completed
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="status-badge rejected">
-                                                        <i class="bi bi-x-circle"></i> Rejected
-                                                    </span>
-                                                }
-                                            </td>
-                                            <td>@booking.ContactNumber</td>
-                                            <td><span class="text-muted">@booking.CreatedDate.ToString("MMM dd, yyyy")</span></td>
-                                            <td>
-                                                @if (booking.Status == BookingStatus.Approved)
-                                                {
-                                                    <form method="post" asp-page-handler="MarkComplete" asp-route-id="@booking.Id">
-                                                        <button type="submit" class="btn btn-sm btn-outline-success">
-                                                            <i class="bi bi-check-circle"></i> Mark Complete
-                                                        </button>
-                                                    </form>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="8" class="text-center py-5">
-                                            <div class="empty-state">
-                                                <i class="bi bi-calendar-x display-4 text-muted"></i>
-                                                <h5 class="mt-3">No reservations found</h5>
-                                                <p class="text-muted">There are no booking records in the system yet</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                            }
+                        </tbody>
+                    </table>
                 </div>
+                
+                @if (Model.AllBookings != null && Model.AllBookings.Any())
+                {
+                    <div class="card-footer bg-white border-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Showing @((Model.AllPageIndex - 1) * Model.PageSize + 1) -
+                                @(Math.Min(Model.AllPageIndex * Model.PageSize, Model.AllTotalCount))
+                                of @Model.AllTotalCount bookings
+                            </small>
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination mb-0">
+                                    @{
+                                        var prevDisabled = Model.AllPageIndex <= 1 ? "disabled" : "";
+                                        var nextDisabled = Model.AllPageIndex >= Model.AllTotalPages ? "disabled" : "";
+                                    }
+                                    <li class="page-item @prevDisabled">
+                                        <a class="page-link" asp-page="./BookingRequests" 
+                                           asp-route-allPageIndex="1"
+                                           asp-route-currentFilter="@Model.CurrentFilter"
+                                           asp-route-sortOrder="@Model.CurrentSort"
+                                           asp-route-statusFilter="@Model.StatusFilter"
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-chevron-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item @prevDisabled">
+                                        <a class="page-link" asp-page="./BookingRequests"
+                                           asp-route-allPageIndex="@(Model.AllPageIndex - 1)"
+                                           asp-route-currentFilter="@Model.CurrentFilter"
+                                           asp-route-sortOrder="@Model.CurrentSort"
+                                           asp-route-statusFilter="@Model.StatusFilter"
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    
+                                    @for (var i = Math.Max(1, Model.AllPageIndex - 2);
+                                        i <= Math.Min(Model.AllTotalPages, Model.AllPageIndex + 2); i++)
+                                    {
+                                        <li class="page-item @(i == Model.AllPageIndex ? "active" : "")">
+                                            <a class="page-link" asp-page="./BookingRequests"
+                                               asp-route-allPageIndex="@i"
+                                               asp-route-currentFilter="@Model.CurrentFilter"
+                                               asp-route-sortOrder="@Model.CurrentSort"
+                                               asp-route-statusFilter="@Model.StatusFilter"
+                                               asp-route-tabFilter="all">@i</a>
+                                        </li>
+                                    }
+                                    
+                                    <li class="page-item @nextDisabled">
+                                        <a class="page-link" asp-page="./BookingRequests"
+                                           asp-route-allPageIndex="@(Model.AllPageIndex + 1)"
+                                           asp-route-currentFilter="@Model.CurrentFilter"
+                                           asp-route-sortOrder="@Model.CurrentSort"
+                                           asp-route-statusFilter="@Model.StatusFilter"
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item @nextDisabled">
+                                        <a class="page-link" asp-page="./BookingRequests"
+                                           asp-route-allPageIndex="@Model.AllTotalPages"
+                                           asp-route-currentFilter="@Model.CurrentFilter"
+                                           asp-route-sortOrder="@Model.CurrentSort"
+                                           asp-route-statusFilter="@Model.StatusFilter"
+                                           asp-route-tabFilter="all">
+                                            <i class="bi bi-chevron-double-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -564,4 +907,145 @@
         color: #4e6e4d;
         border-color: #4e6e4d;
     }
+
+    /* Added search form styles matching Users page */
+    .search-form .form-control {
+        border-right: 0;
+    }
+
+    .search-form .btn {
+        border-left: 0;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .search-form .form-control:focus {
+        box-shadow: none;
+        border-color: #4e6e4d;
+    }
+
+    .search-form .input-group-text {
+        color: var(--text-muted);
+    }
+
+    /* Pagination styles */
+    .pagination {
+        gap: 0.25rem;
+    }
+
+    .page-link {
+        border-radius: 0.25rem;
+        padding: 0.375rem 0.75rem;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-light);
+        transition: all 0.2s ease;
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .page-link:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        border-color: var(--primary-light);
+    }
+
+    .page-item.disabled .page-link {
+        color: var(--text-muted);
+        background-color: transparent;
+        border-color: var(--primary-lighter);
+    }
+
+    /* Dropdown styles */
+    .dropdown-item.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .dropdown-item:active {
+        background-color: var(--primary-color);
+    }
+
+    /* Updated page header */
+    .page-title {
+        font-weight: 600;
+        color: #4e6e4d;
+        font-size: 1.75rem;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Empty state improvements */
+    .empty-state {
+        padding: 2rem 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--text-muted);
+    }
+
+    /* Tab styling improvements */
+    .nav-pills .nav-link {
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: var(--primary-lighter);
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        background-color: #fff;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Tab content border */
+    .tab-content {
+        border-radius: 0 0 0.5rem 0.5rem;
+    }
+
+    /* Improved table styling */
+    .booking-table thead th {
+        background-color: #f9fafb;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0.85rem 1.25rem;
+        border-bottom-width: 1px;
+    }
+
+    .booking-table tbody tr {
+        transition: all 0.15s ease;
+    }
+
+    .booking-table tbody tr:hover {
+        background-color: rgba(78, 110, 77, 0.03);
+    }
 </style>
+
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Initialize tabs and handle tab changes
+        var triggerTabList = [].slice.call(document.querySelectorAll('#bookingTabs a'))
+        triggerTabList.forEach(function (triggerEl) {
+            triggerEl.addEventListener('click', function (event) {
+                // Update URL with tab parameter without reloading page
+                var tabId = this.getAttribute('href').replace('#', '').replace('-tab', '');
+                var url = new URL(window.location);
+                url.searchParams.set('tabFilter', tabId);
+                history.pushState({}, '', url);
+            })
+        })
+    });
+</script>

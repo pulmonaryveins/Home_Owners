@@ -1,0 +1,885 @@
+﻿@* HomeOwners/Areas/Admin/Pages/ServiceRequests.cshtml *@
+@page
+@using HomeOwners.Models
+@model HomeOwners.Areas.Admin.Pages.ServiceRequestsModel
+@{
+    ViewData["Title"] = "Service Requests Management";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" asp-area="Admin" asp-page="/Dashboard">
+            <span class="brand-text">ADMIN DASHBOARD</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" asp-area="Admin" asp-page="/Services">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Facilities">Facilities</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Calendar">Calendar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Announcement">Announcements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Reports</a>
+                </li>
+            </ul>
+
+            <!-- Profile Menu -->
+            <div class="nav-item dropdown profile-menu">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <span class="d-none d-lg-inline">@User.Identity?.Name</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                            <i class="bi bi-gear"></i> Profile Settings
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                              asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                            <button type="submit" class="dropdown-item">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 pt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-tools me-2"></i>
+                Service Requests Management
+            </h1>
+            <p class="text-muted mb-0 mt-1">Manage and respond to homeowner service requests</p>
+        </div>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i> Back to Services
+        </a>
+    </div>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+        <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                <span>@TempData["StatusMessage"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <ul class="nav nav-pills card-header-pills" id="requestTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#pending-requests" data-bs-toggle="tab">
+                        <i class="bi bi-hourglass me-2"></i> Pending Requests
+                        @if (Model.PendingRequests.Any())
+                        {
+                            <span class="badge bg-primary ms-1">@Model.PendingRequests.Count()</span>
+                        }
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#all-requests" data-bs-toggle="tab">
+                        <i class="bi bi-list-check me-2"></i> All Requests
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body p-0">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="pending-requests">
+                    <div class="table-responsive">
+                        <table class="table table-hover request-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Requester</th>
+                                    <th>Service</th>
+                                    <th>Date & Time</th>
+                                    <th>Contact</th>
+                                    <th>Created On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.PendingRequests != null && Model.PendingRequests.Any())
+                                {
+                                    @foreach (var request in Model.PendingRequests)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="requester-info">
+                                                    <strong>@request.FullName</strong>
+                                                    <div class="house-number">House #@request.HouseNumber</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
+                                                    <span class="service-name">@request.Service?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="date-time-info">
+                                                    <div><i class="bi bi-calendar3 me-1"></i> @request.RequestDate.ToString("MMM dd, yyyy")</div>
+                                                    <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="contact-info">
+                                                    <i class="bi bi-telephone me-1"></i> @request.ContactNumber
+                                                </div>
+                                            </td>
+                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <form method="post" asp-page-handler="ApproveRequest" asp-route-id="@request.Id">
+                                                        <button type="submit" class="btn btn-sm btn-success">
+                                                            <i class="bi bi-check-lg"></i> Approve
+                                                        </button>
+                                                    </form>
+                                                    <form method="post" asp-page-handler="RejectRequest" asp-route-id="@request.Id">
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            <i class="bi bi-x-lg"></i> Reject
+                                                        </button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                            data-bs-toggle="modal" data-bs-target="#detailsModal@(request.Id)">
+                                                        <i class="bi bi-eye"></i> Details
+                                                    </button>
+                                                </div>
+
+                                                <!-- Modal for Details -->
+                                                <div class="modal fade" id="detailsModal@(request.Id)" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Service Request Details</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="request-details">
+                                                                    <div class="mb-3">
+                                                                        <div class="d-flex justify-content-center mb-3">
+                                                                            <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                                                 alt="@request.Service?.Name" class="request-detail-image">
+                                                                        </div>
+                                                                        <h5 class="service-title text-center">@request.Service?.Name</h5>
+                                                                    </div>
+
+                                                                    <div class="detail-section">
+                                                                        <h6>Requester Information</h6>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Name:</span>
+                                                                            <span class="detail-value">@request.FullName</span>
+                                                                        </div>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">House Number:</span>
+                                                                            <span class="detail-value">#@request.HouseNumber</span>
+                                                                        </div>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Contact Number:</span>
+                                                                            <span class="detail-value">@request.ContactNumber</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="detail-section">
+                                                                        <h6>Service Details</h6>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Date:</span>
+                                                                            <span class="detail-value">@request.RequestDate.ToString("MMMM dd, yyyy")</span>
+                                                                        </div>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Time:</span>
+                                                                            <span class="detail-value">@DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</span>
+                                                                        </div>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Request Date:</span>
+                                                                            <span class="detail-value">@request.CreatedDate.ToString("MMMM dd, yyyy h:mm tt")</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    @if (!string.IsNullOrEmpty(request.AdditionalDetails))
+                                                                    {
+                                                                        <div class="detail-section">
+                                                                            <h6>Additional Details</h6>
+                                                                            <div class="additional-details p-3">
+                                                                                @request.AdditionalDetails
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                <form method="post" asp-page-handler="ApproveRequest" asp-route-id="@request.Id" class="d-inline">
+                                                                    <button type="submit" class="btn btn-success">
+                                                                        <i class="bi bi-check-lg me-1"></i> Approve
+                                                                    </button>
+                                                                </form>
+                                                                <form method="post" asp-page-handler="RejectRequest" asp-route-id="@request.Id" class="d-inline">
+                                                                    <button type="submit" class="btn btn-danger">
+                                                                        <i class="bi bi-x-lg me-1"></i> Reject
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <div class="empty-state">
+                                                <i class="bi bi-hourglass display-4 text-muted"></i>
+                                                <h5 class="mt-3">No pending requests</h5>
+                                                <p class="text-muted">There are no pending service requests at the moment</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="all-requests">
+                    <div class="table-responsive">
+                        <table class="table table-hover request-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Requester</th>
+                                    <th>Service</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Created On</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.AllRequests != null && Model.AllRequests.Any())
+                                {
+                                    @foreach (var request in Model.AllRequests)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="requester-info">
+                                                    <strong>@request.FullName</strong>
+                                                    <div class="house-number">House #@request.HouseNumber</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
+                                                    <span class="service-name">@request.Service?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="date-time-info">
+                                                    <div><i class="bi bi-calendar3 me-1"></i> @request.RequestDate.ToString("MMM dd, yyyy")</div>
+                                                    <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if (request.Status == ServiceRequestStatus.Pending)
+                                                {
+                                                    <span class="status-badge pending">
+                                                        <i class="bi bi-hourglass"></i> Pending
+                                                    </span>
+                                                }
+                                                else if (request.Status == ServiceRequestStatus.Approved)
+                                                {
+                                                    <span class="status-badge approved">
+                                                        <i class="bi bi-check-circle"></i> Approved
+                                                    </span>
+                                                }
+                                                else if (request.Status == ServiceRequestStatus.Done)
+                                                {
+                                                    <span class="status-badge completed">
+                                                        <i class="bi bi-trophy"></i> Done
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="status-badge rejected">
+                                                        <i class="bi bi-x-circle"></i> Rejected
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        data-bs-toggle="modal" data-bs-target="#detailsModalAll@(request.Id)">
+                                                    <i class="bi bi-eye"></i> Details
+                                                </button>
+
+                                                <!-- Modal for Details -->
+                                                <div class="modal fade" id="detailsModalAll@(request.Id)" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Service Request Details</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="request-details">
+                                                                    <div class="mb-3">
+                                                                        <div class="d-flex justify-content-center mb-3">
+                                                                            <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                                                 alt="@request.Service?.Name" class="request-detail-image">
+                                                                        </div>
+                                                                        <h5 class="service-title text-center">@request.Service?.Name</h5>
+                                                                        <div class="status-indicator text-center mt-2">
+                                                                            @if (request.Status == ServiceRequestStatus.Pending)
+                                                                            {
+                                                                                <span class="status-badge pending">
+                                                                                    <i class="bi bi-hourglass"></i> Pending
+                                                                                </span>
+                                                                            }
+                                                                            else if (request.Status == ServiceRequestStatus.Approved)
+                                                                            {
+                                                                                <span class="status-badge approved">
+                                                                                    <i class="bi bi-check-circle"></i> Approved
+                                                                                </span>
+                                                                            }
+                                                                            else if (request.Status == ServiceRequestStatus.Done)
+                                                                            {
+                                                                                <span class="status-badge completed">
+                                                                                    <i class="bi bi-trophy"></i> Done
+                                                                                </span>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <span class="status-badge rejected">
+                                                                                    <i class="bi bi-x-circle"></i> Rejected
+                                                                                </span>
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="detail-section">
+                                                                        <h6>Requester Information</h6>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Name:</span>
+                                                                            <span class="detail-value">@request.FullName</span>
+                                                                        </div>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">House Number:</span>
+                                                                            <span class="detail-value">#@request.HouseNumber</span>
+                                                                        </div>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Contact Number:</span>
+                                                                            <span class="detail-value">@request.ContactNumber</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="detail-section">
+                                                                        <h6>Service Details</h6>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Date:</span>
+                                                                            <span class="detail-value">@request.RequestDate.ToString("MMMM dd, yyyy")</span>
+                                                                        </div>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Time:</span>
+                                                                            <span class="detail-value">@DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</span>
+                                                                        </div>
+                                                                        <div class="detail-item">
+                                                                            <span class="detail-label">Request Date:</span>
+                                                                            <span class="detail-value">@request.CreatedDate.ToString("MMMM dd, yyyy h:mm tt")</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    @if (!string.IsNullOrEmpty(request.AdditionalDetails))
+                                                                    {
+                                                                        <div class="detail-section">
+                                                                            <h6>Additional Details</h6>
+                                                                            <div class="additional-details p-3">
+                                                                                @request.AdditionalDetails
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <div class="empty-state">
+                                                <i class="bi bi-clipboard-x display-4 text-muted"></i>
+                                                <h5 class="mt-3">No service requests found</h5>
+                                                <p class="text-muted">No service requests have been submitted yet</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-light: #f8f9fa;
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+    }
+
+    /* Navbar styling */
+    .navbar {
+        background-color: var(--primary-color) !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        color: white !important;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-text {
+        background: linear-gradient(45deg, #fff, #e0e0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-nav {
+        gap: 0.5rem;
+    }
+
+        .navbar-nav .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.15);
+                transform: translateY(-1px);
+            }
+
+    .profile-menu .nav-link {
+        padding: 0.5rem !important;
+        color: white !important;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+    }
+
+        .profile-menu .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        min-width: 220px;
+        margin-top: 0.5rem;
+    }
+
+    .dropdown-header {
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+
+    .dropdown-item {
+        padding: 0.6rem 1rem;
+        color: var(--text-dark);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item i {
+            font-size: 1.1rem;
+        }
+
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler i {
+            font-size: 1.5rem;
+        }
+
+    .page-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 1.75rem;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Card and Nav Pills */
+    .card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+    }
+
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1rem 1.5rem;
+    }
+
+    .nav-pills .nav-link {
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        color: #6c757d;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+        .nav-pills .nav-link:hover {
+            background-color: rgba(78, 110, 77, 0.05);
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #4e6e4d;
+            color: white;
+            box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+        }
+
+    .nav-pills .badge {
+        font-weight: 500;
+        font-size: 0.7rem;
+    }
+
+    /* Table Styling */
+    .request-table thead th {
+        background-color: #f9fafb;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 0.85rem 1.25rem;
+    }
+
+    .request-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .request-table tbody tr:hover {
+            background-color: rgba(78, 110, 77, 0.03);
+        }
+
+    .requester-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .house-number {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .request-thumbnail {
+        width: 54px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+
+    .request-detail-image {
+        width: 150px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .request-table tr:hover .request-thumbnail {
+        transform: scale(1.05);
+    }
+
+    .service-name {
+        font-weight: 500;
+        color: #2d3748;
+    }
+
+    .date-time-info {
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .contact-info {
+        font-size: 0.9rem;
+        color: var(--text-dark);
+    }
+
+    .time-badge {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: #4e6e4d;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+        .status-badge.pending {
+            background-color: rgba(246, 173, 85, 0.15);
+            color: #ed8936;
+        }
+
+        .status-badge.approved {
+            background-color: rgba(72, 187, 120, 0.15);
+            color: #48bb78;
+        }
+
+        .status-badge.completed {
+            background-color: rgba(56, 161, 219, 0.15);
+            color: #38a1db;
+        }
+
+        .status-badge.rejected {
+            background-color: rgba(229, 62, 62, 0.15);
+            color: #e53e3e;
+        }
+
+    /* Modal Style */
+    .request-details {
+        padding: 0.5rem;
+    }
+
+    .detail-section {
+        background-color: #f9fafb;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+        .detail-section h6 {
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-bottom: 0.5rem;
+        }
+
+    .detail-item {
+        display: flex;
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: var(--text-muted);
+        width: 40%;
+    }
+
+    .detail-value {
+        color: var(--text-dark);
+        width: 60%;
+    }
+
+    .additional-details {
+        background-color: white;
+        border-radius: 6px;
+        border: 1px solid rgba(0,0,0,0.05);
+        color: var(--text-dark);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 3rem 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .empty-state i {
+            color: #cbd5e0;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h5 {
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            max-width: 300px;
+        }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+        }
+
+    .btn-success {
+        transition: all 0.3s ease;
+    }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+
+    .btn-danger {
+        transition: all 0.3s ease;
+    }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+        }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize the tabs
+        const triggerTabList = [].slice.call(document.querySelectorAll('#requestTabs a'));
+        triggerTabList.forEach(function(triggerEl) {
+            const tabTrigger = new bootstrap.Tab(triggerEl);
+            triggerEl.addEventListener('click', function(event) {
+                event.preventDefault();
+                tabTrigger.show();
+            });
+        });
+    });
+</script>

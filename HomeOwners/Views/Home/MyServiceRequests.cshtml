@@ -1,6 +1,7 @@
-﻿@model List<HomeOwners.Models.Booking>
+﻿@* HomeOwners/Views/Home/MyServiceRequests.cshtml *@
+@model List<HomeOwners.Models.ServiceRequest>
 @{
-    ViewData["Title"] = "My Bookings";
+    ViewData["Title"] = "My Service Requests";
 }
 
 <nav class="navbar navbar-expand-lg fixed-top">
@@ -27,7 +28,7 @@
                     <a class="nav-link" href="/Home/Facilities">Facilities</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/Home/Services">Services</a>
+                    <a class="nav-link active" href="/Home/Services">Services</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/Home/Annoucements">Annoucements</a>
@@ -54,8 +55,8 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" asp-controller="Home" asp-action="MyBookings">
-                                    <i class="bi bi-calendar-check"></i> My Bookings
+                                <a class="dropdown-item" asp-controller="Home" asp-action="MyServiceRequests">
+                                    <i class="bi bi-tools"></i> My Service Requests
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -97,13 +98,13 @@
 
 <div class="container mt-5 pt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title">My Bookings</h1>
+        <h1 class="page-title">My Service Requests</h1>
         <div class="d-flex gap-2">
             <a href="javascript:history.back()" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-2"></i> Back
             </a>
-            <a asp-controller="Home" asp-action="Facilities" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-2"></i> Book New Facility
+            <a asp-controller="Home" asp-action="Services" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i> Request New Service
             </a>
         </div>
     </div>
@@ -122,27 +123,27 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
-            <ul class="nav nav-pills card-header-pills" id="bookingTabs">
+            <ul class="nav nav-pills card-header-pills" id="requestTabs">
                 <li class="nav-item">
-                    <a class="nav-link active" href="#my-bookings" data-bs-toggle="tab">
-                        <i class="bi bi-person-check me-2"></i> My Bookings
+                    <a class="nav-link active" href="#my-requests" data-bs-toggle="tab">
+                        <i class="bi bi-person-check me-2"></i> My Service Requests
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#all-bookings" data-bs-toggle="tab">
-                        <i class="bi bi-calendar-event me-2"></i> All Bookings
+                    <a class="nav-link" href="#all-requests" data-bs-toggle="tab">
+                        <i class="bi bi-list-check me-2"></i> All Service Requests
                     </a>
                 </li>
             </ul>
         </div>
         <div class="card-body p-0">
             <div class="tab-content">
-                <div class="tab-pane fade show active" id="my-bookings">
+                <div class="tab-pane fade show active" id="my-requests">
                     <div class="table-responsive">
-                        <table class="table table-hover booking-table mb-0">
+                        <table class="table table-hover request-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Facility</th>
+                                    <th>Service</th>
                                     <th>Date</th>
                                     <th>Time</th>
                                     <th>Status</th>
@@ -153,40 +154,39 @@
                             <tbody>
                                 @if (Model != null && Model.Any())
                                 {
-                                    @foreach (var booking in Model)
+                                    @foreach (var request in Model)
                                     {
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
-                                                         alt="@booking.Facility?.Name" class="booking-thumbnail me-3">
-                                                    <span class="facility-name">@booking.Facility?.Name</span>
+                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
+                                                    <span class="service-name">@request.Service?.Name</span>
                                                 </div>
                                             </td>
-                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@request.RequestDate.ToString("MMM dd, yyyy")</td>
                                             <td>
                                                 <span class="time-badge">
-                                                    @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - 
-                                                    @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
+                                                    @DateTime.Today.Add(request.PreferredTime).ToString("hh:mm tt")
                                                 </span>
                                             </td>
                                             <td>
-                                                @if (booking.Status == BookingStatus.Pending)
+                                                @if (request.Status == ServiceRequestStatus.Pending)
                                                 {
                                                     <span class="status-badge pending">
                                                         <i class="bi bi-hourglass"></i> Pending
                                                     </span>
                                                 }
-                                                else if (booking.Status == BookingStatus.Approved)
+                                                else if (request.Status == ServiceRequestStatus.Approved)
                                                 {
                                                     <span class="status-badge approved">
                                                         <i class="bi bi-check-circle"></i> Approved
                                                     </span>
                                                 }
-                                                else if (booking.Status == BookingStatus.Completed)
+                                                else if (request.Status == ServiceRequestStatus.Done)
                                                 {
                                                     <span class="status-badge completed">
-                                                        <i class="bi bi-trophy"></i> Completed
+                                                        <i class="bi bi-trophy"></i> Done
                                                     </span>
                                                 }
                                                 else
@@ -196,11 +196,19 @@
                                                     </span>
                                                 }
                                             </td>
-                                            <td><span class="text-muted">@booking.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
                                             <td>
-                                                @if (booking.BookingDate > DateTime.Today && booking.Status == BookingStatus.Pending)
+                                                @if (request.Status == ServiceRequestStatus.Approved)
                                                 {
-                                                    <form asp-action="CancelBooking" asp-route-id="@booking.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                                    <form asp-controller="Home" asp-action="MarkServiceRequestAsDone" asp-route-id="@request.Id" method="post">
+                                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                                            <i class="bi bi-check-circle"></i> Mark as Done
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else if (request.Status == ServiceRequestStatus.Pending)
+                                                {
+                                                    <form asp-controller="Home" asp-action="CancelServiceRequest" asp-route-id="@request.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this service request?');">
                                                         <button type="submit" class="btn btn-sm btn-outline-danger">
                                                             <i class="bi bi-x-circle"></i> Cancel
                                                         </button>
@@ -215,11 +223,11 @@
                                     <tr>
                                         <td colspan="6" class="text-center py-5">
                                             <div class="empty-state">
-                                                <i class="bi bi-calendar-x display-4 text-muted"></i>
-                                                <h5 class="mt-3">No bookings found</h5>
-                                                <p class="text-muted mb-3">You haven't made any facility bookings yet</p>
-                                                <a asp-controller="Home" asp-action="Facilities" class="btn btn-primary">
-                                                    <i class="bi bi-plus-lg me-2"></i> Book a Facility
+                                                <i class="bi bi-tools display-4 text-muted"></i>
+                                                <h5 class="mt-3">No service requests found</h5>
+                                                <p class="text-muted mb-3">You haven't made any service requests yet</p>
+                                                <a asp-controller="Home" asp-action="Services" class="btn btn-primary">
+                                                    <i class="bi bi-plus-lg me-2"></i> Request a Service
                                                 </a>
                                             </div>
                                         </td>
@@ -230,12 +238,12 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade" id="all-bookings">
+                <div class="tab-pane fade" id="all-requests">
                     <div class="table-responsive">
-                        <table class="table table-hover booking-table mb-0">
+                        <table class="table table-hover request-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Facility</th>
+                                    <th>Service</th>
                                     <th>Date</th>
                                     <th>Time</th>
                                     <th>Status</th>
@@ -243,31 +251,39 @@
                             </thead>
                             <tbody>
                                 @{
-                                    var allBookings = ViewBag.AllBookings as List<HomeOwners.Models.Booking>;
+                                    var allRequests = ViewBag.AllServiceRequests as List<HomeOwners.Models.ServiceRequest>;
                                 }
-                                @if (allBookings != null && allBookings.Any())
+                                @if (allRequests != null && allRequests.Any())
                                 {
-                                    @foreach (var booking in allBookings.Where(b => b.Status == BookingStatus.Approved))
+                                    @foreach (var request in allRequests.Where(r => r.Status == ServiceRequestStatus.Approved || r.Status == ServiceRequestStatus.Done))
                                     {
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
-                                                         alt="@booking.Facility?.Name" class="booking-thumbnail me-3">
-                                                    <span class="facility-name">@booking.Facility?.Name</span>
+                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
+                                                    <span class="service-name">@request.Service?.Name</span>
                                                 </div>
                                             </td>
-                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>@request.RequestDate.ToString("MMM dd, yyyy")</td>
                                             <td>
                                                 <span class="time-badge">
-                                                    @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - 
-                                                    @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
+                                                    @DateTime.Today.Add(request.PreferredTime).ToString("hh:mm tt")
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="status-badge approved">
-                                                    <i class="bi bi-check-circle"></i> Reserved
-                                                </span>
+                                                @if (request.Status == ServiceRequestStatus.Approved)
+                                                {
+                                                    <span class="status-badge approved">
+                                                        <i class="bi bi-check-circle"></i> Approved
+                                                    </span>
+                                                }
+                                                else if (request.Status == ServiceRequestStatus.Done)
+                                                {
+                                                    <span class="status-badge completed">
+                                                        <i class="bi bi-trophy"></i> Done
+                                                    </span>
+                                                }
                                             </td>
                                         </tr>
                                     }
@@ -277,9 +293,9 @@
                                     <tr>
                                         <td colspan="4" class="text-center py-5">
                                             <div class="empty-state">
-                                                <i class="bi bi-calendar-x display-4 text-muted"></i>
-                                                <h5 class="mt-3">No community bookings</h5>
-                                                <p class="text-muted">There are currently no approved reservations</p>
+                                                <i class="bi bi-tools display-4 text-muted"></i>
+                                                <h5 class="mt-3">No community service requests</h5>
+                                                <p class="text-muted">There are currently no approved service requests</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -308,19 +324,6 @@
         --info-color: #17a2b8;
     }
 
-    :root {
-        --primary-color: #4e6e4d;
-        --primary-dark: #3d5a3c;
-        --primary-light: rgba(78, 110, 77, 0.1);
-        --primary-lighter: rgba(78, 110, 77, 0.05);
-        --text-light: #f8f9fa;
-        --text-dark: #333;
-        --text-muted: #6c757d;
-        --success-color: #28a745;
-        --warning-color: #ffc107;
-        --danger-color: #dc3545;
-        --info-color: #17a2b8;
-    }
     /* Navbar styling */
     .navbar {
         background-color: var(--primary-color) !important;
@@ -420,14 +423,14 @@
         .navbar-toggler i {
             font-size: 1.5rem;
         }
-    
+
     .page-title {
         font-weight: 600;
         color: var(--primary-color);
         font-size: 1.75rem;
         margin-bottom: 0;
     }
-    
+
     /* Card and Nav Pills */
     .card {
         border: none;
@@ -435,12 +438,12 @@
         overflow: hidden;
         box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
     }
-    
+
     .card-header {
         border-bottom: 1px solid rgba(0,0,0,0.05);
         padding: 1rem 1.5rem;
     }
-    
+
     .nav-pills .nav-link {
         border-radius: 8px;
         padding: 0.6rem 1.2rem;
@@ -448,19 +451,19 @@
         color: #6c757d;
         transition: all 0.3s ease;
     }
-    
-    .nav-pills .nav-link:hover {
-        background-color: rgba(78, 110, 77, 0.05);
-    }
-    
-    .nav-pills .nav-link.active {
-        background-color: #4e6e4d;
-        color: white;
-        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
-    }
-    
+
+        .nav-pills .nav-link:hover {
+            background-color: rgba(78, 110, 77, 0.05);
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: #4e6e4d;
+            color: white;
+            box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+        }
+
     /* Table Styling */
-    .booking-table thead th {
+    .request-table thead th {
         background-color: #f9fafb;
         color: #4a5568;
         font-weight: 600;
@@ -470,16 +473,16 @@
         border-bottom: 1px solid rgba(0,0,0,0.05);
         padding: 0.85rem 1.25rem;
     }
-    
-    .booking-table tbody tr {
+
+    .request-table tbody tr {
         transition: all 0.2s ease;
     }
-    
-    .booking-table tbody tr:hover {
-        background-color: rgba(78, 110, 77, 0.03);
-    }
-    
-    .booking-thumbnail {
+
+        .request-table tbody tr:hover {
+            background-color: rgba(78, 110, 77, 0.03);
+        }
+
+    .request-thumbnail {
         width: 54px;
         height: 40px;
         object-fit: cover;
@@ -487,16 +490,16 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.08);
         transition: transform 0.3s ease;
     }
-    
-    .booking-table tr:hover .booking-thumbnail {
+
+    .request-table tr:hover .request-thumbnail {
         transform: scale(1.05);
     }
-    
-    .facility-name {
+
+    .service-name {
         font-weight: 500;
         color: #2d3748;
     }
-    
+
     .time-badge {
         background-color: rgba(78, 110, 77, 0.1);
         color: #4e6e4d;
@@ -505,7 +508,7 @@
         font-size: 0.85rem;
         font-weight: 500;
     }
-    
+
     /* Status Badges */
     .status-badge {
         display: inline-flex;
@@ -516,27 +519,27 @@
         font-size: 0.85rem;
         font-weight: 500;
     }
-    
-    .status-badge.pending {
-        background-color: rgba(246, 173, 85, 0.15);
-        color: #ed8936;
-    }
-    
-    .status-badge.approved {
-        background-color: rgba(72, 187, 120, 0.15);
-        color: #48bb78;
-    }
-    
-    .status-badge.completed {
-        background-color: rgba(56, 161, 219, 0.15);
-        color: #38a1db;
-    }
-    
-    .status-badge.rejected {
-        background-color: rgba(229, 62, 62, 0.15);
-        color: #e53e3e;
-    }
-    
+
+        .status-badge.pending {
+            background-color: rgba(246, 173, 85, 0.15);
+            color: #ed8936;
+        }
+
+        .status-badge.approved {
+            background-color: rgba(72, 187, 120, 0.15);
+            color: #48bb78;
+        }
+
+        .status-badge.completed {
+            background-color: rgba(56, 161, 219, 0.15);
+            color: #38a1db;
+        }
+
+        .status-badge.rejected {
+            background-color: rgba(229, 62, 62, 0.15);
+            color: #e53e3e;
+        }
+
     /* Empty State */
     .empty-state {
         padding: 3rem 2rem;
@@ -545,61 +548,70 @@
         align-items: center;
         justify-content: center;
     }
-    
-    .empty-state i {
-        color: #cbd5e0;
-        margin-bottom: 1rem;
-    }
-    
-    .empty-state h5 {
-        color: #4a5568;
-        font-weight: 600;
-    }
-    
-    .empty-state p {
-        max-width: 300px;
-    }
-    
+
+        .empty-state i {
+            color: #cbd5e0;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h5 {
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            max-width: 300px;
+        }
+
     /* Button Styling */
     .btn-primary {
         background-color: var(--primary-color);
         border-color: var(--primary-color);
         transition: all 0.3s ease;
     }
-    
-    .btn-primary:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
-    }
-    
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+        }
+
     .btn-outline-secondary {
         color: var(--text-muted);
         border-color: #dee2e6;
         transition: all 0.3s ease;
     }
-    
-    .btn-outline-secondary:hover {
-        background-color: #f8f9fa;
-        color: var(--primary-color);
-        border-color: var(--primary-color);
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+    .btn-outline-success {
+        transition: all 0.3s ease;
     }
-    
+
+        .btn-outline-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+        }
+
     .btn-outline-danger {
         transition: all 0.3s ease;
     }
-    
-    .btn-outline-danger:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
-    }
+
+        .btn-outline-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+        }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize the tabs
-        const triggerTabList = [].slice.call(document.querySelectorAll('#bookingTabs a'));
+        const triggerTabList = [].slice.call(document.querySelectorAll('#requestTabs a'));
         triggerTabList.forEach(function(triggerEl) {
             const tabTrigger = new bootstrap.Tab(triggerEl);
             triggerEl.addEventListener('click', function(event) {

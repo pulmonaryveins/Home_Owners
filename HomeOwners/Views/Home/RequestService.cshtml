@@ -1,0 +1,533 @@
+﻿@* HomeOwners/Views/Home/RequestService.cshtml *@
+@model HomeOwners.ViewModels.ServiceRequestViewModel
+@{
+    ViewData["Title"] = "Request Service";
+}
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">Neighborly</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Facilities">Facilities</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Home/Services">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Annoucements">Annoucements</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Profile Menu -->
+            <div class="nav-items-right">
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-header">@User.Identity.Name</li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Home" asp-action="Favorites">
+                                    <i class="bi bi-heart"></i> Saved Properties
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 pt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">Request Service</h1>
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Services
+                </a>
+            </div>
+
+            @if (TempData["StatusMessage"] != null)
+            {
+                var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+                <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                        <span>@TempData["StatusMessage"]</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="card shadow service-request-card">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Service Summary Sidebar -->
+                        <div class="col-md-4 request-sidebar">
+                            <div class="p-4 h-100 d-flex flex-column">
+                                <h5 class="sidebar-title">Service Details</h5>
+
+                                <div class="service-image-container mb-3">
+                                    <img src="@(string.IsNullOrEmpty(Model.ServiceImageUrl) ? "/images/placeholder.jpg" : Model.ServiceImageUrl)"
+                                         alt="@Model.ServiceName" class="service-image">
+                                </div>
+
+                                <h5 class="service-title">@Model.ServiceName</h5>
+
+                                @if (Model.AvailableFrom.HasValue && Model.AvailableTo.HasValue)
+                                {
+                                    <div class="availability-time mb-3">
+                                        <i class="bi bi-clock me-2"></i>
+                                        <span>
+                                            @DateTime.Today.Add(Model.AvailableFrom.Value).ToString("h:mm tt") -
+                                            @DateTime.Today.Add(Model.AvailableTo.Value).ToString("h:mm tt")
+                                        </span>
+                                    </div>
+                                }
+
+                                <div class="info-box mt-auto">
+                                    <h6><i class="bi bi-info-circle me-2"></i>Request Information</h6>
+                                    <p class="mb-0 text-muted">
+                                        Your service request will be reviewed by the administrator.
+                                        You will receive a confirmation once approved.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Request Form -->
+                        <div class="col-md-8">
+                            <div class="p-4">
+                                <h4 class="form-title">Service Request Form</h4>
+
+                                <form asp-controller="Home" asp-action="RequestService" method="post">
+                                    <input type="hidden" asp-for="ServiceId" />
+                                    <input type="hidden" asp-for="UserId" />
+                                    <input type="hidden" asp-for="ServiceName" />
+                                    <input type="hidden" asp-for="ServiceImageUrl" />
+
+                                    <div class="form-section">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-person-badge me-2"></i>Personal Information
+                                        </h5>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label asp-for="FullName" class="form-label">Full Name</label>
+                                                <input asp-for="FullName" class="form-control" placeholder="Enter your full name">
+                                                <span asp-validation-for="FullName" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="ContactNumber" class="form-label">Contact Number</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                                    <input asp-for="ContactNumber" class="form-control" placeholder="Enter your contact number">
+                                                </div>
+                                                <span asp-validation-for="ContactNumber" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label asp-for="HouseNumber" class="form-label">House Number</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-house-door"></i></span>
+                                                    <input asp-for="HouseNumber" class="form-control" placeholder="Enter your house number">
+                                                </div>
+                                                <span asp-validation-for="HouseNumber" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h5 class="form-section-title">
+                                            <i class="bi bi-calendar-event me-2"></i>Service Details
+                                        </h5>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label asp-for="RequestDate" class="form-label">Preferred Date</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                                    <input asp-for="RequestDate" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                                                </div>
+                                                <span asp-validation-for="RequestDate" class="text-danger"></span>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label asp-for="PreferredTime" class="form-label">Preferred Time</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                                                    <input asp-for="PreferredTime" class="form-control" type="time">
+                                                </div>
+                                                <span asp-validation-for="PreferredTime" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-12">
+                                                <label asp-for="AdditionalDetails" class="form-label">Additional Details</label>
+                                                <textarea asp-for="AdditionalDetails" class="form-control" rows="3" placeholder="Please provide more details about your service request"></textarea>
+                                                <span asp-validation-for="AdditionalDetails" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                        <a asp-controller="Home" asp-action="Services" class="btn btn-outline-secondary">Cancel</a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-send me-2"></i>Submit Request
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+    }
+
+    /* Navbar styling */
+    .navbar {
+        background-color: var(--primary-color) !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-weight: 700;
+        color: white !important;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-text {
+        background: linear-gradient(45deg, #fff, #e0e0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-nav {
+        gap: 0.5rem;
+    }
+
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.15);
+                transform: translateY(-1px);
+            }
+
+    .profile-menu .nav-link {
+        padding: 0.5rem !important;
+        color: white !important;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+    }
+
+        .profile-menu .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+    .dropdown-menu {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        min-width: 220px;
+        margin-top: 0.5rem;
+    }
+
+    .dropdown-header {
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+
+    .dropdown-item {
+        padding: 0.6rem 1rem;
+        color: var(--text-dark);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item i {
+            font-size: 1.1rem;
+        }
+
+    .navbar-toggler {
+        border: none;
+        padding: 0.5rem;
+    }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler i {
+            font-size: 1.5rem;
+        }
+
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.8rem;
+        margin-bottom: 0;
+    }
+
+    .service-request-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* Service Sidebar */
+    .request-sidebar {
+        background-color: var(--primary-light);
+        border-right: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .sidebar-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .service-image-container {
+        width: 100%;
+        height: 140px;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+
+    .service-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .service-image:hover {
+        transform: scale(1.05);
+    }
+
+    .service-title {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin: 1rem 0 0.5rem;
+    }
+
+    .availability-time {
+        display: flex;
+        align-items: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        padding: 0.5rem 0;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .info-box {
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .info-box h6 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .info-box p {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
+    /* Form Styling */
+    .form-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section-title {
+        color: var(--primary-dark);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label {
+        color: var(--text-dark);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        padding: 0.6rem 0.75rem;
+        border-color: rgba(0,0,0,0.1);
+    }
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.15);
+        border-color: var(--primary-color);
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: rgba(0,0,0,0.1);
+        color: var(--text-muted);
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+        padding: 0.6rem 1.2rem;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #ced4da;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date for request date
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('RequestDate').setAttribute('min', today);
+
+            // Add focus styles to the form controls
+            const formControls = document.querySelectorAll('.form-control');
+            formControls.forEach(control => {
+                control.addEventListener('focus', function() {
+                    this.closest('.form-group')?.classList.add('focused');
+                });
+                control.addEventListener('blur', function() {
+                    this.closest('.form-group')?.classList.remove('focused');
+                });
+            });
+        });
+    </script>
+}

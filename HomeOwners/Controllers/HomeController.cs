@@ -17,12 +17,13 @@ public class HomeController : Controller
     private readonly EventService _eventService;
     private readonly FacilityService _facilityService;
     private readonly BookingService _bookingService;
-    private readonly ServiceService _serviceService; 
+    private readonly ServiceService _serviceService;
+    private readonly ServiceRequestService _serviceRequestService;
 
 
 
 
-    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService)
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService, ServiceRequestService serviceRequestService)
     {
         _logger = logger;
         _announcementService = announcementService;
@@ -30,6 +31,7 @@ public class HomeController : Controller
         _facilityService = facilityService;
         _bookingService = bookingService;
         _serviceService = serviceService;
+        _serviceRequestService = serviceRequestService;
     }
 
     public IActionResult Index()
@@ -168,8 +170,109 @@ public class HomeController : Controller
             return NotFound();
         }
 
-        // This is a placeholder. You'll implement the actual service request form later
-        return View(service);
+        var model = new ServiceRequestViewModel
+        {
+            ServiceId = service.Id,
+            ServiceName = service.Name,
+            ServiceImageUrl = service.ImageUrl,
+            AvailableFrom = service.AvailableFrom,
+            AvailableTo = service.AvailableTo,
+            RequestDate = DateTime.Today,
+            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RequestService(ServiceRequestViewModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            // Convert the view model to a service request entity
+            var serviceRequest = new ServiceRequest
+            {
+                ServiceId = model.ServiceId,
+                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                FullName = model.FullName,
+                ContactNumber = model.ContactNumber,
+                HouseNumber = model.HouseNumber,
+                RequestDate = model.RequestDate,
+                PreferredTime = model.PreferredTime,
+                AdditionalDetails = model.AdditionalDetails,
+                CreatedDate = DateTime.Now,
+                Status = ServiceRequestStatus.Pending
+            };
+
+            await _serviceRequestService.CreateServiceRequestAsync(serviceRequest);
+
+            TempData["StatusMessage"] = "Your service request has been submitted and is pending approval.";
+            TempData["StatusType"] = "Success";
+
+            return RedirectToAction("MyServiceRequests");
+        }
+
+        // If we got this far, something failed, redisplay form
+        var service = await _serviceService.GetServiceByIdAsync(model.ServiceId);
+        model.ServiceName = service?.Name;
+        model.ServiceImageUrl = service?.ImageUrl;
+
+        return View(model);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> MyServiceRequests()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var serviceRequests = await _serviceRequestService.GetServiceRequestsByUserIdAsync(userId);
+        var allServiceRequests = await _serviceRequestService.GetAllServiceRequestsAsync();
+
+        ViewBag.AllServiceRequests = allServiceRequests;
+        return View(serviceRequests);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MarkServiceRequestAsDone(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var serviceRequest = await _serviceRequestService.GetServiceRequestByIdAsync(id);
+
+        if (serviceRequest == null || serviceRequest.UserId != userId)
+        {
+            return Unauthorized();
+        }
+
+        await _serviceRequestService.UpdateServiceRequestStatusAsync(id, ServiceRequestStatus.Done);
+
+        TempData["StatusMessage"] = "Service request has been marked as done.";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction("MyServiceRequests");
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CancelServiceRequest(int id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var serviceRequest = await _serviceRequestService.GetServiceRequestByIdAsync(id);
+
+        if (serviceRequest == null || serviceRequest.UserId != userId)
+        {
+            return Unauthorized();
+        }
+
+        await _serviceRequestService.DeleteServiceRequestAsync(id);
+
+        TempData["StatusMessage"] = "Service request has been cancelled.";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction("MyServiceRequests");
     }
 
     [RequireAuthentication]

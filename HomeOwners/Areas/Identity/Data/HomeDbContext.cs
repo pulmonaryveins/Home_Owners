@@ -30,7 +30,7 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Service> Services { get; set; }
-
+        public DbSet<ServiceRequest> ServiceRequests { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

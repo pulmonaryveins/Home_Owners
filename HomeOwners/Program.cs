@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using HomeOwners.Services;
 using HomeOwners.Infrastructure;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using HomeOwners.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("HomeDbContextConnection") ?? throw new InvalidOperationException("Connection string 'HomeDbContextConnection' not found.");
@@ -33,6 +34,7 @@ builder.Services.AddScoped<AnnouncementService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<FacilityService>();
 builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<ServiceService>();
 
 builder.Services.AddControllers(options =>
 {

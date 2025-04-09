@@ -1,0 +1,237 @@
+﻿@page
+@model HomeOwners.Areas.Admin.Pages.CreateServiceModel
+@{
+    ViewData["Title"] = "Create Service";
+}
+
+<div class="container mt-5 pt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            @if (TempData["ErrorMsg"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Error:</strong> @TempData["ErrorMsg"]
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">Create New Service</h1>
+                <a asp-page="./Services" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
+                </a>
+            </div>
+
+            <div class="card shadow-sm service-card">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <!-- Form Instructions Sidebar -->
+                        <div class="col-lg-4 service-sidebar">
+                            <div class="p-4 h-100 d-flex flex-column">
+                                <h5 class="sidebar-title">
+                                    <i class="bi bi-info-circle me-2"></i>Service Creation
+                                </h5>
+
+                                <div class="text-center mt-3 mb-4">
+                                    <img id="imagePreview" src="/images/placeholder.jpg"
+                                         class="img-thumbnail service-image" alt="Preview" />
+                                </div>
+
+                                <div class="info-box mt-auto">
+                                    <h6><i class="bi bi-lightbulb me-2"></i>Tips</h6>
+                                    <p class="mb-2 text-muted">
+                                        Upload a high-quality image to showcase your service.
+                                    </p>
+                                    <p class="mb-2 text-muted">
+                                        Provide a detailed description to help users understand the service.
+                                    </p>
+                                    <p class="mb-0 text-muted">
+                                        Set reasonable availability hours to maximize service requests.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Service Creation Form -->
+                        <div class="col-lg-8">
+                            <div class="p-4">
+                                <h4 class="form-title">Service Details</h4>
+
+                                <form method="post" enctype="multipart/form-data">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                                    <div class="form-section">
+                                        <div class="mb-3">
+                                            <label asp-for="Service.Name" class="form-label">Service Name</label>
+                                            <input asp-for="Service.Name" class="form-control" required />
+                                            <span asp-validation-for="Service.Name" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label asp-for="Service.Description" class="form-label">Description</label>
+                                            <textarea asp-for="Service.Description" class="form-control" rows="4" required></textarea>
+                                            <span asp-validation-for="Service.Description" class="text-danger"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h5 class="section-title">Availability</h5>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label asp-for="Service.AvailableFrom" class="form-label">Available From</label>
+                                                <input asp-for="Service.AvailableFrom" class="form-control" type="time" />
+                                                <span asp-validation-for="Service.AvailableFrom" class="text-danger"></span>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label asp-for="Service.AvailableTo" class="form-label">Available To</label>
+                                                <input asp-for="Service.AvailableTo" class="form-control" type="time" />
+                                                <span asp-validation-for="Service.AvailableTo" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h5 class="section-title">Image</h5>
+
+                                        <div class="mb-3">
+                                            <label for="ImageFile" class="form-label">Upload Image</label>
+                                            <input id="ImageFile" name="ImageFile" type="file" class="form-control"
+                                                   accept=".jpg,.jpeg,.png" onchange="previewImage(this);" />
+                                            <div class="form-text">Recommended image size: 800x600 pixels (JPG, JPEG, PNG)</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input asp-for="Service.IsActive" class="form-check-input" type="checkbox" checked />
+                                                <label asp-for="Service.IsActive" class="form-check-label">Active</label>
+                                                <span asp-validation-for="Service.IsActive" class="text-danger"></span>
+                                            </div>
+                                            <div class="form-text">Inactive services won't be visible to users</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-buttons">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-plus-circle me-2"></i>Create Service
+                                        </button>
+                                        <a asp-page="./Services" class="btn btn-outline-secondary">
+                                            Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#imagePreview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
+
+<style>
+    .page-title {
+        color: #4e6e4d;
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+
+    .service-card {
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+    }
+
+    .service-sidebar {
+        background-color: #f8f9fa;
+    }
+
+    .sidebar-title {
+        color: #4e6e4d;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .service-image {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .info-box {
+        background-color: white;
+        border-radius: 8px;
+        padding: 1rem;
+        border-left: 4px solid #4e6e4d;
+    }
+
+    .info-box h6 {
+        color: #4e6e4d;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .form-title {
+        color: #4e6e4d;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .form-section:last-child {
+        margin-bottom: 1.5rem;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 1rem;
+    }
+
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-primary {
+        background-color: #4e6e4d;
+        border-color: #4e6e4d;
+    }
+
+    .btn-primary:hover {
+        background-color: #3d5a3c;
+        border-color: #3d5a3c;
+    }
+</style>

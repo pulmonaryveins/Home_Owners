@@ -29,6 +29,7 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<Service> Services { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

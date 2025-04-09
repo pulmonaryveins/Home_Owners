@@ -17,16 +17,19 @@ public class HomeController : Controller
     private readonly EventService _eventService;
     private readonly FacilityService _facilityService;
     private readonly BookingService _bookingService;
+    private readonly ServiceService _serviceService; 
 
 
 
-    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService)
+
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService)
     {
         _logger = logger;
         _announcementService = announcementService;
         _eventService = eventService;
         _facilityService = facilityService;
         _bookingService = bookingService;
+        _serviceService = serviceService;
     }
 
     public IActionResult Index()
@@ -149,9 +152,24 @@ public class HomeController : Controller
     }
 
     [RequireAuthentication]
-    public IActionResult Services()
+    public async Task<IActionResult> Services()
     {
-        return View();
+        var services = await _serviceService.GetActiveServicesAsync(); // Fetch active services
+        return View(services);
+    }
+
+    // Add this method to handle service requests
+    [Authorize]
+    public async Task<IActionResult> RequestService(int id)
+    {
+        var service = await _serviceService.GetServiceByIdAsync(id);
+        if (service == null)
+        {
+            return NotFound();
+        }
+
+        // This is a placeholder. You'll implement the actual service request form later
+        return View(service);
     }
 
     [RequireAuthentication]

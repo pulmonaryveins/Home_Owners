@@ -496,9 +496,10 @@
                                         <td>
                                             @if (booking.Status == BookingStatus.Approved)
                                             {
-                                                <form method="post" asp-page-handler="MarkComplete" asp-route-id="@booking.Id">
-                                                    <button type="submit" class="btn btn-sm btn-outline-success" data-bs-toggle="tooltip" title="Mark as Completed">
-                                                        <i class="bi bi-check-circle"></i> Mark Complete
+                                                <form method="post" class="d-inline">
+                                                    <button type="submit" asp-page-handler="MarkComplete" asp-route-id="@booking.Id"
+                                                            class="btn btn-sm btn-success" onclick="return confirm('Mark this booking as completed?')">
+                                                        <i class="bi bi-check-circle me-1"></i> Mark Complete
                                                     </button>
                                                 </form>
                                             }

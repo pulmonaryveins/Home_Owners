@@ -148,6 +148,28 @@
                                         </span>
                                     </div>
                                 }
+
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="price-summary-box">
+                                            <h5 class="price-summary-title">Price Summary</h5>
+                                            <div class="price-detail">
+                                                <span>Rate:</span>
+                                                <span>₱@Model.PricePerHour.ToString("N2") per hour</span>
+                                            </div>
+                                            <div class="price-detail" id="hoursContainer">
+                                                <span>Duration:</span>
+                                                <span id="totalHours">0 hours</span>
+                                            </div>
+                                            <div class="price-detail total">
+                                                <span>Total Price:</span>
+                                                <span id="totalPrice">₱0.00</span>
+                                            </div>
+                                            <input type="hidden" asp-for="TotalHours" id="totalHoursInput" />
+                                            <input type="hidden" asp-for="TotalPrice" id="totalPriceInput" />
+                                        </div>
+                                    </div>
+                                </div>
                                 
                                 <div class="info-box mt-auto">
                                     <h6><i class="bi bi-info-circle me-2"></i>Booking Information</h6>
@@ -561,7 +583,7 @@
             // Set minimum date for booking date
             let today = new Date().toISOString().split('T')[0];
             document.getElementById('BookingDate').setAttribute('min', today);
-            
+
             // Add focus styles to the form controls
             const formControls = document.querySelectorAll('.form-control');
             formControls.forEach(control => {
@@ -572,6 +594,51 @@
                     this.closest('.form-group')?.classList.remove('focused');
                 });
             });
+
+                    // Price calculation function
+                     function calculatePrice() {
+                        const startTime = document.getElementById('StartTime').value;
+                        const endTime = document.getElementById('EndTime').value;
+                        const pricePerHour = @Model.PricePerHour;
+
+                        if (startTime && endTime) {
+                            // Convert time strings to Date objects for calculation
+                            const startDate = new Date(`2000-01-01T${startTime}:00`);
+                            const endDate = new Date(`2000-01-01T${endTime}:00`);
+
+                            // Handle cases where end time is on the next day
+                            if (endDate < startDate) {
+                                endDate.setDate(endDate.getDate() + 1);
+                            }
+
+                            // Calculate difference in hours
+                            const diffMs = endDate - startDate;
+                            const diffHours = diffMs / (1000 * 60 * 60);
+
+                            // Calculate total price
+                            const totalPrice = diffHours * pricePerHour;
+
+                            // Update the display
+                            document.getElementById('totalHours').textContent = `${diffHours.toFixed(1)} hours`;
+                            document.getElementById('totalPrice').textContent = `₱${totalPrice.toFixed(2)}`;
+
+                            // Update hidden inputs for form submission
+                            document.getElementById('totalHoursInput').value = diffHours.toFixed(1);
+                            document.getElementById('totalPriceInput').value = totalPrice.toFixed(2);
+                        } else {
+                            document.getElementById('totalHours').textContent = '0 hours';
+                            document.getElementById('totalPrice').textContent = '₱0.00';
+                            document.getElementById('totalHoursInput').value = '0';
+                            document.getElementById('totalPriceInput').value = '0';
+                        }
+                    }
+
+            // Add event listeners to time inputs
+            document.getElementById('StartTime').addEventListener('change', calculatePrice);
+            document.getElementById('EndTime').addEventListener('change', calculatePrice);
+
+            // Initial calculation on page load
+            calculatePrice();
         });
     </script>
 }

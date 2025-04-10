@@ -111,7 +111,7 @@ namespace HomeOwners.Areas.Admin.Pages
             }
 
             // Fetch all bookings first to apply filtering and sorting
-            var allBookingsFromDb = await _bookingService.GetAllBookingsAsync();
+            var allBookingsFromDb = (await _bookingService.GetAllBookingsAsync()).ToList();
             var pendingBookingsFromDb = allBookingsFromDb.Where(b => b.Status == BookingStatus.Pending).ToList();
 
             // Apply search filtering to pending bookings

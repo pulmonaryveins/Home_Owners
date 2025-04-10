@@ -1,0 +1,155 @@
+﻿@model HomeOwners.Models.Payment
+@{
+    ViewData["Title"] = "Payment Receipt";
+}
+
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">Payment Receipt</h1>
+                <div>
+                    <button id="printReceiptBtn" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-printer me-2"></i>Print Receipt
+                    </button>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="card shadow" id="receiptCard">
+                <div class="card-body receipt-content p-5">
+                    <div class="receipt-header text-center mb-4">
+                        <h2 class="mb-0">Neighborly Community</h2>
+                        <p class="text-muted mb-0">Facility Booking Receipt</p>
+                    </div>
+
+                    <div class="receipt-info">
+                        <div class="row mb-4 border-bottom pb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Receipt Number:</strong></p>
+                                <h5 class="receipt-number">@Model.ReceiptNumber</h5>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="mb-1"><strong>Payment Date:</strong></p>
+                                <h5>@Model.PaymentDate.ToString("MMMM dd, yyyy h:mm tt")</h5>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="receipt-section-title">Booking Details</h5>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td width="40%"><strong>Facility:</strong></td>
+                                        <td>@Model.Booking.Facility.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Booking Date:</strong></td>
+                                        <td>@Model.Booking.BookingDate.ToString("MMMM dd, yyyy")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Booking Time:</strong></td>
+                                        <td>
+                                            @DateTime.Today.Add(Model.Booking.StartTime).ToString("h:mm tt") -
+                                            @DateTime.Today.Add(Model.Booking.EndTime).ToString("h:mm tt")
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Duration:</strong></td>
+                                        <td>@((Model.Booking.EndTime - Model.Booking.StartTime).TotalHours.ToString("0.0")) hours</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="receipt-section-title">Payment Details</h5>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td width="40%"><strong>Amount Paid:</strong></td>
+                                        <td>₱@Model.AmountPaid.ToString("N2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Payment Method:</strong></td>
+                                        <td>@Model.PaymentMethod.ToString()</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Transaction ID:</strong></td>
+                                        <td>@Model.TransactionId</td>
+                                    </tr>
+                                    @if (!string.IsNullOrEmpty(Model.Notes))
+                                    {
+                                        <tr>
+                                            <td><strong>Notes:</strong></td>
+                                            <td>@Model.Notes</td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="receipt-footer text-center mt-5 pt-4 border-top">
+                            <p class="mb-1">Thank you for your payment!</p>
+                            <p class="text-muted mb-0">For any queries regarding this receipt, please contact the administration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .receipt-content {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .receipt-number {
+        font-family: monospace;
+        font-weight: 700;
+    }
+
+    .receipt-section-title {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    body {
+        padding: 0;
+        margin: 0;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    .card {
+        border: none;
+        box-shadow: none !important;
+    }
+
+    .page-title {
+        text-align: center;
+    }
+
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Print receipt functionality
+            document.getElementById('printReceiptBtn').addEventListener('click', function() {
+                window.print();
+            });
+        });
+    </script>
+}

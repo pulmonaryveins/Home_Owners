@@ -1,0 +1,339 @@
+﻿@model HomeOwners.ViewModels.BillingViewModel
+@{
+    ViewData["Title"] = "Billing & Payments";
+}
+
+<div class="container mt-5 pt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">Billing & Payments</h1>
+            </div>
+
+            @if (TempData["StatusMessage"] != null)
+            {
+                var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+                <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                        <span>@TempData["StatusMessage"]</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-4" id="billingTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="unpaid-tab" data-bs-toggle="tab" data-bs-target="#unpaid-content"
+                            type="button" role="tab" aria-controls="unpaid-content" aria-selected="true">
+                        <i class="bi bi-credit-card me-2"></i>Unpaid Bills
+                        @if (Model.UnpaidBookings.Count > 0)
+                        {
+                            <span class="badge bg-danger ms-2">@Model.UnpaidBookings.Count</span>
+                        }
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-content"
+                            type="button" role="tab" aria-controls="history-content" aria-selected="false">
+                        <i class="bi bi-clock-history me-2"></i>Payment History
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="billingTabsContent">
+                <!-- Unpaid Bills Tab -->
+                <div class="tab-pane fade show active" id="unpaid-content" role="tabpanel" aria-labelledby="unpaid-tab">
+                    <div class="card shadow">
+                        <div class="card-body p-0">
+                            @if (Model.UnpaidBookings.Count > 0)
+                            {
+                                <div class="payment-summary">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h4>Payment Summary</h4>
+                                            <p class="text-muted">These are your completed facility bookings that require payment.</p>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="total-due">
+                                                <span class="total-label">Total Amount Due:</span>
+                                                <span class="total-amount">₱@Model.TotalUnpaidAmount.ToString("N2")</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Facility</th>
+                                                <th>Booking Date</th>
+                                                <th>Duration</th>
+                                                <th>Amount</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var booking in Model.UnpaidBookings)
+                                            {
+                                                var duration = (booking.EndTime - booking.StartTime).TotalHours;
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
+                                                                 alt="@booking.Facility?.Name" class="billing-thumbnail me-3">
+                                                            <span class="facility-name">@booking.Facility?.Name</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                                    <td>
+                                                        <span class="time-badge">
+                                                            @DateTime.Today.Add(booking.StartTime).ToString("h:mm tt") -
+                                                            @DateTime.Today.Add(booking.EndTime).ToString("h:mm tt")
+                                                            <small class="ms-1">(@duration.ToString("0.0") hrs)</small>
+                                                        </span>
+                                                    </td>
+                                                    <td><span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span></td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-sm btn-primary pay-btn"
+                                                                data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                                data-booking-id="@booking.Id"
+                                                                data-facility-name="@booking.Facility?.Name"
+                                                                data-amount="@booking.TotalPrice.ToString("N2")">
+                                                            <i class="bi bi-credit-card me-1"></i> Pay Now
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="empty-state p-5 text-center">
+                                    <i class="bi bi-check-circle text-success empty-icon"></i>
+                                    <h4 class="mt-3">No Outstanding Bills</h4>
+                                    <p class="text-muted">You don't have any unpaid facility bookings at the moment.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment History Tab -->
+                <div class="tab-pane fade" id="history-content" role="tabpanel" aria-labelledby="history-tab">
+                    <div class="card shadow">
+                        <div class="card-body p-0">
+                            @if (Model.Payments.Count > 0)
+                            {
+                                <div class="payment-history-header">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h4>Payment History</h4>
+                                            <p class="text-muted">A record of all your past payments for facility bookings.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Receipt No.</th>
+                                                <th>Facility</th>
+                                                <th>Payment Date</th>
+                                                <th>Amount Paid</th>
+                                                <th>Method</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var payment in Model.Payments)
+                                            {
+                                                <tr>
+                                                    <td><span class="receipt-number">@payment.ReceiptNumber</span></td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="@(string.IsNullOrEmpty(payment.Booking?.Facility?.ImageUrl) ? "/images/placeholder.jpg" : payment.Booking.Facility.ImageUrl)"
+                                                                 alt="@payment.Booking?.Facility?.Name" class="billing-thumbnail me-3">
+                                                            <span class="facility-name">@payment.Booking?.Facility?.Name</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>@payment.PaymentDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                                                    <td><span class="price-badge paid">₱@payment.AmountPaid.ToString("N2")</span></td>
+                                                    <td>@payment.PaymentMethod</td>
+                                                    <td>
+                                                        <a asp-controller="Home" asp-action="PaymentReceipt" asp-route-id="@payment.Id" class="btn btn-sm btn-outline-primary">
+                                                            <i class="bi bi-receipt me-1"></i> View Receipt
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="empty-state p-5 text-center">
+                                    <i class="bi bi-receipt text-muted empty-icon"></i>
+                                    <h4 class="mt-3">No Payment History</h4>
+                                    <p class="text-muted">You haven't made any payments for facility bookings yet.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Payment for <span id="modalFacilityName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Home" asp-action="ProcessPayment" method="post" id="paymentForm">
+                    <input type="hidden" name="bookingId" id="bookingIdInput" />
+
+                    <div class="payment-amount-display mb-4 text-center">
+                        <p class="mb-1">Total Amount Due</p>
+                        <h3 class="amount-display" id="modalAmount"></h3>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select name="paymentMethod" class="form-select" required>
+                            <option value="" selected disabled>Select payment method</option>
+                            <option value="Cash">Cash</option>
+                            <option value="CreditCard">Credit Card</option>
+                            <option value="DebitCard">Debit Card</option>
+                            <option value="BankTransfer">Bank Transfer</option>
+                            <option value="MobilePayment">Mobile Payment</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notes (Optional)</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="Add any additional information about this payment"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="paymentForm" class="btn btn-primary">
+                    <i class="bi bi-credit-card me-2"></i>Confirm Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Add these styles to your page */
+    .empty-icon {
+        font-size: 3rem;
+    }
+
+    .payment-summary, .payment-history-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .billing-thumbnail {
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        object-fit: cover;
+    }
+
+    .total-due {
+        background-color: var(--primary-light);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .total-label {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .total-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .time-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        background-color: rgba(0,0,0,0.05);
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    .price-badge {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--danger-color);
+    }
+
+        .price-badge.paid {
+            color: var(--success-color);
+        }
+
+    .receipt-number {
+        font-family: monospace;
+        background-color: rgba(0,0,0,0.05);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    .payment-amount-display {
+        padding: 1.5rem;
+        background-color: var(--primary-light);
+        border-radius: 8px;
+    }
+
+    .amount-display {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize payment modal
+            const paymentModal = document.getElementById('paymentModal');
+            if (paymentModal) {
+                paymentModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const bookingId = button.getAttribute('data-booking-id');
+                    const facilityName = button.getAttribute('data-facility-name');
+                    const amount = button.getAttribute('data-amount');
+
+                    document.getElementById('modalFacilityName').textContent = facilityName;
+                    document.getElementById('modalAmount').textContent = '₱' + amount;
+                    document.getElementById('bookingIdInput').value = bookingId;
+                });
+            }
+        });
+    </script>
+}

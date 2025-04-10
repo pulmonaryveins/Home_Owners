@@ -19,11 +19,12 @@ public class HomeController : Controller
     private readonly BookingService _bookingService;
     private readonly ServiceService _serviceService;
     private readonly ServiceRequestService _serviceRequestService;
+    private readonly PaymentService _paymentService;
 
 
 
 
-    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService, ServiceRequestService serviceRequestService)
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService, ServiceRequestService serviceRequestService, PaymentService paymentService)
     {
         _logger = logger;
         _announcementService = announcementService;
@@ -32,6 +33,7 @@ public class HomeController : Controller
         _bookingService = bookingService;
         _serviceService = serviceService;
         _serviceRequestService = serviceRequestService;
+        _paymentService = paymentService;
     }
 
     public IActionResult Index()
@@ -103,7 +105,7 @@ public class HomeController : Controller
     {
         if (ModelState.IsValid)
         {
-            // Convert the view model to a booking entity
+            // Create a new booking entity
             var booking = new Booking
             {
                 FacilityId = model.FacilityId,
@@ -114,6 +116,8 @@ public class HomeController : Controller
                 BookingDate = model.BookingDate,
                 StartTime = model.StartTime,
                 EndTime = model.EndTime,
+                TotalHours = model.TotalHours,  // Ensure this property is set
+                TotalPrice = model.TotalPrice,  // Ensure this property is set
                 SpecialRequests = model.SpecialRequests,
                 CreatedDate = DateTime.Now,
                 Status = BookingStatus.Pending
@@ -131,6 +135,7 @@ public class HomeController : Controller
         var facility = await _facilityService.GetFacilityByIdAsync(model.FacilityId);
         model.FacilityName = facility?.Name;
         model.PricePerHour = facility?.PricePerHour ?? 0;
+        ViewBag.FacilityImage = facility?.ImageUrl;
 
         return View(model);
     }
@@ -280,6 +285,90 @@ public class HomeController : Controller
     {
         return View();
     }
+
+    [Authorize]
+    public async Task<IActionResult> Billing()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var unpaidBookings = await _paymentService.GetCompletedUnpaidBookingsAsync(userId);
+        var userPayments = await _paymentService.GetPaymentsByUserIdAsync(userId);
+
+        var model = new BillingViewModel
+        {
+            UnpaidBookings = unpaidBookings,
+            Payments = userPayments,
+            TotalUnpaidAmount = unpaidBookings.Sum(b => b.TotalPrice)
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ProcessPayment(int bookingId, PaymentMethod paymentMethod, string notes)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var booking = await _bookingService.GetBookingByIdAsync(bookingId);
+
+        if (booking == null || booking.UserId != userId)
+        {
+            return Unauthorized();
+        }
+
+        // Generate receipt number
+        var receiptNumber = await _paymentService.GenerateReceiptNumberAsync();
+
+        // Create payment record
+        var payment = new Payment
+        {
+            BookingId = bookingId,
+            UserId = userId,
+            AmountPaid = booking.TotalPrice,
+            PaymentDate = DateTime.Now,
+            PaymentMethod = paymentMethod,
+            TransactionId = $"TXN-{DateTime.Now.Ticks}",
+            ReceiptNumber = receiptNumber,
+            Notes = notes
+        };
+
+        await _paymentService.CreatePaymentAsync(payment);
+
+        TempData["StatusMessage"] = "Payment processed successfully. A receipt has been generated.";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction("PaymentReceipt", new { id = payment.Id });
+    }
+
+
+    [Authorize]
+    public async Task<IActionResult> PaymentReceipt(int id)
+    {
+        var payment = await _paymentService.GetPaymentByIdAsync(id);
+        if (payment == null)
+        {
+            return NotFound();
+        }
+
+        // Verify that the current user is authorized to view this receipt
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (payment.UserId != userId && !User.IsInRole("Admin"))
+        {
+            return Unauthorized();
+        }
+
+        return View(payment);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> PaymentHistory()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var payments = await _paymentService.GetPaymentsByUserIdAsync(userId);
+
+        return View(payments);
+    }
+
 
     public IActionResult Notifications()
     {

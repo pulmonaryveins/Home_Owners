@@ -143,10 +143,10 @@
                             <thead>
                                 <tr>
                                     <th>Facility</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
+                                    <th>Booking Date</th>
+                                    <th>Duration</th>
                                     <th>Status</th>
-                                    <th>Created On</th>
+                                    <th>Ammount Due</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -166,10 +166,12 @@
                                             <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
                                             <td>
                                                 <span class="time-badge">
-                                                    @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - 
+                                                    @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") -
                                                     @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
+                                                    <small class="ms-1">(@booking.TotalHours.ToString("0.0") hrs)</small>
                                                 </span>
                                             </td>
+
                                             <td>
                                                 @if (booking.Status == BookingStatus.Pending)
                                                 {
@@ -196,7 +198,11 @@
                                                     </span>
                                                 }
                                             </td>
-                                            <td><span class="text-muted">@booking.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+
+                                            <td>
+                                                <span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span>
+                                            </td>
+
                                             <td>
                                                 @if (booking.BookingDate > DateTime.Today && booking.Status == BookingStatus.Pending)
                                                 {
@@ -593,6 +599,16 @@
     .btn-outline-danger:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+    }
+
+    .price-badge {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1rem;
+        background-color: rgba(78, 110, 77, 0.1);
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
     }
 </style>
 

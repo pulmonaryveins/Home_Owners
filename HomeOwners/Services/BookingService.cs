@@ -18,23 +18,6 @@ namespace HomeOwners.Services
             _context = context;
         }
 
-        public async Task<List<Booking>> GetAllBookingsAsync()
-        {
-            return await _context.Bookings
-                .Include(b => b.Facility)
-                .OrderByDescending(b => b.CreatedDate)
-                .ToListAsync();
-        }
-
-        public async Task<List<Booking>> GetBookingsByUserIdAsync(string userId)
-        {
-            return await _context.Bookings
-                .Include(b => b.Facility)
-                .Where(b => b.UserId == userId)
-                .OrderByDescending(b => b.CreatedDate)
-                .ToListAsync();
-        }
-
         public async Task<List<Booking>> GetPendingBookingsAsync()
         {
             return await _context.Bookings
@@ -44,6 +27,42 @@ namespace HomeOwners.Services
                 .ToListAsync();
         }
 
+        public async Task ClearAllBookingsAsync()
+        {
+            // Delete all bookings
+            var bookings = await _context.Bookings.ToListAsync();
+            _context.Bookings.RemoveRange(bookings);
+
+            // Also clear payments related to bookings
+            var payments = await _context.Payments.ToListAsync();
+            _context.Payments.RemoveRange(payments);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Booking> CreateBookingAsync(Booking booking)
+        {
+            // Ensure TotalHours and TotalPrice are calculated if not already
+            if (booking.TotalHours <= 0)
+            {
+                booking.TotalHours = (decimal)(booking.EndTime - booking.StartTime).TotalHours;
+            }
+
+            if (booking.TotalPrice <= 0)
+            {
+                // Get the facility to get the hourly rate
+                var facility = await _context.Facilities.FindAsync(booking.FacilityId);
+                if (facility != null)
+                {
+                    booking.TotalPrice = booking.TotalHours * facility.PricePerHour;
+                }
+            }
+
+            _context.Bookings.Add(booking);
+            await _context.SaveChangesAsync();
+            return booking;
+        }
+
         public async Task<Booking> GetBookingByIdAsync(int id)
         {
             return await _context.Bookings
@@ -51,13 +70,21 @@ namespace HomeOwners.Services
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        public async Task CreateBookingAsync(Booking booking)
+        public async Task<IEnumerable<Booking>> GetBookingsByUserIdAsync(string userId)
         {
-            booking.CreatedDate = DateTime.Now;
-            booking.Status = BookingStatus.Pending;
+            return await _context.Bookings
+                .Include(b => b.Facility)
+                .Where(b => b.UserId == userId)
+                .OrderByDescending(b => b.CreatedDate)
+                .ToListAsync();
+        }
 
-            _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
+        public async Task<IEnumerable<Booking>> GetAllBookingsAsync()
+        {
+            return await _context.Bookings
+                .Include(b => b.Facility)
+                .OrderByDescending(b => b.CreatedDate)
+                .ToListAsync();
         }
 
         public async Task UpdateBookingStatusAsync(int id, BookingStatus status)
@@ -70,14 +97,17 @@ namespace HomeOwners.Services
             }
         }
 
-        public async Task DeleteBookingAsync(int id)
+        public async Task<bool> DeleteBookingAsync(int id)
         {
             var booking = await _context.Bookings.FindAsync(id);
-            if (booking != null)
+            if (booking == null)
             {
-                _context.Bookings.Remove(booking);
-                await _context.SaveChangesAsync();
+                return false;
             }
+
+            _context.Bookings.Remove(booking);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

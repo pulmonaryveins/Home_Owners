@@ -25,40 +25,65 @@
                 <li class="nav-item">
                     <a class="nav-link active" href="/">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Home/Facilities">Facilities</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" 
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#function-hall">Function Hall</a></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#swimming-pool">Swimming Pool</a></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#clubhouse">Clubhouse</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" 
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Home/Annoucements#events">Upcoming Events</a></li>
+                        <li><a class="dropdown-item" href="/Home/Annoucements#community">Community Forum</a></li>
+                    </ul>
+                </li>
+                 <li class="nav-item"></li>
                     <a class="nav-link" href="/Home/Services">Services</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/Home/Annoucements">Annoucements</a>
+                    <a class="nav-link" href="/Home/Billing">Billing</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/Home/Contact">Contact</a>
                 </li>
             </ul>
 
-            <!-- Replace your existing nav-items-right section with this updated version -->
+            <!-- Updated profile menu section -->
             <div class="nav-items-right">
                 <!-- Profile Menu -->
                 <div class="nav-item dropdown profile-menu">
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li class="dropdown-header">@User.Identity.Name</li>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
-                                    <i class="bi bi-gear"></i> Profile Settings
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" asp-controller="Home" asp-action="Favorites">
-                                    <i class="bi bi-heart"></i> Saved Properties
+                                    <i class="bi bi-person-gear"></i> Profile Settings
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -66,7 +91,7 @@
                                 <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
                                       asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="dropdown-item">
+                                    <button type="submit" class="dropdown-item logout-item">
                                         <i class="bi bi-box-arrow-right"></i> Logout
                                     </button>
                                 </form>
@@ -75,11 +100,13 @@
                     }
                     else
                     {
-                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
                             <li>
                                 <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
                                     <i class="bi bi-box-arrow-in-right"></i> Login
@@ -343,198 +370,97 @@
     .facilities-section .featurette-heading {
         margin-top: 2rem;
     }
-</style>
 
-<div class="container services-section">
-    <h2 class="text-center section-title">Our Services</h2>
-    <p class="lead text-center section-subtitle">Comprehensive tools and services designed to enhance community living.</p>
+    .nav-items-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
 
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-person"></i>
-                </div>
-                <h3>User Management</h3>
-                <p>Manage homeowner accounts, profiles, and permissions efficiently.</p>
-            </div>
-        </div>
+    .notification-menu .nav-link {
+        padding: 0.5rem !important;
+        font-size: 1.4rem;
+        color: white !important;
+        transition: all 0.3s ease;
+        position: relative;
+    }
 
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-calendar-event"></i>
-                </div>
-                <h3>Facility Reservations</h3>
-                <p>Book amenities such as function halls, sports courts, and pools with ease.</p>
-            </div>
-        </div>
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #dc3545;
+        color: white;
+        border-radius: 50%;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        border: 2px solid #4e6e4d;
+    }
 
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-bell"></i>
-                </div>
-                <h3>Announcements & Notifications</h3>
-                <p>Stay updated with community news, events, and urgent notices.</p>
-            </div>
-        </div>
+    .notification-dropdown {
+        min-width: 320px;
+        padding: 0.5rem;
+        margin-top: 0.7rem;
+    }
 
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-credit-card"></i>
-                </div>
-                <h3>Billing & Payments</h3>
-                <p>Securely pay association dues, maintenance fees, and other expenses online.</p>
-            </div>
-        </div>
+    .notification-dropdown .dropdown-header {
+        color: #333;
+        font-weight: 600;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #eee;
+    }
 
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-chat-dots"></i>
-                </div>
-                <h3>Community Forum</h3>
-                <p>Engage with neighbors, discuss issues, and share ideas on a secure platform.</p>
-            </div>
-        </div>
+    .notification-dropdown .dropdown-item {
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        border-radius: 6px;
+        margin: 0.2rem 0;
+    }
 
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-shield-lock"></i>
-                </div>
-                <h3>Security Services</h3>
-                <p>Request visitor passes, register vehicles, and access emergency contacts.</p>
-            </div>
-        </div>
-    </div>
-</div>
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        background-color: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
 
+    .notification-content {
+        flex: 1;
+    }
 
+    .notification-text {
+        color: #333;
+        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+    }
 
-<div class="container security-section">
-    <h2 class="text-center section-title">Security & Privacy</h2>
-    <p class="lead text-center section-subtitle">Your trust is our priority. We are committed to protecting your personal information.</p>
-    
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="security-card">
-                <div class="security-icon">
-                    <i class="bi bi-shield-check"></i>
-                </div>
-                <h3>Data Protection</h3>
-                <p>We implement robust security measures to protect your personal information in compliance with GDPR and CCPA regulations. Your data is encrypted and securely stored.</p>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="security-card">
-                <div class="security-icon">
-                    <i class="bi bi-lock"></i>
-                </div>
-                <h3>Privacy Rights</h3>
-                <p>You have full control over your personal data. We respect your right to access, modify, or delete your information at any time, in accordance with privacy laws.</p>
-            </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="security-card">
-                <div class="security-icon">
-                    <i class="bi bi-hand-thumbs-up"></i>
-                </div>
-                <h3>Transparency</h3>
-                <p>We are committed to transparency in our data practices. View our detailed privacy policy to learn how we collect, use, and protect your information.</p>
-            </div>
-        </div>
-    </div>
-</div>
+    .dropdown-item.unread {
+        background-color: #f8f9fa;
+    }
 
+    .dropdown-item.unread .notification-text {
+        font-weight: 600;
+    }
 
-<footer class="footer-section">
-    <div class="footer-wrapper">
-        <div class="container">
-            <div class="row">
-                <!-- Company Info -->
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h5 class="brand-text-footer">HOMEOWNERS</h5>
-                    <p class="footer-description">Your trusted partner in finding the perfect home. We provide comprehensive real estate services with a focus on quality and customer satisfaction.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-twitter-x"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
-                    </div>
-                </div>
+    .notification-menu .nav-link:hover,
+    .profile-menu .nav-link:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
 
-                <!-- Quick Links -->
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h5>Quick Links</h5>
-                    <div class="row">
-                        <div class="col-6">
-                            <ul class="footer-links">
-                                <li><a asp-controller="Home" asp-action="Facilities">Facilities</a></li>
-                                <li><a asp-controller="Home" asp-action="Services">Services</a></li>
-                                <li><a asp-controller="Home" asp-action="Annoucements">Annoucements</a></li>
-                                <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-6">
-                            <ul class="footer-links">
-                                <li><a href="#">About Us</a></li>
-                                <li><a href="#">Contact</a></li>
-                                <li><a href="#">Privacy Policy</a></li>
-                                <li><a href="#">Terms & Conditions</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+    .notification-dropdown .dropdown-item:hover,
+    .profile-menu .dropdown-item:hover {
+        background-color: rgba(78, 110, 77, 0.1);
+        transform: translateX(3px);
+    }
 
-                <!-- Newsletter & Contact -->
-                <div class="col-lg-4">
-                    <h5>Stay Connected</h5>
-                    <div class="newsletter-form mb-4">
-                        <p class="footer-description">Subscribe to our newsletter for updates and special offers.</p>
-                        <div class="input-group">
-                            <input type="email" class="form-control" placeholder="Enter your email">
-                            <button class="btn btn-primary" type="button">Subscribe</button>
-                        </div>
-                    </div>
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="bi bi-geo-alt"></i>
-                            <span>123 Real Estate Ave, Business District, CA 90210</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="bi bi-telephone"></i>
-                            <span>+1 (555) 123-4567</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="bi bi-envelope"></i>
-                            <span>contact@homeowners.com</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Copyright -->
-    <div class="footer-bottom">
-        <div class="container">
-            <hr class="footer-divider">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <p class="mb-0">&copy; 2025 HomeOwners. All rights reserved.</p>
-                <a href="#" class="back-to-top">
-                    Back to top <i class="bi bi-arrow-up"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</footer>
-
-
-<style>
     .footer-section {
         background-color: #4e6e4d;
         color: white;
@@ -685,6 +611,7 @@
         backdrop-filter: blur(10px);
         padding: 0.75rem 0;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     }
 
     .navbar-brand {
@@ -701,84 +628,153 @@
     }
 
     .navbar-nav {
-        gap: 1rem;
+        gap: 0.5rem;
     }
 
     .navbar-nav .nav-link {
         color: white !important;
         font-weight: 500;
         font-size: 0.95rem;
-        padding: 0.5rem 1rem !important;
+        padding: 0.6rem 1rem !important;
         border-radius: 4px;
         transition: all 0.3s ease;
+        position: relative;
     }
 
     .navbar-nav .nav-link:hover,
     .navbar-nav .nav-link.active {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.15);
         transform: translateY(-1px);
     }
 
-    /* Profile Menu Styling */
-    .profile-menu .nav-link {
-        padding: 0.5rem !important;
-        font-size: 1.5rem;
-        color: white !important;
-        transition: all 0.3s ease;
-    }
-
-    .profile-menu .nav-link:hover {
-        transform: translateY(-2px);
-    }
-
-    .dropdown-menu {
+    .navbar-nav .dropdown-menu {
+        background-color: white;
         border: none;
         border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         padding: 0.5rem;
-        min-width: 200px;
         margin-top: 0.5rem;
+        border-top: 3px solid #4e6e4d;
     }
 
-    .dropdown-header {
-        color: #666;
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-    }
-
-    .dropdown-item {
+    .navbar-nav .dropdown-item {
         padding: 0.6rem 1rem;
-        color: #333;
+        color: #555;
         border-radius: 4px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
     }
 
-    .dropdown-item:hover {
+    .navbar-nav .dropdown-item:hover {
         background-color: rgba(78, 110, 77, 0.1);
         color: #4e6e4d;
+        transform: translateX(3px);
     }
 
-    .dropdown-item i {
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-items-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .profile-menu .profile-link {
+        padding: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .bi-person-fill {
+        font-size: 1.2rem;
+        color: white;
+    }
+
+
+    .profile-avatar {
+        width: 35px;
+        height: 35px;
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .profile-link:hover .profile-avatar {
+        transform: translateY(-2px);
+        background-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-dropdown {
+        min-width: 250px;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .profile-dropdown .dropdown-header {
+        padding: 0.5rem 1rem;
+        border-bottom: none;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    .user-role {
+        color: #777;
+        font-size: 0.8rem;
+    }
+
+    .profile-dropdown .dropdown-item {
+        padding: 0.7rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #555;
+        transition: all 0.2s ease;
+        border-radius: 6px;
+        margin: 0.2rem 0.5rem;
+    }
+
+    .profile-dropdown .dropdown-item i {
         font-size: 1.1rem;
+        color: #4e6e4d;
+        width: 20px;
+        text-align: center;
     }
 
-    /* Mobile Responsive Styling */
-    .navbar-toggler {
-        border: none;
-        padding: 0.5rem;
+    .profile-dropdown .dropdown-item:hover {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: #4e6e4d;
+        transform: translateX(3px);
     }
 
-    .navbar-toggler:focus {
-        box-shadow: none;
+    .logout-item {
+        color: #dc3545 !important;
     }
 
-    .navbar-toggler i {
-        font-size: 1.5rem;
+    .logout-item i {
+        color: #dc3545 !important;
     }
 
-    /* Keep your existing carousel styles below this line */
     #carouselExampleIndicators {
         margin-top: 0;
         position: relative;
@@ -797,7 +793,7 @@
             object-fit: cover;
             height: 100%;
             width: 100%;
-            filter: brightness(0.7); /* Darken the image slightly */
+            filter: brightness(0.7);
         }
 
     .carousel-caption {
@@ -877,16 +873,12 @@
         width: 5%;
     }
 
-    /* Add these styles to your existing <style> section */
-
-    /* Marketing and Featurette Styles */
     .container.marketing {
         padding: 5rem 0;
         max-width: 1140px;
         margin: 0 auto;
     }
 
-    /* Three Column Marketing Section */
     .marketing .col-lg-4 {
         text-align: center;
         margin-bottom: 1.5rem;
@@ -916,13 +908,11 @@
         transform: scale(1.05);
     }
 
-    /* Featurette Divider */
     .featurette-divider {
         margin: 5rem 0;
         border-top: 1px solid rgba(78, 110, 77, 0.1);
     }
 
-    /* Featurette Sections */
     .featurette {
         padding: 3rem 0;
         align-items: center;
@@ -998,7 +988,6 @@
         gap: 1.5rem;
     }
 
-    /* Notification Styling */
     .notification-menu .nav-link {
         padding: 0.5rem !important;
         font-size: 1.4rem;
@@ -1071,19 +1060,6 @@
         font-weight: 600;
     }
 
-    /* Profile Menu Updates */
-    .profile-menu .nav-link {
-        padding: 0.4rem !important;
-        font-size: 1.6rem;
-        color: white !important;
-        transition: all 0.3s ease;
-    }
-
-    .profile-menu .dropdown-menu {
-        margin-top: 0.7rem;
-    }
-
-    /* Hover Effects */
     .notification-menu .nav-link:hover,
     .profile-menu .nav-link:hover {
         transform: translateY(-2px);
@@ -1166,7 +1142,6 @@
         margin-bottom: 0;
     }
 
-    /* About Section Styles */
     .about-section {
         padding: 5rem 0;
         background-color: white;
@@ -1244,7 +1219,6 @@
         font-size: 1.2rem;
     }
 
-    /* Security Section Styles */
     .security-section {
         margin-bottom: 10rem;
         padding: 5rem 0;

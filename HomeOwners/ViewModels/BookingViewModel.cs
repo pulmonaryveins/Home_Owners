@@ -5,6 +5,7 @@ using HomeOwners.Models;
 
 namespace HomeOwners.ViewModels
 {
+
     public class BookingViewModel
     {
         public int FacilityId { get; set; }
@@ -46,7 +47,15 @@ namespace HomeOwners.ViewModels
         [DataType(DataType.Time)]
         public TimeSpan EndTime { get; set; }
 
+        [Display(Name = "Total Hours")]
+        public decimal TotalHours { get; set; }
+
+        [Display(Name = "Total Price")]
+        [DataType(DataType.Currency)]
+        public decimal TotalPrice { get; set; }
+
         [Display(Name = "Special Requests")]
         public string SpecialRequests { get; set; }
     }
+
 }

@@ -43,7 +43,9 @@
                     <a class="nav-link" asp-area="Admin" asp-page="/Announcement">Announcements</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Reports</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Billing">
+                        Billing
+                    </a>
                 </li>
             </ul>
 
@@ -84,9 +86,14 @@
             </h1>
             <p class="text-muted mb-0 mt-1">Manage all available services in one place</p>
         </div>
-        <a asp-page="./CreateService" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-2"></i> Add New Service
-        </a>
+        <div class="d-flex gap-2">
+            <a asp-page="./ServiceRequests" class="btn btn-outline-primary">
+                <i class="bi bi-clipboard-check me-2"></i> Service Requests
+            </a>
+            <a asp-page="./CreateService" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i> Add New Service
+            </a>
+        </div>
     </div>
 
     @if (TempData["StatusMessage"] != null)

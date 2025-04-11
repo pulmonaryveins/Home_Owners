@@ -1,7 +1,10 @@
-﻿@model List<HomeOwners.Models.Booking>
+﻿@model HomeOwners.ViewModels.BillingViewModel
 @{
-    ViewData["Title"] = "My Bookings";
+    ViewData["Title"] = "Billing & Payments";
 }
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
@@ -24,7 +27,7 @@
                     <a class="nav-link" href="/">Home</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
                         Facilities
                     </a>
@@ -52,7 +55,7 @@
                 <a class="nav-link" href="/Home/Services">Services</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/Home/Billing">Billing</a>
+                    <a class="nav-link active" href="/Home/Billing">Billing</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/Home/Contact">Contact</a>
@@ -123,15 +126,13 @@
     </div>
 </nav>
 
+
 <div class="container mt-5 pt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="page-title">My Bookings</h1>
+        <h1 class="page-title">Billing & Payments</h1>
         <div class="d-flex gap-2">
             <a href="javascript:history.back()" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-2"></i> Back
-            </a>
-            <a asp-controller="Home" asp-action="Facilities" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-2"></i> Book New Facility
             </a>
         </div>
     </div>
@@ -150,39 +151,62 @@
 
     <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
-            <ul class="nav nav-pills card-header-pills" id="bookingTabs">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#my-bookings" data-bs-toggle="tab">
-                        <i class="bi bi-person-check me-2"></i> My Bookings
+            <ul class="nav nav-pills card-header-pills" id="billingTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="unpaid-tab" data-bs-toggle="tab" data-bs-target="#unpaid-content"
+                        href="#unpaid-content" role="tab" aria-controls="unpaid-content" aria-selected="true">
+                        <i class="bi bi-credit-card me-2"></i>Unpaid Bills
+                        @if (Model.UnpaidBookings.Count > 0)
+                        {
+                            <span class="badge bg-danger ms-2">@Model.UnpaidBookings.Count</span>
+                        }
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#all-bookings" data-bs-toggle="tab">
-                        <i class="bi bi-calendar-event me-2"></i> All Bookings
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-content"
+                        href="#history-content" role="tab" aria-controls="history-content" aria-selected="false">
+                        <i class="bi bi-clock-history me-2"></i>Payment History
                     </a>
                 </li>
             </ul>
         </div>
         <div class="card-body p-0">
-            <div class="tab-content">
-                <div class="tab-pane fade show active" id="my-bookings">
-                    <div class="table-responsive">
-                        <table class="table table-hover booking-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Facility</th>
-                                    <th>Booking Date</th>
-                                    <th>Duration</th>
-                                    <th>Status</th>
-                                    <th>Ammount Due</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model != null && Model.Any())
-                                {
-                                    @foreach (var booking in Model)
+            <div class="tab-content" id="billingTabsContent">
+                <!-- Unpaid Bills Tab -->
+                <div class="tab-pane fade show active" id="unpaid-content" role="tabpanel" aria-labelledby="unpaid-tab">
+                    @if (Model.UnpaidBookings.Count > 0)
+                    {
+                        <div class="payment-summary">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-1">Payment Summary</h5>
+                                    <p class="text-muted mb-0">These are your completed facility bookings that require payment.</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="total-due">
+                                        <span class="total-label">Total Amount Due</span>
+                                        <span class="total-amount">₱@Model.TotalUnpaidAmount.ToString("N2")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover booking-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Facility</th>
+                                        <th>Booking Date</th>
+                                        <th>Duration</th>
+                                        <th>Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.UnpaidBookings)
                                     {
+                                        var duration = (booking.EndTime - booking.StartTime).TotalHours;
+
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
@@ -194,134 +218,154 @@
                                             <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
                                             <td>
                                                 <span class="time-badge">
-                                                    @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") -
-                                                    @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
-                                                    <small class="ms-1">(@booking.TotalHours.ToString("0.0") hrs)</small>
+                                                    @DateTime.Today.Add(booking.StartTime).ToString("h:mm tt") -
+                                                    @DateTime.Today.Add(booking.EndTime).ToString("h:mm tt")
+                                                    <small class="ms-1">(@duration.ToString("0.0") hrs)</small>
                                                 </span>
                                             </td>
-
+                                            <td><span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span></td>
                                             <td>
-                                                @if (booking.Status == BookingStatus.Pending)
-                                                {
-                                                    <span class="status-badge pending">
-                                                        <i class="bi bi-hourglass"></i> Pending
-                                                    </span>
-                                                }
-                                                else if (booking.Status == BookingStatus.Approved)
-                                                {
-                                                    <span class="status-badge approved">
-                                                        <i class="bi bi-check-circle"></i> Approved
-                                                    </span>
-                                                }
-                                                else if (booking.Status == BookingStatus.Completed)
-                                                {
-                                                    <span class="status-badge completed">
-                                                        <i class="bi bi-trophy"></i> Completed
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="status-badge rejected">
-                                                        <i class="bi bi-x-circle"></i> Rejected
-                                                    </span>
-                                                }
-                                            </td>
-
-                                            <td>
-                                                <span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span>
-                                            </td>
-
-                                            <td>
-                                                @if (booking.BookingDate > DateTime.Today && booking.Status == BookingStatus.Pending)
-                                                {
-                                                    <form asp-action="CancelBooking" asp-route-id="@booking.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                            <i class="bi bi-x-circle"></i> Cancel
-                                                        </button>
-                                                    </form>
-                                                }
+                                                <button type="button" class="btn btn-sm btn-primary pay-btn"
+                                                        data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                        data-booking-id="@booking.Id"
+                                                        data-facility-name="@booking.Facility?.Name"
+                                                        data-amount="@booking.TotalPrice.ToString("N2")">
+                                                    <i class="bi bi-credit-card me-1"></i> Pay Now
+                                                </button>
                                             </td>
                                         </tr>
                                     }
-                                }
-                                else
-                                {
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-check-circle-fill display-4 text-success"></i>
+                            <h5 class="mt-3">No Outstanding Bills</h5>
+                            <p class="text-muted mb-3">You don't have any unpaid facility bookings at the moment.</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Payment History Tab -->
+                <div class="tab-pane fade" id="history-content" role="tabpanel" aria-labelledby="history-tab">
+                    @if (Model.Payments.Count > 0)
+                    {
+                        <div class="payment-history-header">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h5 class="mb-1">Payment History</h5>
+                                    <p class="text-muted mb-0">A record of all your past payments for facility bookings.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover booking-table mb-0">
+                                <thead>
                                     <tr>
-                                        <td colspan="6" class="text-center py-5">
-                                            <div class="empty-state">
-                                                <i class="bi bi-calendar-x display-4 text-muted"></i>
-                                                <h5 class="mt-3">No bookings found</h5>
-                                                <p class="text-muted mb-3">You haven't made any facility bookings yet</p>
-                                                <a asp-controller="Home" asp-action="Facilities" class="btn btn-primary">
-                                                    <i class="bi bi-plus-lg me-2"></i> Book a Facility
+                                        <th>Receipt No.</th>
+                                        <th>Facility</th>
+                                        <th>Payment Date</th>
+                                        <th>Amount Paid</th>
+                                        <th>Method</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in Model.Payments)
+                                    {
+                                        <tr>
+                                            <td><code class="receipt-number">@payment.ReceiptNumber</code></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(payment.Booking?.Facility?.ImageUrl) ? "/images/placeholder.jpg" : payment.Booking.Facility.ImageUrl)"
+                                                         alt="@payment.Booking?.Facility?.Name" class="booking-thumbnail me-3">
+                                                    <span class="facility-name">@payment.Booking?.Facility?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>@payment.PaymentDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                                            <td><span class="price-badge paid">₱@payment.AmountPaid.ToString("N2")</span></td>
+                                            <td>
+                                                <span class="payment-method-badge">
+                                                    @{
+                                                        var icon = payment.PaymentMethod.ToString().ToLower() == "cash" ? "bi-cash" :
+                                                                  payment.PaymentMethod.ToString().ToLower().Contains("card") ? "bi-credit-card" :
+                                                                  payment.PaymentMethod.ToString().ToLower().Contains("bank") ? "bi-bank" :
+                                                                  payment.PaymentMethod.ToString().ToLower().Contains("mobile") ? "bi-phone" :
+                                                                  "bi-wallet2";
+                                                    }
+                                                    <i class="bi @icon me-1"></i> @payment.PaymentMethod
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a asp-controller="Home" asp-action="PaymentReceipt" asp-route-id="@payment.Id" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-receipt me-1"></i> View Receipt
                                                 </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="tab-pane fade" id="all-bookings">
-                    <div class="table-responsive">
-                        <table class="table table-hover booking-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Facility</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    var allBookings = ViewBag.AllBookings as List<HomeOwners.Models.Booking>;
-                                }
-                                @if (allBookings != null && allBookings.Any())
-                                {
-                                    @foreach (var booking in allBookings.Where(b => b.Status == BookingStatus.Approved))
-                                    {
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
-                                                         alt="@booking.Facility?.Name" class="booking-thumbnail me-3">
-                                                    <span class="facility-name">@booking.Facility?.Name</span>
-                                                </div>
-                                            </td>
-                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
-                                            <td>
-                                                <span class="time-badge">
-                                                    @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - 
-                                                    @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="status-badge approved">
-                                                    <i class="bi bi-check-circle"></i> Reserved
-                                                </span>
                                             </td>
                                         </tr>
                                     }
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="4" class="text-center py-5">
-                                            <div class="empty-state">
-                                                <i class="bi bi-calendar-x display-4 text-muted"></i>
-                                                <h5 class="mt-3">No community bookings</h5>
-                                                <p class="text-muted">There are currently no approved reservations</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-receipt display-4 text-muted"></i>
+                            <h5 class="mt-3">No Payment History</h5>
+                            <p class="text-muted mb-3">You haven't made any payments for facility bookings yet.</p>
+                        </div>
+                    }
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Payment for <span id="modalFacilityName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Home" asp-action="ProcessPayment" method="post" id="paymentForm">
+                    <input type="hidden" name="bookingId" id="bookingIdInput" />
+
+                    <div class="payment-amount-display mb-4 text-center">
+                        <p class="mb-1">Total Amount Due</p>
+                        <h3 class="amount-display" id="modalAmount"></h3>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <select name="paymentMethod" class="form-select" required>
+                            <option value="" selected disabled>Select payment method</option>
+                            <option value="Cash">Cash</option>
+                            <option value="CreditCard">Credit Card</option>
+                            <option value="DebitCard">Debit Card</option>
+                            <option value="BankTransfer">Bank Transfer</option>
+                            <option value="MobilePayment">Mobile Payment</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notes (Optional)</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="Add any additional information about this payment"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="paymentForm" class="btn btn-primary">
+                    <i class="bi bi-credit-card me-2"></i>Confirm Payment
+                </button>
             </div>
         </div>
     </div>
@@ -341,21 +385,7 @@
         --danger-color: #dc3545;
         --info-color: #17a2b8;
     }
-
-    :root {
-        --primary-color: #4e6e4d;
-        --primary-dark: #3d5a3c;
-        --primary-light: rgba(78, 110, 77, 0.1);
-        --primary-lighter: rgba(78, 110, 77, 0.05);
-        --text-light: #f8f9fa;
-        --text-dark: #333;
-        --text-muted: #6c757d;
-        --success-color: #28a745;
-        --warning-color: #ffc107;
-        --danger-color: #dc3545;
-        --info-color: #17a2b8;
-    }
-
+    
     .navbar {
         background-color: rgba(78, 110, 77, 0.95) !important;
         backdrop-filter: blur(10px);
@@ -525,6 +555,7 @@
             color: #dc3545 !important;
         }
     
+    /* Page title and general styles */
     .page-title {
         font-weight: 600;
         color: var(--primary-color);
@@ -563,7 +594,7 @@
         box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
     }
     
-    /* Table Styling */
+    /* Booking and Payment Tables */
     .booking-table thead th {
         background-color: #f9fafb;
         color: #4a5568;
@@ -601,6 +632,46 @@
         color: #2d3748;
     }
     
+    /* Payment section styling */
+    .payment-summary, .payment-history-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
+    }
+    
+    .total-due {
+        background-color: var(--primary-light);
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .total-label {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+    
+    .total-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .payment-amount-display {
+        padding: 1.5rem;
+        background-color: var(--primary-light);
+        border-radius: 12px;
+    }
+    
+    .amount-display {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    /* Badges */
     .time-badge {
         background-color: rgba(78, 110, 77, 0.1);
         color: #4e6e4d;
@@ -610,61 +681,52 @@
         font-weight: 500;
     }
     
-    /* Status Badges */
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
+    .price-badge {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1rem;
+        background-color: rgba(78, 110, 77, 0.1);
         padding: 0.3rem 0.7rem;
         border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 500;
     }
     
-    .status-badge.pending {
-        background-color: rgba(246, 173, 85, 0.15);
-        color: #ed8936;
-    }
-    
-    .status-badge.approved {
+    .price-badge.paid {
         background-color: rgba(72, 187, 120, 0.15);
         color: #48bb78;
     }
     
-    .status-badge.completed {
+    .payment-method-badge {
         background-color: rgba(56, 161, 219, 0.15);
         color: #38a1db;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
     }
     
-    .status-badge.rejected {
-        background-color: rgba(229, 62, 62, 0.15);
-        color: #e53e3e;
+    .receipt-number {
+        font-family: monospace;
+        background-color: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 0.9rem;
     }
     
-    /* Empty State */
+    /* Empty state */
     .empty-state {
         padding: 3rem 2rem;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        text-align: center;
     }
     
-    .empty-state i {
-        color: #cbd5e0;
-        margin-bottom: 1rem;
-    }
-    
-    .empty-state h5 {
-        color: #4a5568;
-        font-weight: 600;
-    }
-    
-    .empty-state p {
-        max-width: 300px;
-    }
-    
-    /* Button Styling */
+    /* Button styling */
     .btn-primary {
         background-color: var(--primary-color);
         border-color: var(--primary-color);
@@ -674,6 +736,20 @@
     .btn-primary:hover {
         background-color: var(--primary-dark);
         border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+    
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        color: white;
         transform: translateY(-2px);
         box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
     }
@@ -690,36 +766,51 @@
         border-color: var(--primary-color);
     }
     
-    .btn-outline-danger {
-        transition: all 0.3s ease;
+    /* Modal styling */
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
     }
     
-    .btn-outline-danger:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
+    .modal-header {
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
     }
-
-    .price-badge {
-        display: inline-block;
-        font-weight: 700;
-        color: var(--primary-color);
-        font-size: 1rem;
-        background-color: rgba(78, 110, 77, 0.1);
-        padding: 0.3rem 0.7rem;
-        border-radius: 6px;
+    
+    .modal-footer {
+        border-top: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
     }
 </style>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize the tabs
-        const triggerTabList = [].slice.call(document.querySelectorAll('#bookingTabs a'));
-        triggerTabList.forEach(function(triggerEl) {
-            const tabTrigger = new bootstrap.Tab(triggerEl);
-            triggerEl.addEventListener('click', function(event) {
-                event.preventDefault();
-                tabTrigger.show();
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize payment modal
+            const paymentModal = document.getElementById('paymentModal');
+            if (paymentModal) {
+                paymentModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const bookingId = button.getAttribute('data-booking-id');
+                    const facilityName = button.getAttribute('data-facility-name');
+                    const amount = button.getAttribute('data-amount');
+
+                    document.getElementById('modalFacilityName').textContent = facilityName;
+                    document.getElementById('modalAmount').textContent = '₱' + amount;
+                    document.getElementById('bookingIdInput').value = bookingId;
+                });
+            }
+            
+            // Initialize the tabs
+            const triggerTabList = [].slice.call(document.querySelectorAll('#billingTabs a'));
+            triggerTabList.forEach(function(triggerEl) {
+                const tabTrigger = new bootstrap.Tab(triggerEl);
+                triggerEl.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    tabTrigger.show();
+                });
             });
         });
-    });
-</script>
+    </script>
+}

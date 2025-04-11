@@ -6,7 +6,8 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
 
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
@@ -26,30 +27,39 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+                    <a class="nav-link active" asp-area="Admin" asp-page="/Dashboard">
+                         Dashboard
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Users</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users">
+                         Users
+                    </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Services"> Services</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Services">
+                        Services
+                    </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Facilities"> Facilities</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Facilities">
+                         Facilities
+                    </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Calendar">Calendar</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Calendar">
+                         Calendar
+                    </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Announcement"> Annoucements</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Announcement">
+                        Announcements
+                    </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users"> Reports</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Billing">
+                         Billing
+                    </a>
                 </li>
             </ul>
 
@@ -58,7 +68,8 @@
                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
                    data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-person-circle me-1"></i>
-                    <span class="d-none d-lg-inline">@User.Identity?.Name</span>
+                    <span class="d-none d-lg-inline">@(User.Identity?.Name ?? "Admin")</span>
+
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
@@ -68,23 +79,28 @@
                             <i class="bi bi-box-arrow-right"></i> Logout
                         </button>
                     </form>
-                    </li>
                 </ul>
             </div>
         </div>
     </div>
 </nav>
 
+<!-- Dashboard welcome header -->
 <div class="container dashboard-container">
+    <div class="dashboard-welcome mb-4">
+        <h1 class="welcome-title">Welcome, @(User.Identity?.Name ?? "Admin")!</h1>
+        <p class="welcome-subtitle">Here's what's happening in your community today</p>
+    </div>
+    
     <!-- Stats Summary Cards -->
     <div class="row stats-cards">
         <div class="col-md-3 col-sm-6">
             <div class="stat-card">
                 <div class="stat-card-content">
-                    <div class="stat-card-title">Total Users</div>
-                    <div class="stat-card-value">1,284</div>
+                    <div class="stat-card-title">Total Residents</div>
+                    <div class="stat-card-value">@Model.TotalUsers</div>
                     <div class="stat-card-change positive">
-                        <i class="bi bi-arrow-up-right"></i> 12% from last month
+                        <i class="bi bi-arrow-up-right"></i> @Model.NewUsersPercentage% from last month
                     </div>
                 </div>
                 <div class="stat-card-icon user-icon">
@@ -96,37 +112,39 @@
             <div class="stat-card">
                 <div class="stat-card-content">
                     <div class="stat-card-title">Active Services</div>
-                    <div class="stat-card-value">46</div>
+                    <div class="stat-card-value">@Model.ActiveServices</div>
                     <div class="stat-card-change positive">
-                        <i class="bi bi-arrow-up-right"></i> 8% from last month
+                        <i class="bi bi-arrow-up-right"></i> @Model.ServiceGrowthRate% from last month
                     </div>
                 </div>
                 <div class="stat-card-icon service-icon">
-                    <i class="bi bi-briefcase-fill"></i>
+                    <i class="bi bi-tools"></i>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
             <div class="stat-card">
                 <div class="stat-card-content">
-                    <div class="stat-card-title">Facilities</div>
-                    <div class="stat-card-value">12</div>
-                    <div class="stat-card-change neutral">
-                        <i class="bi bi-dash"></i> No change
+                    <div class="stat-card-title">Pending Approvals</div>
+                    <div class="stat-card-value">@Model.PendingApprovals</div>
+                    <div class="stat-card-change @(Model.PendingApprovalsChange > 0 ? "negative" : "positive")">
+                        <i class="bi @(Model.PendingApprovalsChange > 0 ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i> 
+                        @Math.Abs(Model.PendingApprovalsChange)% from last week
                     </div>
                 </div>
-                <div class="stat-card-icon facility-icon">
-                    <i class="bi bi-building"></i>
+                <div class="stat-card-icon approval-icon">
+                    <i class="bi bi-clock-history"></i>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
             <div class="stat-card">
                 <div class="stat-card-content">
-                    <div class="stat-card-title">Revenue</div>
-                    <div class="stat-card-value">$24.5k</div>
-                    <div class="stat-card-change negative">
-                        <i class="bi bi-arrow-down-right"></i> 3% from last month
+                    <div class="stat-card-title">Monthly Revenue</div>
+                    <div class="stat-card-value">$@Model.MonthlyRevenue.ToString("N0")</div>
+                    <div class="stat-card-change @(Model.RevenueChange >= 0 ? "positive" : "negative")">
+                        <i class="bi @(Model.RevenueChange >= 0 ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i> 
+                        @Math.Abs(Model.RevenueChange)% from last month
                     </div>
                 </div>
                 <div class="stat-card-icon revenue-icon">
@@ -141,108 +159,197 @@
         <div class="col-md-8">
             <div class="card dashboard-card chart-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5><i class="bi bi-graph-up me-2"></i>User Registration Trend</h5>
+                    <h5><i class="bi bi-graph-up me-2"></i>Resident Activity Trends</h5>
                     <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            This Year
+                        <button class="btn btn-sm dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown">
+                            Last 6 Months
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
-                            <li><a class="dropdown-item" href="#">This Month</a></li>
-                            <li><a class="dropdown-item" href="#">This Year</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="timeRangeDropdown">
+                            <li><a class="dropdown-item" href="#" data-range="7">Last 7 Days</a></li>
+                            <li><a class="dropdown-item" href="#" data-range="30">Last 30 Days</a></li>
+                            <li><a class="dropdown-item" href="#" data-range="180">Last 6 Months</a></li>
+                            <li><a class="dropdown-item" href="#" data-range="365">This Year</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="card-body chart-container">
-                    <canvas id="userRegistrationChart"></canvas>
+                    <canvas id="activityTrendsChart"></canvas>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card dashboard-card chart-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5><i class="bi bi-pie-chart-fill me-2"></i>User Distribution</h5>
+                    <h5><i class="bi bi-pie-chart-fill me-2"></i>Service Requests</h5>
                     <div class="dropdown">
                         <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            All Users
+                            Current Month
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#">Active Users</a></li>
-                            <li><a class="dropdown-item" href="#">New Users</a></li>
-                            <li><a class="dropdown-item" href="#">All Users</a></li>
+                            <li><a class="dropdown-item" href="#" data-period="week">This Week</a></li>
+                            <li><a class="dropdown-item" href="#" data-period="month">Current Month</a></li>
+                            <li><a class="dropdown-item" href="#" data-period="quarter">This Quarter</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="card-body chart-container">
-                    <canvas id="userDistributionChart"></canvas>
+                    <canvas id="serviceRequestsChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Activities & Quick Access -->
+    <!-- Recent Activities & Quick Stats -->
     <div class="row mt-4">
         <div class="col-md-6">
             <div class="card dashboard-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5><i class="bi bi-activity me-2"></i>Recent Activities</h5>
+                    <h5><i class="bi bi-activity me-2"></i>Recent Activity</h5>
                     <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
                 </div>
                 <div class="card-body p-0">
                     <ul class="activity-list">
-                        <li class="activity-item">
-                            <div class="activity-icon bg-primary">
-                                <i class="bi bi-person-plus"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">New user registered</div>
-                                <div class="activity-subtitle">John Smith joined the community</div>
-                                <div class="activity-time">2 hours ago</div>
-                            </div>
-                        </li>
-                        <li class="activity-item">
-                            <div class="activity-icon bg-success">
-                                <i class="bi bi-check-circle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">Service request completed</div>
-                                <div class="activity-subtitle">Plumbing repair in Unit #105</div>
-                                <div class="activity-time">Yesterday</div>
-                            </div>
-                        </li>
-                        <li class="activity-item">
-                            <div class="activity-icon bg-warning">
-                                <i class="bi bi-exclamation-triangle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">Payment overdue</div>
-                                <div class="activity-subtitle">Monthly fees for 5 residents</div>
-                                <div class="activity-time">2 days ago</div>
-                            </div>
-                        </li>
-                        <li class="activity-item">
-                            <div class="activity-icon bg-info">
-                                <i class="bi bi-calendar-event"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">Community event scheduled</div>
-                                <div class="activity-subtitle">Annual homeowners meeting</div>
-                                <div class="activity-time">1 week ago</div>
-                            </div>
-                        </li>
+                        @foreach (var activity in Model.RecentActivities)
+                        {
+                            <li class="activity-item">
+                                <div class="activity-icon @activity.IconClass">
+                                    <i class="bi @activity.Icon"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">@activity.Title</div>
+                                    <div class="activity-subtitle">@activity.Subtitle</div>
+                                    <div class="activity-time">@activity.Time</div>
+                                </div>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card dashboard-card mb-4">
-                <div class="card-header">
-                    <h5><i class="bi bi-bar-chart-steps me-2"></i>Service Requests Status</h5>
+            <div class="card dashboard-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-calendar-check me-2"></i>Upcoming Events</h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary">Manage Calendar</a>
                 </div>
-                <div class="card-body chart-container">
-                    <canvas id="serviceRequestChart"></canvas>
+                <div class="card-body p-0">
+                    <ul class="event-list">
+                        @foreach (var evt in Model.UpcomingEvents)
+                        {
+                            <li class="event-item">
+                                <div class="event-date">
+                                    <div class="event-month">@evt.StartTime.ToString("MMM")</div>
+                                    <div class="event-day">@evt.StartTime.Day</div>
+                                </div>
+                                <div class="event-content">
+                                    <div class="event-title">@evt.Title</div>
+                                    <div class="event-details">
+                                        <span><i class="bi bi-clock"></i> @evt.StartTime.ToString("h:mm tt") - @evt.EndTime.ToString("h:mm tt")</span>
+                                        <span><i class="bi bi-geo-alt"></i> @evt.Location</span>
+                                    </div>
+                                </div>
+                                <div class="event-actions">
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Third row with extra statistics -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-bell me-2"></i>Pending User Approvals</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="user-approval-list">
+                        @if (Model.PendingUserApprovals.Any())
+                        {
+                            @foreach (var user in Model.PendingUserApprovals)
+                            {
+                                <li class="user-approval-item">
+                                    <div class="user-info">
+                                        <div class="user-avatar">
+                                            <i class="bi bi-person-circle"></i>
+                                        </div>
+                                        <div class="user-details">
+                                            <div class="user-name">@user.FullName</div>
+                                            <div class="user-meta">
+                                                <span>House #@user.HouseNumber</span>
+                                                <span>@user.RequestDate.ToString("MMM d, yyyy")</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="user-actions">
+                                        <button class="btn btn-sm btn-outline-success me-1" onclick="approveUser('@user.Id')">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="rejectUser('@user.Id')">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="no-data-item">
+                                <div class="no-data-content">
+                                    <i class="bi bi-check2-circle"></i>
+                                    <p>No pending approvals</p>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-house-gear me-2"></i>Facility Usage</h5>
+                </div>
+                <div class="card-body chart-container">
+                    <canvas id="facilityUsageChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5><i class="bi bi-cash-stack me-2"></i>Payment Status</h5>
+                </div>
+                <div class="card-body chart-container">
+                    <canvas id="paymentStatusChart"></canvas>
+                    <div class="payment-status-legend mt-3">
+                        <div class="payment-status-item">
+                            <span class="status-dot paid"></span>
+                            <span class="status-label">Paid</span>
+                            <span class="status-value">@Model.PaymentStats.PaidPercentage%</span>
+                        </div>
+                        <div class="payment-status-item">
+                            <span class="status-dot pending"></span>
+                            <span class="status-label">Pending</span>
+                            <span class="status-value">@Model.PaymentStats.PendingPercentage%</span>
+                        </div>
+                        <div class="payment-status-item">
+                            <span class="status-dot overdue"></span>
+                            <span class="status-label">Overdue</span>
+                            <span class="status-value">@Model.PaymentStats.OverduePercentage%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
     :root {
@@ -257,12 +364,15 @@
         --warning-color: #ffc107;
         --danger-color: #dc3545;
         --info-color: #17a2b8;
+        --body-bg: #f9f9f9;
     }
 
     body {
-        background-color: #f9f9f9;
+        background-color: var(--body-bg);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+    /* Navbar styling */
     .navbar {
         background-color: var(--primary-color) !important;
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
@@ -315,72 +425,31 @@
         background-color: rgba(255, 255, 255, 0.15);
     }
 
-    .dropdown-menu {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 0.5rem;
-        min-width: 220px;
-        margin-top: 0.5rem;
-    }
-
-    .dropdown-header {
-        color: var(--text-muted);
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-    }
-
-    .dropdown-item {
-        padding: 0.6rem 1rem;
-        color: var(--text-dark);
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s ease;
-    }
-
-    .dropdown-item:hover {
-        background-color: var(--primary-light);
-        color: var(--primary-color);
-    }
-
-    .dropdown-item i {
-        font-size: 1.1rem;
-    }
-
-    .navbar-toggler {
-        border: none;
-        padding: 0.5rem;
-    }
-
-    .navbar-toggler:focus {
-        box-shadow: none;
-    }
-
-    .navbar-toggler i {
-        font-size: 1.5rem;
-    }
-
+    /* Dashboard container */
     .dashboard-container {
-        margin-top: 6rem;
+        margin-top: 5rem;
         padding-bottom: 2rem;
     }
 
-    .dashboard-header {
-        margin-bottom: 1.5rem;
+    .dashboard-welcome {
+        padding: 1.5rem 0;
         border-bottom: 1px solid rgba(0,0,0,0.1);
-        padding-bottom: 1rem;
+        margin-bottom: 2rem;
     }
 
-    .dashboard-header h2 {
+    .welcome-title {
+        font-size: 1.75rem;
         font-weight: 600;
         color: var(--primary-color);
-        display: flex;
-        align-items: center;
+        margin-bottom: 0.5rem;
     }
 
-    /* Stats Cards Styling */
+    .welcome-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    /* Stats Cards */
     .stats-cards {
         margin-bottom: 1.5rem;
     }
@@ -456,18 +525,18 @@
     }
     
     .service-icon {
-        background-color: var(--primary-color);
+        background-color: var(--info-color);
     }
     
-    .facility-icon {
-        background-color: var(--primary-color);
+    .approval-icon {
+        background-color: var(--warning-color);
     }
     
     .revenue-icon {
-        background-color: var(--primary-color);
+        background-color: var(--success-color);
     }
 
-    /* Chart Cards Styling */
+    /* Chart Cards */
     .chart-card {
         margin-bottom: 1.5rem;
     }
@@ -499,7 +568,6 @@
         color: var(--primary-color);
     }
     
-    /* Fix for chart expansion */
     .chart-container {
         position: relative;
         height: 250px;
@@ -510,7 +578,7 @@
         max-width: 100%;
     }
 
-    /* Activity List Styling */
+    /* Activity List */
     .activity-list {
         list-style: none;
         padding: 0;
@@ -556,7 +624,7 @@
     
     .activity-subtitle {
         font-size: 0.85rem;
-        color: var (--text-muted);
+        color: var(--text-muted);
         margin-bottom: 0.25rem;
     }
     
@@ -566,43 +634,27 @@
         opacity: 0.8;
     }
 
-    /* Task List Styling */
-    .task-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .task-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        transition: background-color 0.2s ease;
-    }
-    
-    .task-item:last-child {
-        border-bottom: none;
-    }
-    
-    .task-item:hover {
-        background-color: var(--primary-lighter);
-    }
-    
-    .task-item .form-check {
-        margin: 0;
-    }
-    
-    .task-item .form-check-label {
-        cursor: pointer;
-    }
-    
-    .task-item .form-check-input:checked + .form-check-label {
-        text-decoration: line-through;
-        color: var(--text-muted);
+    .bg-primary {
+        background-color: var(--primary-color) !important;
     }
 
+    .bg-success {
+        background-color: var(--success-color) !important;
+    }
+    
+    .bg-warning {
+        background-color: var(--warning-color) !important;
+    }
+    
+    .bg-danger {
+        background-color: var(--danger-color) !important;
+    }
+    
+    .bg-info {
+        background-color: var(--info-color) !important;
+    }
+
+    /* Dashboard cards */
     .dashboard-card {
         height: 100%;
         border: none;
@@ -610,81 +662,281 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         transition: all 0.3s ease;
         overflow: hidden;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-    }
-
-    .card-icon {
-        font-size: 2rem;
-        color: var(--primary-color);
-        margin-bottom: 1rem;
-    }
-
-    .card-title {
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: 1rem;
-    }
-
-    .card-text {
-        color: var(--text-muted);
         margin-bottom: 1.5rem;
     }
 
-    .btn-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-card .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1rem 1.25rem;
+    }
+
+    .dashboard-card .card-header h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+    }
+
+    /* Event list */
+    .event-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .event-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        transition: background-color 0.2s ease;
+    }
+
+    .event-item:last-child {
+        border-bottom: none;
+    }
+
+    .event-item:hover {
+        background-color: var(--primary-lighter);
+    }
+
+    .event-date {
+        width: 50px;
+        height: 50px;
+        background-color: var(--primary-light);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-right: 1rem;
+        color: var(--primary-color);
+    }
+
+    .event-month {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .event-day {
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .event-content {
+        flex: 1;
+    }
+
+    .event-title {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        color: var(--text-dark);
+    }
+
+    .event-details {
+        display: flex;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        gap: 1rem;
+    }
+
+    .event-details span {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .event-actions {
+        margin-left: 0.5rem;
+    }
+
+    /* User Approval List */
+    .user-approval-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .user-approval-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        transition: background-color 0.2s ease;
+    }
+
+    .user-approval-item:last-child {
+        border-bottom: none;
+    }
+
+    .user-approval-item:hover {
+        background-color: var(--primary-lighter);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .user-name {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        color: var(--text-dark);
+    }
+
+    .user-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .no-data-item {
+        display: flex;
+        justify-content: center;
+        padding: 2rem 1.25rem;
+    }
+
+    .no-data-content {
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .no-data-content i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    /* Payment status */
+    .payment-status-legend {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .payment-status-item {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        transition: all 0.3s ease;
     }
 
-    .btn-primary:hover {
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .status-dot.paid {
+        background-color: var(--success-color);
+    }
+
+    .status-dot.pending {
+        background-color: var(--warning-color);
+    }
+
+    .status-dot.overdue {
+        background-color: var(--danger-color);
+    }
+
+    .status-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .status-value {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    /* Buttons styling */
+    .btn-primary, .btn-outline-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover, .btn-outline-primary:hover {
         background-color: var(--primary-dark);
         border-color: var(--primary-dark);
-        transform: translateY(-2px);
     }
-    
-    .badge {
-        font-weight: 500;
-        padding: 0.35em 0.65em;
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        background-color: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        color: white;
     }
 </style>
 
 <script>
     // Initialize charts when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
-        // User Registration Chart
-        const userRegistrationCanvas = document.getElementById('userRegistrationChart');
-        if (userRegistrationCanvas) {
-            const userRegistrationData = {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [{
-                    label: 'New Users',
-                    data: [65, 78, 52, 91, 40, 48, 110, 70, 95, 145, 136, 70],
-                    borderColor: '#4e6e4d',
-                    backgroundColor: 'rgba(78, 110, 77, 0.1)',
-                    tension: 0.3,
-                    fill: true
-                }]
+        // Set chart defaults to match theme
+        Chart.defaults.color = '#6c757d';
+        Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif";
+        
+        // Activity Trends Chart
+        const activityTrendsCtx = document.getElementById('activityTrendsChart');
+        if (activityTrendsCtx) {
+            const activityData = {
+                labels: @Html.Raw(Json.Serialize(Model.ActivityTrends.Labels)),
+                datasets: [
+                    {
+                        label: 'New Registrations',
+                        data: @Html.Raw(Json.Serialize(Model.ActivityTrends.RegistrationData)),
+                        borderColor: '#4e6e4d',
+                        backgroundColor: 'rgba(78, 110, 77, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Service Requests',
+                        data: @Html.Raw(Json.Serialize(Model.ActivityTrends.ServiceRequestData)),
+                        borderColor: '#17a2b8',
+                        backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
             };
             
-            new Chart(userRegistrationCanvas, {
+            new Chart(activityTrendsCtx, {
                 type: 'line',
-                data: userRegistrationData,
+                data: activityData,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
                             grid: {
-                                drawBorder: false
+                                drawBorder: false,
+                                color: 'rgba(0,0,0,0.05)'
                             }
                         },
                         x: {
@@ -695,31 +947,42 @@
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
                         }
                     }
                 }
             });
         }
         
-        // User Distribution Chart
-        const userDistributionCanvas = document.getElementById('userDistributionChart');
-        if (userDistributionCanvas) {
-            const userDistributionData = {
-                labels: ['Active', 'Inactive', 'New', 'Pending'],
+        // Service Requests Chart
+        const serviceRequestsCtx = document.getElementById('serviceRequestsChart');
+        if (serviceRequestsCtx) {
+            const serviceData = {
+                labels: ['Open', 'In Progress', 'Completed', 'Cancelled'],
                 datasets: [{
-                    data: [65, 15, 15, 5],
-                    backgroundColor: ['#4e6e4d', '#17a2b8', '#ffc107', '#dc3545'],
+                    data: @Html.Raw(Json.Serialize(Model.ServiceStats)),
+                    backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545'],
                     borderWidth: 0
                 }]
             };
             
-            new Chart(userDistributionCanvas, {
+            new Chart(serviceRequestsCtx, {
                 type: 'doughnut',
-                data: userDistributionData,
+                data: serviceData,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -736,29 +999,31 @@
             });
         }
         
-        // Service Request Chart
-        const serviceRequestCanvas = document.getElementById('serviceRequestChart');
-        if (serviceRequestCanvas) {
-            const serviceRequestData = {
-                labels: ['Completed', 'In Progress', 'Pending', 'Cancelled'],
+        // Facility Usage Chart
+        const facilityUsageCtx = document.getElementById('facilityUsageChart');
+        if (facilityUsageCtx) {
+            const facilityData = {
+                labels: @Html.Raw(Json.Serialize(Model.FacilityUsage.Labels)),
                 datasets: [{
-                    label: 'Service Requests',
-                    data: [42, 15, 23, 8],
-                    backgroundColor: ['#28a745', '#17a2b8', '#ffc107', '#dc3545']
+                    label: 'Usage Count',
+                    data: @Html.Raw(Json.Serialize(Model.FacilityUsage.Data)),
+                    backgroundColor: '#4e6e4d',
+                    borderRadius: 4
                 }]
             };
             
-            new Chart(serviceRequestCanvas, {
+            new Chart(facilityUsageCtx, {
                 type: 'bar',
-                data: serviceRequestData,
+                data: facilityData,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
                             grid: {
-                                drawBorder: false
+                                drawBorder: false,
+                                color: 'rgba(0,0,0,0.05)'
                             }
                         },
                         x: {
@@ -775,5 +1040,67 @@
                 }
             });
         }
+        
+        // Payment Status Chart
+        const paymentStatusCtx = document.getElementById('paymentStatusChart');
+        if (paymentStatusCtx) {
+            const paymentData = {
+                labels: ['Paid', 'Pending', 'Overdue'],
+                datasets: [{
+                    data: [
+                        @Model.PaymentStats.PaidPercentage, 
+                        @Model.PaymentStats.PendingPercentage, 
+                        @Model.PaymentStats.OverduePercentage
+                    ],
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                    borderWidth: 0
+                }]
+            };
+            
+            new Chart(paymentStatusCtx, {
+                type: 'pie',
+                data: paymentData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Handle time range dropdown for activity chart
+        document.querySelectorAll('[data-range]').forEach(item => {
+            item.addEventListener('click', event => {
+                event.preventDefault();
+                const days = event.target.dataset.range;
+                document.getElementById('timeRangeDropdown').textContent = event.target.textContent;
+                // Here you would fetch new data and update the chart
+                console.log(`Fetch data for last ${days} days`);
+            });
+        });
+
+        // Handle user approval actions
+        window.approveUser = function(userId) {
+            // Add AJAX call to approve user
+            console.log(`Approving user ${userId}`);
+            // On success, refresh the list or remove the item
+        };
+
+        window.rejectUser = function(userId) {
+            // Add AJAX call to reject user
+            console.log(`Rejecting user ${userId}`);
+            // On success, refresh the list or remove the item
+        };
     });
 </script>

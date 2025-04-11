@@ -11,6 +11,15 @@ namespace HomeOwners.Models
         [Required]
         public int FacilityId { get; set; }
         public Facility Facility { get; set; }
+        public decimal TotalPrice { get; set; }
+
+        [Display(Name = "Total Hours")]
+        public decimal TotalHours { get; set; }
+
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;
+        public DateTime? PaidDate { get; set; }
+        public string? TransactionId { get; set; }
+        public string? ReceiptNumber { get; set; }
 
         [Required]
         public string UserId { get; set; }
@@ -51,6 +60,12 @@ namespace HomeOwners.Models
         [Required]
         [Display(Name = "Status")]
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
+    }
+
+    public enum PaymentStatus
+    {
+        Unpaid,
+        Paid
     }
 
     public enum BookingStatus

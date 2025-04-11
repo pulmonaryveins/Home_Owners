@@ -76,6 +76,7 @@ public class HomeController : Controller
     }
 
     [Authorize] // Ensure user is logged 
+    [Authorize] // Ensure user is logged 
     public async Task<IActionResult> BookFacility(int id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -104,6 +105,9 @@ public class HomeController : Controller
             BookingDate = DateTime.Today,
             UserId = userId
         };
+
+        // Set the facility image url in ViewBag
+        ViewBag.FacilityImage = facility.ImageUrl;
 
         return View(model);
     }

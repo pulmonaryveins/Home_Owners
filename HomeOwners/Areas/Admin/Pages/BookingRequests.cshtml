@@ -267,13 +267,13 @@
                                             <span class="fw-medium">@booking.FullName</span>
                                             <small class="d-block text-muted">House #@booking.HouseNumber</small>
                                         </td>
-                                        <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
                                         <td>
                                             <span class="contact-info">
                                                 <i class="bi bi-telephone me-1"></i>
                                                 @booking.ContactNumber
                                             </span>
                                         </td>
+                                        <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
                                         <td>
                                             <span class="time-badge">
                                                 @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - 

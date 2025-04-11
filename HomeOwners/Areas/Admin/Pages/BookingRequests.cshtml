@@ -243,10 +243,10 @@
                             <tr>
                                 <th>Facility</th>
                                 <th>Requester</th>
-                                <th>Date</th>
-                                <th>Time</th>
                                 <th>Contact</th>
-                                <th>Requested On</th>
+                                <th>Booking Date</th>
+                                <th>Duration</th>
+                                <th>Amount Due</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -263,11 +263,27 @@
                                                 <span class="facility-name">@booking.Facility?.Name</span>
                                             </div>
                                         </td>
-                                        <td><span class="fw-medium">@booking.FullName</span></td>
+                                        <td>
+                                            <span class="fw-medium">@booking.FullName</span>
+                                            <small class="d-block text-muted">House #@booking.HouseNumber</small>
+                                        </td>
                                         <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
-                                        <td><span class="time-badge">@DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")</span></td>
-                                        <td>@booking.ContactNumber</td>
-                                        <td><span class="text-muted">@booking.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                        <td>
+                                            <span class="contact-info">
+                                                <i class="bi bi-telephone me-1"></i>
+                                                @booking.ContactNumber
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="time-badge">
+                                                @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - 
+                                                @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
+                                                <small class="ms-1">(@booking.TotalHours.ToString("0.0") hrs)</small>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span>
+                                        </td>
                                         <td>
                                             <div class="d-flex gap-2">
                                                 <form method="post" asp-page-handler="Approve" asp-route-id="@booking.Id">
@@ -288,7 +304,7 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="7" class="text-center py-5">
+                                    <td colspan="8" class="text-center py-5">
                                         <div class="empty-state">
                                             <i class="bi bi-calendar-check display-4 text-muted"></i>
                                             <h5 class="mt-3">No pending requests</h5>
@@ -491,11 +507,12 @@
                             <tr>
                                 <th>Facility</th>
                                 <th>Requester</th>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Status</th>
                                 <th>Contact</th>
-                                <th>Requested On</th>
+                                <th>Booking Date</th>
+                                <th>Duration</th>
+                                <th>Contact</th>
+                                <th>Status</th>
+                                <th>Amount Due</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -512,9 +529,24 @@
                                                 <span class="facility-name">@booking.Facility?.Name</span>
                                             </div>
                                         </td>
-                                        <td><span class="fw-medium">@booking.FullName</span></td>
+                                        <td>
+                                            <span class="fw-medium">@booking.FullName</span>
+                                            <small class="d-block text-muted">House #@booking.HouseNumber</small>
+                                        </td>
+                                        <td>
+                                            <span class="contact-info">
+                                                <i class="bi bi-telephone me-1"></i>
+                                                @booking.ContactNumber
+                                            </span>
+                                        </td>
                                         <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
-                                        <td><span class="time-badge">@DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")</span></td>
+                                        <td>
+                                            <span class="time-badge">
+                                                @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - 
+                                                @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
+                                                <small class="ms-1">(@booking.TotalHours.ToString("0.0") hrs)</small>
+                                            </span>
+                                        </td>
                                         <td>
                                             @if (booking.Status == BookingStatus.Pending)
                                             {
@@ -541,8 +573,15 @@
                                                 </span>
                                             }
                                         </td>
-                                        <td>@booking.ContactNumber</td>
-                                        <td><span class="text-muted">@booking.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                        <td>
+                                            <span class="text-muted">
+                                                <i class="bi bi-calendar-date me-1"></i>
+                                                @booking.CreatedDate.ToString("MMM dd, yyyy")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span>
+                                        </td>
                                         <td>
                                             @if (booking.Status == BookingStatus.Approved)
                                             {
@@ -575,7 +614,7 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="8" class="text-center py-5">
+                                    <td colspan="9" class="text-center py-5">
                                         <div class="empty-state">
                                             <i class="bi bi-calendar-x display-4 text-muted"></i>
                                             <h5 class="mt-3">No reservations found</h5>
@@ -1081,6 +1120,70 @@
 
     .booking-table tbody tr:hover {
         background-color: rgba(78, 110, 77, 0.03);
+    }
+
+    .price-badge {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 0.95rem;
+        background-color: rgba(78, 110, 77, 0.1);
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+    }
+    
+    .contact-info {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+    }
+    
+    .booking-table th, 
+    .booking-table td {
+        vertical-align: middle;
+        padding: 0.75rem 1rem;
+    }
+    
+    .booking-table tbody tr {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .time-badge {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: var(--primary-color);
+        padding: 0.4rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-block;
+        line-height: 1.2;
+    }
+    
+    .time-badge small {
+        opacity: 0.8;
+        font-weight: normal;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    
+    .booking-thumbnail {
+        width: 60px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
     }
 </style>
 

@@ -18,6 +18,15 @@ namespace HomeOwners.Services
             _context = context;
         }
 
+        public async Task<bool> HasActiveBookingsAsync(string userId)
+        {
+            return await _context.Bookings
+                .AnyAsync(b => b.UserId == userId &&
+                               (b.Status == BookingStatus.Pending ||
+                                b.Status == BookingStatus.Approved) &&
+                               b.BookingDate >= DateTime.Today);
+        }
+
         public async Task<List<Booking>> GetPendingBookingsAsync()
         {
             return await _context.Bookings

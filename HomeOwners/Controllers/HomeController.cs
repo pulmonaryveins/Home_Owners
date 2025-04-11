@@ -75,9 +75,19 @@ public class HomeController : Controller
         return View(facilities);
     }
 
-    [Authorize] // Ensure user is logged in
+    [Authorize] // Ensure user is logged 
     public async Task<IActionResult> BookFacility(int id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Check if user already has an active booking
+        if (await _bookingService.HasActiveBookingsAsync(userId))
+        {
+            TempData["StatusMessage"] = "You already have an active facility booking. You can only have one active booking at a time.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction("MyBookings");
+        }
+
         var facility = await _facilityService.GetFacilityByIdAsync(id);
         if (facility == null)
         {
@@ -92,7 +102,7 @@ public class HomeController : Controller
             AvailableFrom = facility.AvailableFrom,
             AvailableTo = facility.AvailableTo,
             BookingDate = DateTime.Today,
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            UserId = userId
         };
 
         return View(model);
@@ -105,19 +115,36 @@ public class HomeController : Controller
     {
         if (ModelState.IsValid)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Check if user already has an active booking
+            if (await _bookingService.HasActiveBookingsAsync(userId))
+            {
+                TempData["StatusMessage"] = "You can only have one active facility booking at a time. Please wait until your current booking is completed or contact an administrator.";
+                TempData["StatusType"] = "Error";
+
+                // Use a different variable name to avoid the scope conflict
+                var currentFacility = await _facilityService.GetFacilityByIdAsync(model.FacilityId);
+                model.FacilityName = currentFacility?.Name;
+                model.PricePerHour = currentFacility?.PricePerHour ?? 0;
+                ViewBag.FacilityImage = currentFacility?.ImageUrl;
+
+                return View(model);
+            }
+
             // Create a new booking entity
             var booking = new Booking
             {
                 FacilityId = model.FacilityId,
-                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                UserId = userId,
                 FullName = model.FullName,
                 ContactNumber = model.ContactNumber,
                 HouseNumber = model.HouseNumber,
                 BookingDate = model.BookingDate,
                 StartTime = model.StartTime,
                 EndTime = model.EndTime,
-                TotalHours = model.TotalHours,  // Ensure this property is set
-                TotalPrice = model.TotalPrice,  // Ensure this property is set
+                TotalHours = model.TotalHours,
+                TotalPrice = model.TotalPrice,
                 SpecialRequests = model.SpecialRequests,
                 CreatedDate = DateTime.Now,
                 Status = BookingStatus.Pending
@@ -132,10 +159,11 @@ public class HomeController : Controller
         }
 
         // If we got this far, something failed, redisplay form
-        var facility = await _facilityService.GetFacilityByIdAsync(model.FacilityId);
-        model.FacilityName = facility?.Name;
-        model.PricePerHour = facility?.PricePerHour ?? 0;
-        ViewBag.FacilityImage = facility?.ImageUrl;
+        // Use a different variable name here too to be consistent
+        var selectedFacility = await _facilityService.GetFacilityByIdAsync(model.FacilityId);
+        model.FacilityName = selectedFacility?.Name;
+        model.PricePerHour = selectedFacility?.PricePerHour ?? 0;
+        ViewBag.FacilityImage = selectedFacility?.ImageUrl;
 
         return View(model);
     }

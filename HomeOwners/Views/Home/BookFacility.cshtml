@@ -304,7 +304,7 @@
                                         
                                         <div class="row mb-4">
                                             <div class="col-md-12">
-                                                <label asp-for="SpecialRequests" class="form-label">Special Requests (Optional)</label>
+                                                <label asp-for="SpecialRequests" class="form-label">Special Requests</label>
                                                 <textarea asp-for="SpecialRequests" class="form-control" rows="3" placeholder="Any special requirements or additional information"></textarea>
                                                 <span asp-validation-for="SpecialRequests" class="text-danger"></span>
                                             </div>
@@ -596,7 +596,7 @@
     }
     
     .price-summary-title {
-        color: var(--primary-color);
+        color: var (--primary-color);
         font-weight: 600;
         font-size: 1rem;
         margin-bottom: 0.75rem;
@@ -716,6 +716,36 @@
             let today = new Date().toISOString().split('T')[0];
             document.getElementById('BookingDate').setAttribute('min', today);
 
+            // Facility Availability Time Constraints
+            const facilityAvailableFrom = '@(Model.AvailableFrom.HasValue ? DateTime.Today.Add(Model.AvailableFrom.Value).ToString("HH:mm") : "09:00")';
+            const facilityAvailableTo = '@(Model.AvailableTo.HasValue ? DateTime.Today.Add(Model.AvailableTo.Value).ToString("HH:mm") : "21:00")';
+            
+            // Set min and max time for time inputs
+            const startTimeInput = document.getElementById('StartTime');
+            const endTimeInput = document.getElementById('EndTime');
+            
+            startTimeInput.setAttribute('min', facilityAvailableFrom);
+            startTimeInput.setAttribute('max', facilityAvailableTo);
+            endTimeInput.setAttribute('min', facilityAvailableFrom);
+            endTimeInput.setAttribute('max', facilityAvailableTo);
+            
+            // Create help text for time availability
+            const startTimeContainer = startTimeInput.closest('.col-md-6');
+            const availabilityHelpText = document.createElement('small');
+            availabilityHelpText.className = 'form-text text-muted';
+            startTimeContainer.appendChild(availabilityHelpText);
+            
+            // Function to format time for display (converts 24h to 12h format)
+            function formatTime(timeStr) {
+                const timeParts = timeStr.split(':');
+                let hours = parseInt(timeParts[0]);
+                const minutes = timeParts[1];
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                return hours + ':' + minutes + ' ' + ampm;
+            }
+
             // Add focus styles to the form controls
             const formControls = document.querySelectorAll('.form-control');
             formControls.forEach(control => {
@@ -765,12 +795,162 @@
                 }
             }
 
+            // Validate time selection against facility hours
+            function validateTimeSelection() {
+                const startTime = startTimeInput.value;
+                const endTime = endTimeInput.value;
+                
+                if (startTime && endTime) {
+                    // Check if times are within facility hours
+                    if (startTime < facilityAvailableFrom) {
+                        showTimeError(`Start time must be after ${formatTime(facilityAvailableFrom)}`);
+                        startTimeInput.setCustomValidity(`Start time must be after ${formatTime(facilityAvailableFrom)}`);
+                        return false;
+                    } else if (endTime > facilityAvailableTo) {
+                        showTimeError(`End time must be before ${formatTime(facilityAvailableTo)}`);
+                        endTimeInput.setCustomValidity(`End time must be before ${formatTime(facilityAvailableTo)}`);
+                        return false;
+                    } else if (startTime >= endTime) {
+                        showTimeError('End time must be after start time');
+                        endTimeInput.setCustomValidity('End time must be after start time');
+                        return false;
+                    } else {
+                        hideTimeError();
+                        startTimeInput.setCustomValidity('');
+                        endTimeInput.setCustomValidity('');
+                        return true;
+                    }
+                }
+                return true; // If either field is empty, other validation will catch it
+            }
+            
+            // Add time error message display
+            function showTimeError(message) {
+                // Remove any existing error message
+                hideTimeError();
+                
+                const timeErrorContainer = document.createElement('div');
+                timeErrorContainer.id = 'timeError';
+                timeErrorContainer.className = 'alert alert-danger mt-2';
+                timeErrorContainer.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i>${message}`;
+                
+                const bookingDetailsSection = document.querySelector('.form-section:nth-child(2)');
+                bookingDetailsSection.appendChild(timeErrorContainer);
+            }
+            
+            function hideTimeError() {
+                const existingError = document.getElementById('timeError');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
             // Add event listeners to time inputs
-            document.getElementById('StartTime').addEventListener('change', calculatePrice);
-            document.getElementById('EndTime').addEventListener('change', calculatePrice);
+            startTimeInput.addEventListener('change', function() {
+                validateTimeSelection();
+                calculatePrice();
+            });
+            
+            endTimeInput.addEventListener('change', function() {
+                validateTimeSelection();
+                calculatePrice();
+            });
+            
+            // Form submission validation
+            document.querySelector('form').addEventListener('submit', function(e) {
+                if (!validateTimeSelection()) {
+                    e.preventDefault();
+                    return false;
+                }
+                return true;
+            });
 
             // Initial calculation on page load
             calculatePrice();
         });
     </script>
 }
+
+<!-- Add the following code to the booking details section for server-side validation -->
+@{
+    var availableFromFormatted = Model.AvailableFrom.HasValue ? DateTime.Today.Add(Model.AvailableFrom.Value).ToString("h:mm tt") : "9:00 AM";
+    var availableToFormatted = Model.AvailableTo.HasValue ? DateTime.Today.Add(Model.AvailableTo.Value).ToString("h:mm tt") : "9:00 PM";
+}
+
+<!-- This JavaScript code controls the alert display with a fade effect -->
+<script>
+    window.onload = function() {
+        // Show availability notification if it exists
+        const availabilityAlert = document.getElementById('availabilityAlert');
+        if (availabilityAlert) {
+            setTimeout(function() {
+                availabilityAlert.classList.add('show');
+            }, 500);
+            
+            // Auto-hide after 8 seconds
+            setTimeout(function() {
+                availabilityAlert.classList.remove('show');
+                setTimeout(function() {
+                    availabilityAlert.remove();
+                }, 500);
+            }, 8000);
+        }
+    };
+</script>
+
+<style>
+    /* ...existing styles... */
+    
+    /* Availability alert styling */
+    .availability-alert {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        max-width: 350px;
+        z-index: 1050;
+        opacity: 0;
+        transform: translateX(30px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .availability-alert.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    
+    /* Time validation error styling */
+    #timeError {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+        animation: shake 0.5s linear;
+    }
+    
+    /* Enhanced form field styling with validation indicators */
+    .form-control.is-invalid {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .form-control.is-valid {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+</style>
+
+<!-- Add a notification about facility availability that appears when the page loads -->
+<div id="availabilityAlert" class="availability-alert alert alert-info" role="alert">
+    <div class="d-flex">
+        <div class="me-3">
+            <i class="bi bi-info-circle-fill fs-4"></i>
+        </div>
+        <div>
+            <h6 class="alert-heading mb-1">Facility Hours</h6>
+            <p class="mb-0">This facility is only available from <strong>@availableFromFormatted</strong> to <strong>@availableToFormatted</strong>.</p>
+        </div>
+    </div>
+</div>

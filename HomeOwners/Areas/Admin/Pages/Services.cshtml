@@ -231,7 +231,6 @@
                                         @if (service.AvailableFrom.HasValue && service.AvailableTo.HasValue)
                                         {
                                             <div class="availability-time">
-                                                <i class="bi bi-clock me-1"></i>
                                                 <span>
                                                     @DateTime.Today.Add(service.AvailableFrom.Value).ToString("h:mm tt") -
                                                     @DateTime.Today.Add(service.AvailableTo.Value).ToString("h:mm tt")

@@ -173,10 +173,10 @@
                         <table class="table table-hover request-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Requester</th>
                                     <th>Service</th>
-                                    <th>Date & Time</th>
+                                    <th>Requester</th>
                                     <th>Contact</th>
+                                    <th>Date & Time</th>
                                     <th>Created On</th>
                                     <th>Actions</th>
                                 </tr>
@@ -186,13 +186,8 @@
                                 {
                                     @foreach (var request in Model.PendingRequests)
                                     {
+
                                         <tr>
-                                            <td>
-                                                <div class="requester-info">
-                                                    <strong>@request.FullName</strong>
-                                                    <div class="house-number">House #@request.HouseNumber</div>
-                                                </div>
-                                            </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
@@ -201,14 +196,20 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="date-time-info">
-                                                    <div><i class="bi bi-calendar3 me-1"></i> @request.RequestDate.ToString("MMM dd, yyyy")</div>
-                                                    <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
+                                                <div class="requester-info">
+                                                    <strong>@request.FullName</strong>
+                                                    <div class="house-number">House #@request.HouseNumber</div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="contact-info">
                                                     <i class="bi bi-telephone me-1"></i> @request.ContactNumber
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="date-time-info">
+                                                    <div><i class="bi bi-calendar3 me-1"></i> @request.RequestDate.ToString("MMM dd, yyyy")</div>
+                                                    <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
                                                 </div>
                                             </td>
                                             <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
@@ -329,15 +330,23 @@
                 </div>
 
                 <div class="tab-pane fade" id="all-requests">
+                    <div class="d-flex justify-content-end p-3">
+                        <form method="post" asp-page-handler="ClearAllRequests" onsubmit="return confirm('WARNING: This will permanently delete ALL service requests from the database. This action cannot be undone. Are you sure you want to proceed?');">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash3"></i> Clear All Service Requests
+                            </button>
+                        </form>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover request-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Requester</th>
                                     <th>Service</th>
+                                    <th>Requester</th>
+                                    <th>Contact</th>
                                     <th>Date & Time</th>
-                                    <th>Status</th>
                                     <th>Created On</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -348,16 +357,21 @@
                                     {
                                         <tr>
                                             <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
+                                                    <span class="service-name">@request.Service?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>
                                                 <div class="requester-info">
                                                     <strong>@request.FullName</strong>
                                                     <div class="house-number">House #@request.HouseNumber</div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
-                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
-                                                    <span class="service-name">@request.Service?.Name</span>
+                                                <div class="contact-info">
+                                                    <i class="bi bi-telephone me-1"></i> @request.ContactNumber
                                                 </div>
                                             </td>
                                             <td>
@@ -366,6 +380,7 @@
                                                     <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
                                                 </div>
                                             </td>
+                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
                                             <td>
                                                 @if (request.Status == ServiceRequestStatus.Pending)
                                                 {
@@ -392,7 +407,6 @@
                                                     </span>
                                                 }
                                             </td>
-                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-outline-primary"
                                                         data-bs-toggle="modal" data-bs-target="#detailsModalAll@(request.Id)">

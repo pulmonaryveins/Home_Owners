@@ -18,6 +18,13 @@ namespace HomeOwners.Services
             _context = context;
         }
 
+        public async Task DeleteAllServiceRequestsAsync()
+        {
+            var allRequests = await _context.ServiceRequests.ToListAsync();
+            _context.ServiceRequests.RemoveRange(allRequests);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<ServiceRequest>> GetAllServiceRequestsAsync()
         {
             return await _context.ServiceRequests

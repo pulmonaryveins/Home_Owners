@@ -32,10 +32,8 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/Home/Facilities#function-hall">Function Hall</a></li>
-                        <li><a class="dropdown-item" href="/Home/Facilities#swimming-pool">Swimming Pool</a></li>
-                        <li><a class="dropdown-item" href="/Home/Facilities#clubhouse">Clubhouse</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">All Bookings</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -45,16 +43,30 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/Home/Annoucements#events">Upcoming Events</a></li>
+                        <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
                         <li><a class="dropdown-item" href="/Home/Annoucements#community">Community Forum</a></li>
                     </ul>
                 </li>
-                <li class="nav-item"></li>
-                <a class="nav-link active" href="/Home/Services">Services</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Services">All Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">My Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">All Request</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Home/Billing">Billing</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Billing">Unpaid Bills</a></li>
+                        <li><a class="dropdown-item" href="/Home/Billing">Payment History</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/Home/Contact">Contact</a>
@@ -174,9 +186,19 @@
                                     </div>
                                 }
                             </div>
-                            <a asp-controller="Home" asp-action="RequestService" asp-route-id="@service.Id" class="btn btn-primary w-100 request-btn">
-                                <i class="bi bi-tools me-2"></i>Request Service
-                            </a>
+                            @if (ViewBag.HasActiveServiceRequest)
+                            {
+                                <button type="button" class="btn btn-secondary disabled w-100" disabled
+                                        data-bs-toggle="tooltip" title="You already have an active service request">
+                                    <i class="bi bi-tools me-2"></i>Request Service
+                                </button>
+                            }
+                            else
+                            {
+                                <a asp-controller="Home" asp-action="RequestService" asp-route-id="@service.Id" class="btn btn-primary w-100 request-btn">
+                                    <i class="bi bi-tools me-2"></i>Request Service
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>

@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/css/nav.css" asp-append-version="true" />
 
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
@@ -26,46 +27,93 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">
+                        Dashboard
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Users</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users">
+                        Users
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Services">Services</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Services">Manage Services</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ServiceRequests">Service Request</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Facilities">Facilities</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Facilities">Manage Facilities</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/BookingRequests">Booking Requests</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active" asp-area="Admin" asp-page="/Calendar">Calendar</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Announcement</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Calendar">Manage Events</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Forum</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Polls</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Announcement">Announcements</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Billing">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
                         Billing
                     </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Billing">All Invoices</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Billing">Payment History</a></li>
+                    </ul>
                 </li>
             </ul>
 
             <!-- Profile Menu -->
-            <div class="nav-item dropdown profile-menu">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle me-1"></i>
-                    <span class="d-none d-lg-inline">@User.Identity?.Name</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
-                          asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="dropdown-item">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
-                </ul>
+            <div class="nav-items-right">
+                <div class="nav-item dropdown profile-menu">
+                    <a class="profile-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="profile-avatar">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                        <li class="dropdown-header">
+                            <div class="user-info">
+                                <span class="user-name">@(User.Identity?.Name ?? "Admin")</span>
+                                <span class="user-role">Administrator</span>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" asp-area="Admin" asp-page="/Profile">
+                                <i class="bi bi-person-gear"></i> Profile Settings
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                  asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item logout-item">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -80,9 +128,6 @@
             </h2>
             <p class="text-muted mb-0 mt-1">Manage community events and scheduled activities</p>
         </div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEventModal">
-            <i class="bi bi-plus-circle me-1"></i> Create New Event
-        </button>
     </div>
 
     @if (TempData["StatusMessage"] != null)
@@ -95,7 +140,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
-    
+
     <div class="row mb-4">
         <div class="col-lg-3">
             <div class="card dashboard-card shadow-sm mb-4">
@@ -138,7 +183,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">Date Range</label>
                         <select id="dateRangeFilter" class="form-select">
@@ -150,7 +195,7 @@
                             <option value="all" selected>All Events</option>
                         </select>
                     </div>
-                    
+
                     <div>
                         <button id="applyFilters" class="btn btn-primary w-100">
                             <i class="bi bi-funnel me-1"></i> Apply Filters
@@ -158,7 +203,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="card dashboard-card shadow-sm">
                 <div class="card-header bg-white py-3">
                     <h5 class="card-title mb-0">
@@ -189,7 +234,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="col-lg-9">
             <div class="card dashboard-card shadow-sm">
                 <div class="card-header bg-white py-3">
@@ -198,11 +243,8 @@
                             <i class="bi bi-calendar3 me-2"></i> Community Calendar
                         </h5>
                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-primary btn-sm" id="printCalendar">
-                                <i class="bi bi-printer"></i> Print
-                            </button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" id="exportCalendar">
-                                <i class="bi bi-download"></i> Export
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createEventModal">
+                                <i class="bi bi-plus-circle me-1"></i> Create New Event
                             </button>
                         </div>
                     </div>
@@ -761,6 +803,121 @@
             // If no overlap, submit the form
             this.submit();
         });
+
+                // Function to show visual indication of overlapping time on form inputs
+        function markOverlappingTimeInputs(isOverlapping) {
+            const createForm = document.getElementById('createEventForm');
+            const editForm = document.getElementById('editEventForm');
+
+            // Determine which form is active
+            const form = document.getElementById('createEventModal').classList.contains('show') ? createForm : editForm;
+            const startTimeId = form === createForm ? 'StartTime' : 'editStartTime';
+            const endTimeId = form === createForm ? 'EndTime' : 'editEndTime';
+
+            const startTimeInput = document.getElementById(startTimeId);
+            const endTimeInput = document.getElementById(endTimeId);
+
+            if (isOverlapping) {
+                // Add visual indication of error
+                startTimeInput.classList.add('is-invalid');
+                endTimeInput.classList.add('is-invalid');
+
+                // Add error message if it doesn't exist
+                let errorDiv = form.querySelector('.overlap-error');
+                if (!errorDiv) {
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger overlap-error mt-3';
+                    errorDiv.innerHTML = `
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        This time slot conflicts with an existing event. Please choose a different time.
+                    `;
+                    endTimeInput.parentNode.parentNode.after(errorDiv);
+                }
+            } else {
+                // Remove visual indication of error
+                startTimeInput.classList.remove('is-invalid');
+                endTimeInput.classList.remove('is-invalid');
+
+                // Remove error message if it exists
+                const errorDiv = form.querySelector('.overlap-error');
+                if (errorDiv) {
+                    errorDiv.remove();
+                }
+            }
+        }
+
+        // Enhanced check for event overlap that provides visual feedback
+        async function enhancedEventOverlapCheck(form) {
+            const isCreateForm = form.id === 'createEventForm';
+            const startTimeId = isCreateForm ? 'StartTime' : 'editStartTime';
+            const endTimeId = isCreateForm ? 'EndTime' : 'editEndTime';
+            const eventId = isCreateForm ? null : document.getElementById('editEventId').value;
+
+            const startTime = document.getElementById(startTimeId).value;
+            const endTime = document.getElementById(endTimeId).value;
+
+            if (!startTime || !endTime) return false;
+
+            // Basic validation - ensure end time is after start time
+            const startDate = new Date(startTime);
+            const endDate = new Date(endTime);
+
+            if (endDate <= startDate) {
+                showToast('End time must be after start time', 'danger');
+                markOverlappingTimeInputs(true);
+                return true; // Prevent form submission
+            }
+
+            // Check for overlapping events
+            const hasOverlap = await checkEventOverlap(startTime, endTime, eventId);
+            markOverlappingTimeInputs(hasOverlap);
+
+            if (hasOverlap) {
+                showToast('This time slot conflicts with an existing event', 'danger');
+                return true; // Prevent form submission
+            }
+
+            return false; // Allow form submission
+        }
+
+        // Update event listeners for form submission with enhanced validation
+        document.getElementById('createEventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const hasErrors = await enhancedEventOverlapCheck(this);
+            if (!hasErrors) {
+                this.submit();
+            }
+        });
+
+        document.getElementById('editEventForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const hasErrors = await enhancedEventOverlapCheck(this);
+            if (!hasErrors) {
+                this.submit();
+            }
+        });
+
+        // Add real-time validation as user changes dates
+        function addDateChangeListeners() {
+            const dateInputs = ['StartTime', 'EndTime', 'editStartTime', 'editEndTime'];
+
+            dateInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.addEventListener('change', async function() {
+                        const form = this.closest('form');
+                        if (form) {
+                            await enhancedEventOverlapCheck(form);
+                        }
+                    });
+                }
+            });
+        }
+
+        // Initialize date change listeners when DOM is loaded
+        addDateChangeListeners();
     </script>
 }
 

@@ -17,6 +17,15 @@ namespace HomeOwners.Services
             _context = context;
         }
 
+        public async Task<bool> HasActiveServiceRequestsAsync(string userId)
+        {
+            return await _context.ServiceRequests
+                .AnyAsync(sr => sr.UserId == userId &&
+                               (sr.Status == ServiceRequestStatus.Pending ||
+                                sr.Status == ServiceRequestStatus.Approved) &&
+                               sr.RequestDate >= DateTime.Today);
+        }
+
         public async Task<List<Service>> GetAllServicesAsync()
         {
             return await _context.Services.OrderBy(s => s.Name).ToListAsync();

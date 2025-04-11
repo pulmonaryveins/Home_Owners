@@ -8,6 +8,8 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/css/nav.css" asp-append-version="true" />
+
 
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
@@ -27,53 +29,93 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">
+                        Dashboard
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Users</a>
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users">
+                        Users
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active" asp-area="Admin" asp-page="/Services">Services</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Services">Manage Services</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ServiceRequests">Service Request</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Facilities">Facilities</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Facilities">Manage Facilities</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/BookingRequests">Booking Requests</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Calendar">Calendar</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle acitve" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Announcement</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Calendar">Manage Events</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Forum</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Polls</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Announcement">Announcements</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Billing">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
                         Billing
                     </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Billing">All Invoices</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Billing">Payment History</a></li>
+                    </ul>
                 </li>
             </ul>
 
             <!-- Profile Menu -->
-            <div class="nav-item dropdown profile-menu">
-                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle me-1"></i>
-                    <span class="d-none d-lg-inline">@User.Identity?.Name</span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
-                            <i class="bi bi-gear"></i> Profile Settings
-                        </a>
-                    </li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
-                              asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                            <button type="submit" class="dropdown-item">
-                                <i class="bi bi-box-arrow-right"></i> Logout
-                            </button>
-                        </form>
-                    </li>
-                </ul>
+            <div class="nav-items-right">
+                <div class="nav-item dropdown profile-menu">
+                    <a class="profile-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="profile-avatar">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                        <li class="dropdown-header">
+                            <div class="user-info">
+                                <span class="user-name">@(User.Identity?.Name ?? "Admin")</span>
+                                <span class="user-role">Administrator</span>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" asp-area="Admin" asp-page="/Profile">
+                                <i class="bi bi-person-gear"></i> Profile Settings
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                  asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item logout-item">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -113,7 +155,7 @@
                         <i class="bi bi-hourglass me-2"></i> Pending Requests
                         @if (Model.PendingRequests.Any())
                         {
-                            <span class="badge bg-primary ms-1">@Model.PendingRequests.Count()</span>
+                            <span class="badge bg-danger ms-1">@Model.PendingRequests.Count()</span>
                         }
                     </a>
                 </li>
@@ -127,14 +169,61 @@
         <div class="card-body p-0">
             <div class="tab-content">
                 <div class="tab-pane fade show active" id="pending-requests">
+                    <div class="card-body border-bottom">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="pendingSearch" 
+                                           placeholder="Search pending requests..." 
+                                           aria-label="Search requests">
+                                </div>
+                            </div>
+                            <div class="col-md-6 d-flex justify-content-md-end">
+                                <div class="dropdown">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <i class="bi bi-sort-alpha-down"></i>
+                                        <span class="ms-1 d-none d-md-inline">Sort by</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item active" href="#">
+                                                <i class="bi bi-calendar-date"></i> Newest First
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-calendar-date"></i> Oldest First
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-sort-alpha-down"></i> Name (A-Z)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-sort-alpha-up"></i> Name (Z-A)
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover request-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Requester</th>
                                     <th>Service</th>
-                                    <th>Date & Time</th>
+                                    <th>Requester</th>
                                     <th>Contact</th>
+                                    <th>Date & Time</th>
                                     <th>Created On</th>
                                     <th>Actions</th>
                                 </tr>
@@ -146,16 +235,21 @@
                                     {
                                         <tr>
                                             <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
+                                                    <span class="service-name">@request.Service?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>
                                                 <div class="requester-info">
                                                     <strong>@request.FullName</strong>
                                                     <div class="house-number">House #@request.HouseNumber</div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
-                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
-                                                    <span class="service-name">@request.Service?.Name</span>
+                                                <div class="contact-info">
+                                                    <i class="bi bi-telephone me-1"></i> @request.ContactNumber
                                                 </div>
                                             </td>
                                             <td>
@@ -164,21 +258,16 @@
                                                     <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
                                                 </div>
                                             </td>
-                                            <td>
-                                                <div class="contact-info">
-                                                    <i class="bi bi-telephone me-1"></i> @request.ContactNumber
-                                                </div>
-                                            </td>
                                             <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
                                             <td>
                                                 <div class="d-flex gap-2">
                                                     <form method="post" asp-page-handler="ApproveRequest" asp-route-id="@request.Id">
-                                                        <button type="submit" class="btn btn-sm btn-success">
+                                                        <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Approve Request">
                                                             <i class="bi bi-check-lg"></i> Approve
                                                         </button>
                                                     </form>
                                                     <form method="post" asp-page-handler="RejectRequest" asp-route-id="@request.Id">
-                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                        <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Reject Request">
                                                             <i class="bi bi-x-lg"></i> Reject
                                                         </button>
                                                     </form>
@@ -287,15 +376,84 @@
                 </div>
 
                 <div class="tab-pane fade" id="all-requests">
+                    <div class="card-body border-bottom">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="allSearch" 
+                                           placeholder="Search requests..." 
+                                           aria-label="Search all requests">
+                                </div>
+                            </div>
+                            <div class="col-md-6 d-flex justify-content-md-end gap-2">
+                                <form method="post" asp-page-handler="ClearAllRequests" onsubmit="return confirm('WARNING: This will permanently delete ALL service requests from the database. This action cannot be undone. Are you sure you want to proceed?');">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-trash3"></i> Clear Data
+                                    </button>
+                                </form>
+                                <div class="dropdown">
+                                    <button type="button"
+                                            class="btn btn-outline-primary dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <i class="bi bi-filter"></i>
+                                        <span class="ms-1">All Statuses</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item active" href="#"><i class="bi bi-grid-3x3-gap"></i> All Statuses</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-hourglass"></i> Pending</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-check-circle"></i> Approved</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-trophy"></i> Done</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-x-circle"></i> Rejected</a></li>
+                                    </ul>
+                                </div>
+                                <div class="dropdown">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary dropdown-toggle"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <i class="bi bi-sort-alpha-down"></i>
+                                        <span class="ms-1 d-none d-md-inline">Sort by</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item active" href="#">
+                                                <i class="bi bi-calendar-date"></i> Newest First
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-calendar-date"></i> Oldest First
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-sort-alpha-down"></i> Name (A-Z)
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="#">
+                                                <i class="bi bi-sort-alpha-up"></i> Name (Z-A)
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-hover request-table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Requester</th>
                                     <th>Service</th>
+                                    <th>Requester</th>
+                                    <th>Contact</th>
                                     <th>Date & Time</th>
-                                    <th>Status</th>
                                     <th>Created On</th>
+                                    <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -306,16 +464,21 @@
                                     {
                                         <tr>
                                             <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
+                                                    <span class="service-name">@request.Service?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>
                                                 <div class="requester-info">
                                                     <strong>@request.FullName</strong>
                                                     <div class="house-number">House #@request.HouseNumber</div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
-                                                         alt="@request.Service?.Name" class="request-thumbnail me-3">
-                                                    <span class="service-name">@request.Service?.Name</span>
+                                                <div class="contact-info">
+                                                    <i class="bi bi-telephone me-1"></i> @request.ContactNumber
                                                 </div>
                                             </td>
                                             <td>
@@ -324,6 +487,7 @@
                                                     <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
                                                 </div>
                                             </td>
+                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
                                             <td>
                                                 @if (request.Status == ServiceRequestStatus.Pending)
                                                 {
@@ -350,7 +514,6 @@
                                                     </span>
                                                 }
                                             </td>
-                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
                                             <td>
                                                 <button type="button" class="btn btn-sm btn-outline-primary"
                                                         data-bs-toggle="modal" data-bs-target="#detailsModalAll@(request.Id)">
@@ -446,6 +609,27 @@
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                @if (request.Status == ServiceRequestStatus.Approved)
+                                                                {
+                                                                    <form method="post" asp-page-handler="MarkCompleted" asp-route-id="@request.Id" class="d-inline">
+                                                                        <button type="submit" class="btn btn-success">
+                                                                            <i class="bi bi-check-circle me-1"></i> Mark as Done
+                                                                        </button>
+                                                                    </form>
+                                                                }
+                                                                @if (request.Status == ServiceRequestStatus.Pending)
+                                                                {
+                                                                    <form method="post" asp-page-handler="ApproveRequest" asp-route-id="@request.Id" class="d-inline">
+                                                                        <button type="submit" class="btn btn-success">
+                                                                            <i class="bi bi-check-lg me-1"></i> Approve
+                                                                        </button>
+                                                                    </form>
+                                                                    <form method="post" asp-page-handler="RejectRequest" asp-route-id="@request.Id" class="d-inline">
+                                                                        <button type="submit" class="btn btn-danger">
+                                                                            <i class="bi bi-x-lg me-1"></i> Reject
+                                                                        </button>
+                                                                    </form>
+                                                                }
                                                             </div>
                                                         </div>
                                                     </div>
@@ -457,7 +641,7 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="6" class="text-center py-5">
+                                        <td colspan="7" class="text-center py-5">
                                             <div class="empty-state">
                                                 <i class="bi bi-clipboard-x display-4 text-muted"></i>
                                                 <h5 class="mt-3">No service requests found</h5>
@@ -469,6 +653,32 @@
                             </tbody>
                         </table>
                     </div>
+                    
+                    @if (Model.AllRequests != null && Model.AllRequests.Any())
+                    {
+                        <div class="card-footer bg-white border-0 py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    Showing @Model.AllRequests.Count() service requests
+                                </small>
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination mb-0">
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -657,6 +867,12 @@
             background-color: rgba(78, 110, 77, 0.03);
         }
 
+    .request-table th, 
+    .request-table td {
+        vertical-align: middle;
+        padding: 0.75rem 1rem;
+    }
+
     .requester-info {
         display: flex;
         flex-direction: column;
@@ -668,8 +884,8 @@
     }
 
     .request-thumbnail {
-        width: 54px;
-        height: 40px;
+        width: 60px;
+        height: 45px;
         object-fit: cover;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.08);
@@ -702,17 +918,22 @@
     }
 
     .contact-info {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
         font-size: 0.9rem;
         color: var(--text-dark);
     }
 
     .time-badge {
         background-color: rgba(78, 110, 77, 0.1);
-        color: #4e6e4d;
-        padding: 0.3rem 0.6rem;
+        color: var(--primary-color);
+        padding: 0.4rem 0.7rem;
         border-radius: 6px;
         font-size: 0.85rem;
         font-weight: 500;
+        display: inline-block;
+        line-height: 1.2;
     }
 
     /* Status Badges */
@@ -720,10 +941,11 @@
         display: inline-flex;
         align-items: center;
         gap: 0.4rem;
-        padding: 0.3rem 0.7rem;
+        padding: 0.35rem 0.75rem;
         border-radius: 6px;
         font-size: 0.85rem;
         font-weight: 500;
+        white-space: nowrap;
     }
 
         .status-badge.pending {
@@ -794,11 +1016,11 @@
 
     /* Empty State */
     .empty-state {
-        padding: 3rem 2rem;
+        padding: 2rem 0;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        color: var(--text-muted);
     }
 
         .empty-state i {
@@ -830,12 +1052,16 @@
         }
 
     .btn-success {
+        background-color: #4e6e4d;
+        border-color: #4e6e4d;
         transition: all 0.3s ease;
     }
 
         .btn-success:hover {
+            background-color: #3d5a3c;
+            border-color: #3d5a3c;
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
         }
 
     .btn-danger {
@@ -870,6 +1096,56 @@
             color: var(--primary-color);
             border-color: var(--primary-color);
         }
+
+    /* Search form styling */
+    .input-group .form-control:focus {
+        box-shadow: none;
+        border-color: #4e6e4d;
+    }
+
+    .input-group-text {
+        color: var(--text-muted);
+    }
+
+    /* Pagination styles */
+    .pagination {
+        gap: 0.25rem;
+    }
+
+    .page-link {
+        border-radius: 0.25rem;
+        padding: 0.375rem 0.75rem;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-light);
+        transition: all 0.2s ease;
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .page-link:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        border-color: var(--primary-light);
+    }
+
+    .page-item.disabled .page-link {
+        color: var(--text-muted);
+        background-color: transparent;
+        border-color: var(--primary-lighter);
+    }
+
+    /* Dropdown styles */
+    .dropdown-item.active {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .dropdown-item:active {
+        background-color: var(--primary-color);
+    }
 </style>
 
 <script>
@@ -883,5 +1159,34 @@
                 tabTrigger.show();
             });
         });
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Simple filter/search functionality
+        document.getElementById('pendingSearch').addEventListener('keyup', function() {
+            filterTable(this.value, 'pending-requests');
+        });
+
+        document.getElementById('allSearch').addEventListener('keyup', function() {
+            filterTable(this.value, 'all-requests');
+        });
+
+        function filterTable(query, tableId) {
+            query = query.toLowerCase();
+            const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
     });
 </script>

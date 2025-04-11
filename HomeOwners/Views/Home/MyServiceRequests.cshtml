@@ -4,6 +4,9 @@
     ViewData["Title"] = "My Service Requests";
 }
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
         <!-- Logo -->
@@ -31,10 +34,8 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/Home/Facilities#function-hall">Function Hall</a></li>
-                        <li><a class="dropdown-item" href="/Home/Facilities#swimming-pool">Swimming Pool</a></li>
-                        <li><a class="dropdown-item" href="/Home/Facilities#clubhouse">Clubhouse</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">All Bookings</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -44,16 +45,30 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/Home/Annoucements#events">Upcoming Events</a></li>
+                        <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
                         <li><a class="dropdown-item" href="/Home/Annoucements#community">Community Forum</a></li>
                     </ul>
                 </li>
-                <li class="nav-item"></li>
-                <a class="nav-link active" href="/Home/Services">Services</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Services">All Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">My Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">All Request</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Home/Billing">Billing</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Billing">Unpaid Bills</a></li>
+                        <li><a class="dropdown-item" href="/Home/Billing">Payment History</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/Home/Contact">Contact</a>
@@ -338,6 +353,18 @@
     </div>
 </div>
 
+<div class="alert alert-info mb-4" role="alert">
+    <div class="d-flex">
+        <div class="me-3">
+            <i class="bi bi-info-circle-fill fs-4"></i>
+        </div>
+        <div>
+            <h6 class="alert-heading mb-1">Service Request Policy</h6>
+            <p class="mb-0">Please note that you can only have one active service request at a time. You'll need to wait until your current request is completed before making a new request.</p>
+        </div>
+    </div>
+</div>
+
 <style>
     :root {
         --primary-color: #4e6e4d;
@@ -351,6 +378,10 @@
         --warning-color: #ffc107;
         --danger-color: #dc3545;
         --info-color: #17a2b8;
+    }
+
+    .alert-info {
+        margin-top: 3rem;
     }
 
     .navbar {

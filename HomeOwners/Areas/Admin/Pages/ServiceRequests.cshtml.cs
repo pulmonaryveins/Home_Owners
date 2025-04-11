@@ -36,6 +36,16 @@ namespace HomeOwners.Areas.Admin.Pages
             return RedirectToPage();
         }
 
+        public async Task<IActionResult> OnPostClearAllRequestsAsync()
+        {
+            await _serviceRequestService.DeleteAllServiceRequestsAsync();
+
+            TempData["StatusMessage"] = "All service requests have been successfully cleared from the database.";
+            TempData["StatusType"] = "Success";
+
+            return RedirectToPage();
+        }
+
         public async Task<IActionResult> OnPostRejectRequestAsync(int id)
         {
             await _serviceRequestService.UpdateServiceRequestStatusAsync(id, ServiceRequestStatus.Rejected);

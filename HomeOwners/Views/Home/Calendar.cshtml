@@ -1,4 +1,4 @@
-﻿<!-- Views/Home/Calendar.cshtml -->
+﻿﻿<!-- Views/Home/Calendar.cshtml -->
 @model IEnumerable<HomeOwners.Models.Event>
 @{
     ViewData["Title"] = "Community Calendar";
@@ -27,40 +27,77 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Home/Facilities">Facilities</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">All Bookings</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Home/Services">Services</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
+                        <li><a class="dropdown-item" href="/Home/Annoucements#community">Community Forum</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/Home/Annoucements">Annoucements</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Services">All Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">My Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">All Request</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Billing">Unpaid Bills</a></li>
+                        <li><a class="dropdown-item" href="/Home/Billing">Payment History</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/Home/Contact">Contact</a>
                 </li>
             </ul>
 
-             <!-- Replace your existing nav-items-right section with this updated version -->
+            <!-- Updated profile menu section -->
             <div class="nav-items-right">
                 <!-- Profile Menu -->
                 <div class="nav-item dropdown profile-menu">
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li class="dropdown-header">@User.Identity.Name</li>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
-                                    <i class="bi bi-gear"></i> Profile Settings
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" asp-controller="Home" asp-action="Favorites">
-                                    <i class="bi bi-heart"></i> Saved Properties
+                                    <i class="bi bi-person-gear"></i> Profile Settings
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -68,7 +105,7 @@
                                 <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
                                       asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="dropdown-item">
+                                    <button type="submit" class="dropdown-item logout-item">
                                         <i class="bi bi-box-arrow-right"></i> Logout
                                     </button>
                                 </form>
@@ -77,11 +114,13 @@
                     }
                     else
                     {
-                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
                             <li>
                                 <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
                                     <i class="bi bi-box-arrow-in-right"></i> Login

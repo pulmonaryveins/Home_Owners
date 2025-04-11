@@ -4,6 +4,140 @@
     ViewData["Title"] = "Request Service";
 }
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">Neighborly</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">All Bookings</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
+                        <li><a class="dropdown-item" href="/Home/Annoucements#community">Community Forum</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Services">All Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">My Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">All Request</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Billing">Unpaid Bills</a></li>
+                        <li><a class="dropdown-item" href="/Home/Billing">Payment History</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Updated profile menu section -->
+            <div class="nav-items-right">
+                <!-- Profile Menu -->
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-person-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item logout-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
 
 <div class="container mt-5 pt-5">
     <div class="row">
@@ -34,7 +168,6 @@
                         <div class="col-md-4 request-sidebar">
                             <div class="p-4 h-100 d-flex flex-column">
                                 <h5 class="sidebar-title">Service Details</h5>
-
                                 <div class="service-image-container mb-3">
                                     <img src="@(string.IsNullOrEmpty(Model.ServiceImageUrl) ? "/images/placeholder.jpg" : Model.ServiceImageUrl)"
                                          alt="@Model.ServiceName" class="service-image">
@@ -437,6 +570,103 @@
                     this.closest('.form-group')?.classList.remove('focused');
                 });
             });
+        });
+
+            document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date for request date
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('RequestDate').setAttribute('min', today);
+
+            // Service availability time constraints
+            const serviceAvailableFrom = '@(Model.AvailableFrom.HasValue ? DateTime.Today.Add(Model.AvailableFrom.Value).ToString("HH:mm") : "09:00")';
+            const serviceAvailableTo = '@(Model.AvailableTo.HasValue ? DateTime.Today.Add(Model.AvailableTo.Value).ToString("HH:mm") : "17:00")';
+
+            // Set min and max time for time input
+            const preferredTimeInput = document.getElementById('PreferredTime');
+
+            preferredTimeInput.setAttribute('min', serviceAvailableFrom);
+            preferredTimeInput.setAttribute('max', serviceAvailableTo);
+
+            // Create help text for time availability
+            const timeContainer = preferredTimeInput.closest('.form-group');
+            const availabilityHelpText = document.createElement('small');
+            availabilityHelpText.className = 'form-text text-muted';
+            availabilityHelpText.innerHTML = `Available hours: ${formatTime(serviceAvailableFrom)} - ${formatTime(serviceAvailableTo)}`;
+            if (timeContainer) {
+                timeContainer.appendChild(availabilityHelpText);
+            }
+
+            // Function to format time for display (converts 24h to 12h format)
+            function formatTime(timeStr) {
+                const timeParts = timeStr.split(':');
+                let hours = parseInt(timeParts[0]);
+                const minutes = timeParts[1];
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                return hours + ':' + minutes + ' ' + ampm;
+            }
+
+            // Validate time selection against service hours
+            function validateTimeSelection() {
+                const preferredTime = preferredTimeInput.value;
+
+                if (preferredTime) {
+                    // Check if time is within service hours
+                    if (preferredTime < serviceAvailableFrom) {
+                        showTimeError(`Preferred time must be after ${formatTime(serviceAvailableFrom)}`);
+                        preferredTimeInput.setCustomValidity(`Preferred time must be after ${formatTime(serviceAvailableFrom)}`);
+                        return false;
+                    } else if (preferredTime > serviceAvailableTo) {
+                        showTimeError(`Preferred time must be before ${formatTime(serviceAvailableTo)}`);
+                        preferredTimeInput.setCustomValidity(`Preferred time must be before ${formatTime(serviceAvailableTo)}`);
+                        return false;
+                    } else {
+                        hideTimeError();
+                        preferredTimeInput.setCustomValidity('');
+                        return true;
+                    }
+                }
+                return true; // If field is empty, other validation will catch it
+            }
+
+            // Add time error message display
+            function showTimeError(message) {
+                // Remove any existing error message
+                hideTimeError();
+
+                const timeErrorContainer = document.createElement('div');
+                timeErrorContainer.id = 'timeError';
+                timeErrorContainer.className = 'alert alert-danger mt-2';
+                timeErrorContainer.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i>${message}`;
+
+                const formSection = preferredTimeInput.closest('.form-section');
+                if (formSection) {
+                    formSection.appendChild(timeErrorContainer);
+                }
+            }
+
+            function hideTimeError() {
+                const existingError = document.getElementById('timeError');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
+            // Add event listener to time input
+            preferredTimeInput.addEventListener('change', validateTimeSelection);
+
+            // Form submission validation
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (!validateTimeSelection()) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    return true;
+                });
+            }
         });
     </script>
 }

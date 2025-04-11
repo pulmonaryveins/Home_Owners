@@ -18,6 +18,13 @@ namespace HomeOwners.Services
             _context = context;
         }
 
+        public async Task DeleteAllServiceRequestsAsync()
+        {
+            var allRequests = await _context.ServiceRequests.ToListAsync();
+            _context.ServiceRequests.RemoveRange(allRequests);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<ServiceRequest>> GetAllServiceRequestsAsync()
         {
             return await _context.ServiceRequests
@@ -49,6 +56,15 @@ namespace HomeOwners.Services
             return await _context.ServiceRequests
                 .Include(sr => sr.Service)
                 .FirstOrDefaultAsync(sr => sr.Id == id);
+        }
+
+        public async Task<bool> HasActiveServiceRequestsAsync(string userId)
+        {
+            return await _context.ServiceRequests
+                .AnyAsync(sr => sr.UserId == userId &&
+                         (sr.Status == ServiceRequestStatus.Pending ||
+                          sr.Status == ServiceRequestStatus.Approved) &&
+                         sr.RequestDate >= DateTime.Today);
         }
 
         public async Task CreateServiceRequestAsync(ServiceRequest serviceRequest)

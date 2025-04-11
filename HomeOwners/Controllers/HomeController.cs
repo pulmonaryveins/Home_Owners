@@ -189,7 +189,11 @@ public class HomeController : Controller
     [RequireAuthentication]
     public async Task<IActionResult> Services()
     {
-        var services = await _serviceService.GetActiveServicesAsync(); // Fetch active services
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var hasActiveRequest = await _serviceRequestService.HasActiveServiceRequestsAsync(userId);
+
+        ViewBag.HasActiveServiceRequest = hasActiveRequest;
+        var services = await _serviceService.GetActiveServicesAsync();
         return View(services);
     }
 
@@ -197,6 +201,16 @@ public class HomeController : Controller
     [Authorize]
     public async Task<IActionResult> RequestService(int id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Check if user already has an active service request
+        if (await _serviceRequestService.HasActiveServiceRequestsAsync(userId))
+        {
+            TempData["StatusMessage"] = "You already have an active service request. You can only have one active request at a time.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction("MyServiceRequests");
+        }
+
         var service = await _serviceService.GetServiceByIdAsync(id);
         if (service == null)
         {
@@ -211,7 +225,7 @@ public class HomeController : Controller
             AvailableFrom = service.AvailableFrom,
             AvailableTo = service.AvailableTo,
             RequestDate = DateTime.Today,
-            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            UserId = userId
         };
 
         return View(model);
@@ -224,11 +238,44 @@ public class HomeController : Controller
     {
         if (ModelState.IsValid)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Check if user already has an active service request
+            if (await _serviceRequestService.HasActiveServiceRequestsAsync(userId))
+            {
+                TempData["StatusMessage"] = "You can only have one active service request at a time. Please wait until your current request is completed or contact an administrator.";
+                TempData["StatusType"] = "Error";
+
+                var currentService = await _serviceService.GetServiceByIdAsync(model.ServiceId);
+                model.ServiceName = currentService?.Name;
+                model.ServiceImageUrl = currentService?.ImageUrl;
+
+                return View(model);
+            }
+
+            // Validate service hours
+            var service = await _serviceService.GetServiceByIdAsync(model.ServiceId);
+            if (service != null && service.AvailableFrom.HasValue && service.AvailableTo.HasValue)
+            {
+                // Check if preferred time is within service provider's available hours
+                if (model.PreferredTime < service.AvailableFrom.Value ||
+                    model.PreferredTime > service.AvailableTo.Value)
+                {
+                    ModelState.AddModelError("PreferredTime",
+                        $"Service is only available from {DateTime.Today.Add(service.AvailableFrom.Value).ToString("hh:mm tt")} to {DateTime.Today.Add(service.AvailableTo.Value).ToString("hh:mm tt")}");
+
+                    model.ServiceName = service.Name;
+                    model.ServiceImageUrl = service.ImageUrl;
+
+                    return View(model);
+                }
+            }
+
             // Convert the view model to a service request entity
             var serviceRequest = new ServiceRequest
             {
                 ServiceId = model.ServiceId,
-                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                UserId = userId,
                 FullName = model.FullName,
                 ContactNumber = model.ContactNumber,
                 HouseNumber = model.HouseNumber,
@@ -248,9 +295,9 @@ public class HomeController : Controller
         }
 
         // If we got this far, something failed, redisplay form
-        var service = await _serviceService.GetServiceByIdAsync(model.ServiceId);
-        model.ServiceName = service?.Name;
-        model.ServiceImageUrl = service?.ImageUrl;
+        var selectedService = await _serviceService.GetServiceByIdAsync(model.ServiceId);
+        model.ServiceName = selectedService?.Name;
+        model.ServiceImageUrl = selectedService?.ImageUrl;
 
         return View(model);
     }
@@ -260,7 +307,11 @@ public class HomeController : Controller
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var serviceRequests = await _serviceRequestService.GetServiceRequestsByUserIdAsync(userId);
-        var allServiceRequests = await _serviceRequestService.GetAllServiceRequestsAsync();
+
+        // Filter out "DONE" service requests for the "All Service Requests" tab
+        var allServiceRequests = (await _serviceRequestService.GetAllServiceRequestsAsync())
+            .Where(r => r.Status != ServiceRequestStatus.Done)
+            .ToList();
 
         ViewBag.AllServiceRequests = allServiceRequests;
         return View(serviceRequests);

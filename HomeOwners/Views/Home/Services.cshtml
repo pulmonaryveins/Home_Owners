@@ -186,9 +186,19 @@
                                     </div>
                                 }
                             </div>
-                            <a asp-controller="Home" asp-action="RequestService" asp-route-id="@service.Id" class="btn btn-primary w-100 request-btn">
-                                <i class="bi bi-tools me-2"></i>Request Service
-                            </a>
+                            @if (ViewBag.HasActiveServiceRequest)
+                            {
+                                <button type="button" class="btn btn-secondary disabled w-100" disabled
+                                        data-bs-toggle="tooltip" title="You already have an active service request">
+                                    <i class="bi bi-tools me-2"></i>Request Service
+                                </button>
+                            }
+                            else
+                            {
+                                <a asp-controller="Home" asp-action="RequestService" asp-route-id="@service.Id" class="btn btn-primary w-100 request-btn">
+                                    <i class="bi bi-tools me-2"></i>Request Service
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>

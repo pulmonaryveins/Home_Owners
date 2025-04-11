@@ -168,7 +168,6 @@
                         <div class="col-md-4 request-sidebar">
                             <div class="p-4 h-100 d-flex flex-column">
                                 <h5 class="sidebar-title">Service Details</h5>
-
                                 <div class="service-image-container mb-3">
                                     <img src="@(string.IsNullOrEmpty(Model.ServiceImageUrl) ? "/images/placeholder.jpg" : Model.ServiceImageUrl)"
                                          alt="@Model.ServiceName" class="service-image">
@@ -571,6 +570,103 @@
                     this.closest('.form-group')?.classList.remove('focused');
                 });
             });
+        });
+
+            document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date for request date
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('RequestDate').setAttribute('min', today);
+
+            // Service availability time constraints
+            const serviceAvailableFrom = '@(Model.AvailableFrom.HasValue ? DateTime.Today.Add(Model.AvailableFrom.Value).ToString("HH:mm") : "09:00")';
+            const serviceAvailableTo = '@(Model.AvailableTo.HasValue ? DateTime.Today.Add(Model.AvailableTo.Value).ToString("HH:mm") : "17:00")';
+
+            // Set min and max time for time input
+            const preferredTimeInput = document.getElementById('PreferredTime');
+
+            preferredTimeInput.setAttribute('min', serviceAvailableFrom);
+            preferredTimeInput.setAttribute('max', serviceAvailableTo);
+
+            // Create help text for time availability
+            const timeContainer = preferredTimeInput.closest('.form-group');
+            const availabilityHelpText = document.createElement('small');
+            availabilityHelpText.className = 'form-text text-muted';
+            availabilityHelpText.innerHTML = `Available hours: ${formatTime(serviceAvailableFrom)} - ${formatTime(serviceAvailableTo)}`;
+            if (timeContainer) {
+                timeContainer.appendChild(availabilityHelpText);
+            }
+
+            // Function to format time for display (converts 24h to 12h format)
+            function formatTime(timeStr) {
+                const timeParts = timeStr.split(':');
+                let hours = parseInt(timeParts[0]);
+                const minutes = timeParts[1];
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // the hour '0' should be '12'
+                return hours + ':' + minutes + ' ' + ampm;
+            }
+
+            // Validate time selection against service hours
+            function validateTimeSelection() {
+                const preferredTime = preferredTimeInput.value;
+
+                if (preferredTime) {
+                    // Check if time is within service hours
+                    if (preferredTime < serviceAvailableFrom) {
+                        showTimeError(`Preferred time must be after ${formatTime(serviceAvailableFrom)}`);
+                        preferredTimeInput.setCustomValidity(`Preferred time must be after ${formatTime(serviceAvailableFrom)}`);
+                        return false;
+                    } else if (preferredTime > serviceAvailableTo) {
+                        showTimeError(`Preferred time must be before ${formatTime(serviceAvailableTo)}`);
+                        preferredTimeInput.setCustomValidity(`Preferred time must be before ${formatTime(serviceAvailableTo)}`);
+                        return false;
+                    } else {
+                        hideTimeError();
+                        preferredTimeInput.setCustomValidity('');
+                        return true;
+                    }
+                }
+                return true; // If field is empty, other validation will catch it
+            }
+
+            // Add time error message display
+            function showTimeError(message) {
+                // Remove any existing error message
+                hideTimeError();
+
+                const timeErrorContainer = document.createElement('div');
+                timeErrorContainer.id = 'timeError';
+                timeErrorContainer.className = 'alert alert-danger mt-2';
+                timeErrorContainer.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i>${message}`;
+
+                const formSection = preferredTimeInput.closest('.form-section');
+                if (formSection) {
+                    formSection.appendChild(timeErrorContainer);
+                }
+            }
+
+            function hideTimeError() {
+                const existingError = document.getElementById('timeError');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+
+            // Add event listener to time input
+            preferredTimeInput.addEventListener('change', validateTimeSelection);
+
+            // Form submission validation
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    if (!validateTimeSelection()) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    return true;
+                });
+            }
         });
     </script>
 }

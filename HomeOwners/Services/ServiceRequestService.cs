@@ -51,6 +51,15 @@ namespace HomeOwners.Services
                 .FirstOrDefaultAsync(sr => sr.Id == id);
         }
 
+        public async Task<bool> HasActiveServiceRequestsAsync(string userId)
+        {
+            return await _context.ServiceRequests
+                .AnyAsync(sr => sr.UserId == userId &&
+                         (sr.Status == ServiceRequestStatus.Pending ||
+                          sr.Status == ServiceRequestStatus.Approved) &&
+                         sr.RequestDate >= DateTime.Today);
+        }
+
         public async Task CreateServiceRequestAsync(ServiceRequest serviceRequest)
         {
             serviceRequest.CreatedDate = DateTime.Now;

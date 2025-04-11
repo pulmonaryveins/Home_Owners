@@ -18,6 +18,7 @@ namespace HomeOwners.Services
             _context = context;
         }
 
+
         public async Task<bool> HasActiveBookingsAsync(string userId)
         {
             return await _context.Bookings

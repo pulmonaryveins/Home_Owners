@@ -5,6 +5,7 @@ using HomeOwners.Models;
 
 namespace HomeOwners.ViewModels
 {
+
     public class BookingViewModel
     {
         public int FacilityId { get; set; }
@@ -56,4 +57,5 @@ namespace HomeOwners.ViewModels
         [Display(Name = "Special Requests")]
         public string SpecialRequests { get; set; }
     }
+
 }

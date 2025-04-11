@@ -23,40 +23,65 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="/Home/Facilities">Facilities</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#function-hall">Function Hall</a></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#swimming-pool">Swimming Pool</a></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#clubhouse">Clubhouse</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Home/Annoucements#events">Upcoming Events</a></li>
+                        <li><a class="dropdown-item" href="/Home/Annoucements#community">Community Forum</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"></li>
+                <a class="nav-link" href="/Home/Services">Services</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/Home/Services">Services</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/Home/Annoucements">Annoucements</a>
+                    <a class="nav-link" href="/Home/Billing">Billing</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/Home/Contact">Contact</a>
                 </li>
             </ul>
 
-            <!-- Replace your existing nav-items-right section with this updated version -->
+            <!-- Updated profile menu section -->
             <div class="nav-items-right">
                 <!-- Profile Menu -->
                 <div class="nav-item dropdown profile-menu">
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li class="dropdown-header">@User.Identity.Name</li>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
                             <li>
                                 <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
-                                    <i class="bi bi-gear"></i> Profile Settings
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" asp-controller="Home" asp-action="Favorites">
-                                    <i class="bi bi-heart"></i> Saved Properties
+                                    <i class="bi bi-person-gear"></i> Profile Settings
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -64,7 +89,7 @@
                                 <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
                                       asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="dropdown-item">
+                                    <button type="submit" class="dropdown-item logout-item">
                                         <i class="bi bi-box-arrow-right"></i> Logout
                                     </button>
                                 </form>
@@ -73,11 +98,13 @@
                     }
                     else
                     {
-                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-circle"></i>
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
                             <li>
                                 <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
                                     <i class="bi bi-box-arrow-in-right"></i> Login
@@ -131,7 +158,7 @@
                                          alt="@Model.FacilityName" class="facility-image">
                                 </div>
                                 
-                                <h5 class="facility-title">@Model.FacilityName</h5>
+                                <h5 class="service-title">@Model.FacilityName</h5>
                                 
                                 <div class="pricing mb-3">
                                     <span class="price">₱@Model.PricePerHour.ToString("N2")</span>
@@ -290,14 +317,6 @@
         --primary-color: #4e6e4d;
         --primary-dark: #3d5a3c;
         --primary-light: rgba(78, 110, 77, 0.1);
-        --text-dark: #333;
-        --text-muted: #6c757d;
-    }
-    
-    :root {
-        --primary-color: #4e6e4d;
-        --primary-dark: #3d5a3c;
-        --primary-light: rgba(78, 110, 77, 0.1);
         --primary-lighter: rgba(78, 110, 77, 0.05);
         --text-light: #f8f9fa;
         --text-dark: #333;
@@ -307,12 +326,13 @@
         --danger-color: #dc3545;
         --info-color: #17a2b8;
     }
-    /* Navbar styling */
+
     .navbar {
-        background-color: var(--primary-color) !important;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        background-color: rgba(78, 110, 77, 0.95) !important;
+        backdrop-filter: blur(10px);
         padding: 0.75rem 0;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     }
 
     .navbar-brand {
@@ -333,14 +353,13 @@
     }
 
         .navbar-nav .nav-link {
-            color: var(--text-light) !important;
+            color: white !important;
             font-weight: 500;
             font-size: 0.95rem;
-            padding: 0.5rem 1rem !important;
+            padding: 0.6rem 1rem !important;
             border-radius: 4px;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
+            position: relative;
         }
 
             .navbar-nav .nav-link:hover,
@@ -349,62 +368,132 @@
                 transform: translateY(-1px);
             }
 
-    .profile-menu .nav-link {
-        padding: 0.5rem !important;
-        color: white !important;
-        transition: all 0.3s ease;
-        border-radius: 4px;
-    }
-
-        .profile-menu .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
+        .navbar-nav .dropdown-menu {
+            background-color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border-top: 3px solid #4e6e4d;
         }
 
-    .dropdown-menu {
-        border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        padding: 0.5rem;
-        min-width: 220px;
-        margin-top: 0.5rem;
+        .navbar-nav .dropdown-item {
+            padding: 0.6rem 1rem;
+            color: #555;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+            .navbar-nav .dropdown-item:hover {
+                background-color: rgba(78, 110, 77, 0.1);
+                color: #4e6e4d;
+                transform: translateX(3px);
+            }
+
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
     }
 
-    .dropdown-header {
-        color: var(--text-muted);
-        font-weight: 600;
-        padding: 0.5rem 1rem;
-    }
-
-    .dropdown-item {
-        padding: 0.6rem 1rem;
-        color: var(--text-dark);
-        border-radius: 4px;
+    .nav-items-right {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 1.5rem;
+    }
+
+    .profile-menu .profile-link {
+        padding: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .bi-person-fill {
+        font-size: 1.2rem;
+        color: white;
+    }
+
+
+    .profile-avatar {
+        width: 35px;
+        height: 35px;
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .profile-link:hover .profile-avatar {
+        transform: translateY(-2px);
+        background-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-dropdown {
+        min-width: 250px;
+        padding: 0.75rem 0.5rem;
+    }
+
+        .profile-dropdown .dropdown-header {
+            padding: 0.5rem 1rem;
+            border-bottom: none;
+        }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    .user-role {
+        color: #777;
+        font-size: 0.8rem;
+    }
+
+    .profile-dropdown .dropdown-item {
+        padding: 0.7rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #555;
         transition: all 0.2s ease;
+        border-radius: 6px;
+        margin: 0.2rem 0.5rem;
     }
 
-        .dropdown-item:hover {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
-        }
-
-        .dropdown-item i {
+        .profile-dropdown .dropdown-item i {
             font-size: 1.1rem;
+            color: #4e6e4d;
+            width: 20px;
+            text-align: center;
         }
 
-    .navbar-toggler {
-        border: none;
-        padding: 0.5rem;
+        .profile-dropdown .dropdown-item:hover {
+            background-color: rgba(78, 110, 77, 0.1);
+            color: #4e6e4d;
+            transform: translateX(3px);
+        }
+
+    .logout-item {
+        color: #dc3545 !important;
     }
 
-        .navbar-toggler:focus {
-            box-shadow: none;
-        }
-
-        .navbar-toggler i {
-            font-size: 1.5rem;
+        .logout-item i {
+            color: #dc3545 !important;
         }
     
     .page-title {
@@ -451,8 +540,8 @@
         transform: scale(1.05);
     }
     
-    .facility-title {
-        color: var (--text-dark);
+    .service-title {
+        color: var(--text-dark);
         font-weight: 600;
         margin: 1rem 0 0.5rem;
     }
@@ -482,6 +571,34 @@
         padding: 0.5rem 0;
         border-top: 1px solid rgba(0,0,0,0.05);
         border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .price-summary-box {
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+    }
+    
+    .price-summary-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .price-detail {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .price-detail.total {
+        border-top: 1px solid rgba(0,0,0,0.1);
+        padding-top: 0.5rem;
+        margin-top: 0.5rem;
+        font-weight: 600;
     }
     
     .info-box {
@@ -595,43 +712,43 @@
                 });
             });
 
-                    // Price calculation function
-                     function calculatePrice() {
-                        const startTime = document.getElementById('StartTime').value;
-                        const endTime = document.getElementById('EndTime').value;
-                        const pricePerHour = @Model.PricePerHour;
+            // Price calculation function
+            function calculatePrice() {
+                const startTime = document.getElementById('StartTime').value;
+                const endTime = document.getElementById('EndTime').value;
+                const pricePerHour = @Model.PricePerHour;
 
-                        if (startTime && endTime) {
-                            // Convert time strings to Date objects for calculation
-                            const startDate = new Date(`2000-01-01T${startTime}:00`);
-                            const endDate = new Date(`2000-01-01T${endTime}:00`);
+                if (startTime && endTime) {
+                    // Convert time strings to Date objects for calculation
+                    const startDate = new Date(`2000-01-01T${startTime}:00`);
+                    const endDate = new Date(`2000-01-01T${endTime}:00`);
 
-                            // Handle cases where end time is on the next day
-                            if (endDate < startDate) {
-                                endDate.setDate(endDate.getDate() + 1);
-                            }
-
-                            // Calculate difference in hours
-                            const diffMs = endDate - startDate;
-                            const diffHours = diffMs / (1000 * 60 * 60);
-
-                            // Calculate total price
-                            const totalPrice = diffHours * pricePerHour;
-
-                            // Update the display
-                            document.getElementById('totalHours').textContent = `${diffHours.toFixed(1)} hours`;
-                            document.getElementById('totalPrice').textContent = `₱${totalPrice.toFixed(2)}`;
-
-                            // Update hidden inputs for form submission
-                            document.getElementById('totalHoursInput').value = diffHours.toFixed(1);
-                            document.getElementById('totalPriceInput').value = totalPrice.toFixed(2);
-                        } else {
-                            document.getElementById('totalHours').textContent = '0 hours';
-                            document.getElementById('totalPrice').textContent = '₱0.00';
-                            document.getElementById('totalHoursInput').value = '0';
-                            document.getElementById('totalPriceInput').value = '0';
-                        }
+                    // Handle cases where end time is on the next day
+                    if (endDate < startDate) {
+                        endDate.setDate(endDate.getDate() + 1);
                     }
+
+                    // Calculate difference in hours
+                    const diffMs = endDate - startDate;
+                    const diffHours = diffMs / (1000 * 60 * 60);
+
+                    // Calculate total price
+                    const totalPrice = diffHours * pricePerHour;
+
+                    // Update the display
+                    document.getElementById('totalHours').textContent = `${diffHours.toFixed(1)} hours`;
+                    document.getElementById('totalPrice').textContent = `₱${totalPrice.toFixed(2)}`;
+
+                    // Update hidden inputs for form submission
+                    document.getElementById('totalHoursInput').value = diffHours.toFixed(1);
+                    document.getElementById('totalPriceInput').value = totalPrice.toFixed(2);
+                } else {
+                    document.getElementById('totalHours').textContent = '0 hours';
+                    document.getElementById('totalPrice').textContent = '₱0.00';
+                    document.getElementById('totalHoursInput').value = '0';
+                    document.getElementById('totalPriceInput').value = '0';
+                }
+            }
 
             // Add event listeners to time inputs
             document.getElementById('StartTime').addEventListener('change', calculatePrice);

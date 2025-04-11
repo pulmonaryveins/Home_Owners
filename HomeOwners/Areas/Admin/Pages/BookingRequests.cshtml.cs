@@ -8,6 +8,7 @@ using HomeOwners.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomeOwners.Areas.Admin.Pages
 {
@@ -229,6 +230,24 @@ namespace HomeOwners.Areas.Admin.Pages
             await _bookingService.UpdateBookingStatusAsync(id, BookingStatus.Rejected);
             TempData["StatusMessage"] = "Booking request has been rejected.";
             TempData["StatusType"] = "Success";
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostClearAllBookingsAsync()
+        {
+            // Confirm admin is performing this operation
+            if (!User.IsInRole("Admin"))
+            {
+                return Unauthorized();
+            }
+
+            // Use the BookingService to clear all bookings
+            await _bookingService.ClearAllBookingsAsync();
+
+            TempData["StatusMessage"] = "All facility bookings and related payments have been cleared successfully.";
+            TempData["StatusType"] = "Success";
+
+            // Redirect back to the BookingRequests page
             return RedirectToPage();
         }
     }

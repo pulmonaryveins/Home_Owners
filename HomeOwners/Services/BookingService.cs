@@ -27,6 +27,19 @@ namespace HomeOwners.Services
                 .ToListAsync();
         }
 
+        public async Task ClearAllBookingsAsync()
+        {
+            // Delete all bookings
+            var bookings = await _context.Bookings.ToListAsync();
+            _context.Bookings.RemoveRange(bookings);
+
+            // Also clear payments related to bookings
+            var payments = await _context.Payments.ToListAsync();
+            _context.Payments.RemoveRange(payments);
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<Booking> CreateBookingAsync(Booking booking)
         {
             // Ensure TotalHours and TotalPrice are calculated if not already

@@ -3,191 +3,322 @@
     ViewData["Title"] = "Billing & Payments";
 }
 
-<div class="container mt-5 pt-4">
-    <div class="row">
-        <div class="col-md-10 mx-auto">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="page-title">Billing & Payments</h1>
-            </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            @if (TempData["StatusMessage"] != null)
-            {
-                var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
-                <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
-                        <span>@TempData["StatusMessage"]</span>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">Neighborly</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#function-hall">Function Hall</a></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#swimming-pool">Swimming Pool</a></li>
+                        <li><a class="dropdown-item" href="/Home/Facilities#clubhouse">Clubhouse</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/Home/Annoucements#events">Upcoming Events</a></li>
+                        <li><a class="dropdown-item" href="/Home/Annoucements#community">Community Forum</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item"></li>
+                <a class="nav-link" href="/Home/Services">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Home/Billing">Billing</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Updated profile menu section -->
+            <div class="nav-items-right">
+                <!-- Profile Menu -->
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-person-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item logout-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
                 </div>
-            }
+            </div>
+        </div>
+    </div>
+</nav>
 
-            <!-- Tabs -->
-            <ul class="nav nav-tabs mb-4" id="billingTabs" role="tablist">
+
+<div class="container mt-5 pt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">Billing & Payments</h1>
+        <div class="d-flex gap-2">
+            <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Back
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+        <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                <span>@TempData["StatusMessage"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <ul class="nav nav-pills card-header-pills" id="billingTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="unpaid-tab" data-bs-toggle="tab" data-bs-target="#unpaid-content"
-                            type="button" role="tab" aria-controls="unpaid-content" aria-selected="true">
+                    <a class="nav-link active" id="unpaid-tab" data-bs-toggle="tab" data-bs-target="#unpaid-content"
+                        href="#unpaid-content" role="tab" aria-controls="unpaid-content" aria-selected="true">
                         <i class="bi bi-credit-card me-2"></i>Unpaid Bills
                         @if (Model.UnpaidBookings.Count > 0)
                         {
                             <span class="badge bg-danger ms-2">@Model.UnpaidBookings.Count</span>
                         }
-                    </button>
+                    </a>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-content"
-                            type="button" role="tab" aria-controls="history-content" aria-selected="false">
+                    <a class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-content"
+                        href="#history-content" role="tab" aria-controls="history-content" aria-selected="false">
                         <i class="bi bi-clock-history me-2"></i>Payment History
-                    </button>
+                    </a>
                 </li>
             </ul>
-
-            <!-- Tab Content -->
+        </div>
+        <div class="card-body p-0">
             <div class="tab-content" id="billingTabsContent">
                 <!-- Unpaid Bills Tab -->
                 <div class="tab-pane fade show active" id="unpaid-content" role="tabpanel" aria-labelledby="unpaid-tab">
-                    <div class="card shadow">
-                        <div class="card-body p-0">
-                            @if (Model.UnpaidBookings.Count > 0)
-                            {
-                                <div class="payment-summary">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <h4>Payment Summary</h4>
-                                            <p class="text-muted">These are your completed facility bookings that require payment.</p>
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <div class="total-due">
-                                                <span class="total-label">Total Amount Due:</span>
-                                                <span class="total-amount">₱@Model.TotalUnpaidAmount.ToString("N2")</span>
-                                            </div>
-                                        </div>
+                    @if (Model.UnpaidBookings.Count > 0)
+                    {
+                        <div class="payment-summary">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-1">Payment Summary</h5>
+                                    <p class="text-muted mb-0">These are your completed facility bookings that require payment.</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="total-due">
+                                        <span class="total-label">Total Amount Due</span>
+                                        <span class="total-amount">₱@Model.TotalUnpaidAmount.ToString("N2")</span>
                                     </div>
                                 </div>
-
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Facility</th>
-                                                <th>Booking Date</th>
-                                                <th>Duration</th>
-                                                <th>Amount</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var booking in Model.UnpaidBookings)
-                                            {
-                                                var duration = (booking.EndTime - booking.StartTime).TotalHours;
-
-                                                <tr>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
-                                                                 alt="@booking.Facility?.Name" class="billing-thumbnail me-3">
-                                                            <span class="facility-name">@booking.Facility?.Name</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
-                                                    <td>
-                                                        <span class="time-badge">
-                                                            @DateTime.Today.Add(booking.StartTime).ToString("h:mm tt") -
-                                                            @DateTime.Today.Add(booking.EndTime).ToString("h:mm tt")
-                                                            <small class="ms-1">(@duration.ToString("0.0") hrs)</small>
-                                                        </span>
-                                                    </td>
-                                                    <td><span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span></td>
-                                                    <td>
-                                                        <button type="button" class="btn btn-sm btn-primary pay-btn"
-                                                                data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                                                data-booking-id="@booking.Id"
-                                                                data-facility-name="@booking.Facility?.Name"
-                                                                data-amount="@booking.TotalPrice.ToString("N2")">
-                                                            <i class="bi bi-credit-card me-1"></i> Pay Now
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="empty-state p-5 text-center">
-                                    <i class="bi bi-check-circle text-success empty-icon"></i>
-                                    <h4 class="mt-3">No Outstanding Bills</h4>
-                                    <p class="text-muted">You don't have any unpaid facility bookings at the moment.</p>
-                                </div>
-                            }
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover booking-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Facility</th>
+                                        <th>Booking Date</th>
+                                        <th>Duration</th>
+                                        <th>Amount</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.UnpaidBookings)
+                                    {
+                                        var duration = (booking.EndTime - booking.StartTime).TotalHours;
+
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(booking.Facility?.ImageUrl) ? "/images/placeholder.jpg" : booking.Facility.ImageUrl)"
+                                                         alt="@booking.Facility?.Name" class="booking-thumbnail me-3">
+                                                    <span class="facility-name">@booking.Facility?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="time-badge">
+                                                    @DateTime.Today.Add(booking.StartTime).ToString("h:mm tt") -
+                                                    @DateTime.Today.Add(booking.EndTime).ToString("h:mm tt")
+                                                    <small class="ms-1">(@duration.ToString("0.0") hrs)</small>
+                                                </span>
+                                            </td>
+                                            <td><span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span></td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-primary pay-btn"
+                                                        data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                        data-booking-id="@booking.Id"
+                                                        data-facility-name="@booking.Facility?.Name"
+                                                        data-amount="@booking.TotalPrice.ToString("N2")">
+                                                    <i class="bi bi-credit-card me-1"></i> Pay Now
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-check-circle-fill display-4 text-success"></i>
+                            <h5 class="mt-3">No Outstanding Bills</h5>
+                            <p class="text-muted mb-3">You don't have any unpaid facility bookings at the moment.</p>
+                        </div>
+                    }
                 </div>
 
                 <!-- Payment History Tab -->
                 <div class="tab-pane fade" id="history-content" role="tabpanel" aria-labelledby="history-tab">
-                    <div class="card shadow">
-                        <div class="card-body p-0">
-                            @if (Model.Payments.Count > 0)
-                            {
-                                <div class="payment-history-header">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <h4>Payment History</h4>
-                                            <p class="text-muted">A record of all your past payments for facility bookings.</p>
-                                        </div>
-                                    </div>
+                    @if (Model.Payments.Count > 0)
+                    {
+                        <div class="payment-history-header">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h5 class="mb-1">Payment History</h5>
+                                    <p class="text-muted mb-0">A record of all your past payments for facility bookings.</p>
                                 </div>
-
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Receipt No.</th>
-                                                <th>Facility</th>
-                                                <th>Payment Date</th>
-                                                <th>Amount Paid</th>
-                                                <th>Method</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var payment in Model.Payments)
-                                            {
-                                                <tr>
-                                                    <td><span class="receipt-number">@payment.ReceiptNumber</span></td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <img src="@(string.IsNullOrEmpty(payment.Booking?.Facility?.ImageUrl) ? "/images/placeholder.jpg" : payment.Booking.Facility.ImageUrl)"
-                                                                 alt="@payment.Booking?.Facility?.Name" class="billing-thumbnail me-3">
-                                                            <span class="facility-name">@payment.Booking?.Facility?.Name</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>@payment.PaymentDate.ToString("MMM dd, yyyy h:mm tt")</td>
-                                                    <td><span class="price-badge paid">₱@payment.AmountPaid.ToString("N2")</span></td>
-                                                    <td>@payment.PaymentMethod</td>
-                                                    <td>
-                                                        <a asp-controller="Home" asp-action="PaymentReceipt" asp-route-id="@payment.Id" class="btn btn-sm btn-outline-primary">
-                                                            <i class="bi bi-receipt me-1"></i> View Receipt
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="empty-state p-5 text-center">
-                                    <i class="bi bi-receipt text-muted empty-icon"></i>
-                                    <h4 class="mt-3">No Payment History</h4>
-                                    <p class="text-muted">You haven't made any payments for facility bookings yet.</p>
-                                </div>
-                            }
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover booking-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Receipt No.</th>
+                                        <th>Facility</th>
+                                        <th>Payment Date</th>
+                                        <th>Amount Paid</th>
+                                        <th>Method</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in Model.Payments)
+                                    {
+                                        <tr>
+                                            <td><code class="receipt-number">@payment.ReceiptNumber</code></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <img src="@(string.IsNullOrEmpty(payment.Booking?.Facility?.ImageUrl) ? "/images/placeholder.jpg" : payment.Booking.Facility.ImageUrl)"
+                                                         alt="@payment.Booking?.Facility?.Name" class="booking-thumbnail me-3">
+                                                    <span class="facility-name">@payment.Booking?.Facility?.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>@payment.PaymentDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                                            <td><span class="price-badge paid">₱@payment.AmountPaid.ToString("N2")</span></td>
+                                            <td>
+                                                <span class="payment-method-badge">
+                                                    @{
+                                                        var icon = payment.PaymentMethod.ToString().ToLower() == "cash" ? "bi-cash" :
+                                                                  payment.PaymentMethod.ToString().ToLower().Contains("card") ? "bi-credit-card" :
+                                                                  payment.PaymentMethod.ToString().ToLower().Contains("bank") ? "bi-bank" :
+                                                                  payment.PaymentMethod.ToString().ToLower().Contains("mobile") ? "bi-phone" :
+                                                                  "bi-wallet2";
+                                                    }
+                                                    <i class="bi @icon me-1"></i> @payment.PaymentMethod
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a asp-controller="Home" asp-action="PaymentReceipt" asp-route-id="@payment.Id" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-receipt me-1"></i> View Receipt
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-receipt display-4 text-muted"></i>
+                            <h5 class="mt-3">No Payment History</h5>
+                            <p class="text-muted mb-3">You haven't made any payments for facility bookings yet.</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -241,79 +372,415 @@
 </div>
 
 <style>
-    /* Add these styles to your page */
-    .empty-icon {
-        font-size: 3rem;
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-light: #f8f9fa;
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+    }
+    
+    .navbar {
+        background-color: rgba(78, 110, 77, 0.95) !important;
+        backdrop-filter: blur(10px);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     }
 
+    .navbar-brand {
+        font-weight: 700;
+        color: white !important;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .brand-text {
+        background: linear-gradient(45deg, #fff, #e0e0e0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-nav {
+        gap: 0.5rem;
+    }
+
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.6rem 1rem !important;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav .nav-link.active {
+                background-color: rgba(255, 255, 255, 0.15);
+                transform: translateY(-1px);
+            }
+
+        .navbar-nav .dropdown-menu {
+            background-color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border-top: 3px solid #4e6e4d;
+        }
+
+        .navbar-nav .dropdown-item {
+            padding: 0.6rem 1rem;
+            color: #555;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+            .navbar-nav .dropdown-item:hover {
+                background-color: rgba(78, 110, 77, 0.1);
+                color: #4e6e4d;
+                transform: translateX(3px);
+            }
+
+    .dropdown-divider {
+        margin: 0.5rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-items-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .profile-menu .profile-link {
+        padding: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .bi-person-fill {
+        font-size: 1.2rem;
+        color: white;
+    }
+
+
+    .profile-avatar {
+        width: 35px;
+        height: 35px;
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .profile-link:hover .profile-avatar {
+        transform: translateY(-2px);
+        background-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-dropdown {
+        min-width: 250px;
+        padding: 0.75rem 0.5rem;
+    }
+
+        .profile-dropdown .dropdown-header {
+            padding: 0.5rem 1rem;
+            border-bottom: none;
+        }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 1rem;
+    }
+
+    .user-role {
+        color: #777;
+        font-size: 0.8rem;
+    }
+
+    .profile-dropdown .dropdown-item {
+        padding: 0.7rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #555;
+        transition: all 0.2s ease;
+        border-radius: 6px;
+        margin: 0.2rem 0.5rem;
+    }
+
+        .profile-dropdown .dropdown-item i {
+            font-size: 1.1rem;
+            color: #4e6e4d;
+            width: 20px;
+            text-align: center;
+        }
+
+        .profile-dropdown .dropdown-item:hover {
+            background-color: rgba(78, 110, 77, 0.1);
+            color: #4e6e4d;
+            transform: translateX(3px);
+        }
+
+    .logout-item {
+        color: #dc3545 !important;
+    }
+
+        .logout-item i {
+            color: #dc3545 !important;
+        }
+    
+    /* Page title and general styles */
+    .page-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 1.75rem;
+        margin-bottom: 0;
+    }
+    
+    /* Card and Nav Pills */
+    .card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1rem 1.5rem;
+    }
+    
+    .nav-pills .nav-link {
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-pills .nav-link:hover {
+        background-color: rgba(78, 110, 77, 0.05);
+    }
+    
+    .nav-pills .nav-link.active {
+        background-color: #4e6e4d;
+        color: white;
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+    
+    /* Booking and Payment Tables */
+    .booking-table thead th {
+        background-color: #f9fafb;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 0.85rem 1.25rem;
+    }
+    
+    .booking-table tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    .booking-table tbody tr:hover {
+        background-color: rgba(78, 110, 77, 0.03);
+    }
+    
+    .booking-thumbnail {
+        width: 54px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+    }
+    
+    .booking-table tr:hover .booking-thumbnail {
+        transform: scale(1.05);
+    }
+    
+    .facility-name {
+        font-weight: 500;
+        color: #2d3748;
+    }
+    
+    /* Payment section styling */
     .payment-summary, .payment-history-header {
         padding: 1.5rem;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
     }
-
-    .billing-thumbnail {
-        width: 40px;
-        height: 40px;
-        border-radius: 4px;
-        object-fit: cover;
-    }
-
+    
     .total-due {
         background-color: var(--primary-light);
         padding: 1rem;
         border-radius: 8px;
         text-align: center;
     }
-
+    
     .total-label {
         display: block;
         font-size: 0.9rem;
         color: var(--text-muted);
         margin-bottom: 0.25rem;
     }
-
+    
     .total-amount {
         font-size: 1.5rem;
         font-weight: 700;
         color: var(--primary-color);
     }
-
-    .time-badge {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        background-color: rgba(0,0,0,0.05);
-        border-radius: 4px;
-        font-size: 0.85rem;
-    }
-
-    .price-badge {
-        display: inline-block;
-        font-weight: 700;
-        color: var(--danger-color);
-    }
-
-        .price-badge.paid {
-            color: var(--success-color);
-        }
-
-    .receipt-number {
-        font-family: monospace;
-        background-color: rgba(0,0,0,0.05);
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-size: 0.85rem;
-    }
-
+    
     .payment-amount-display {
         padding: 1.5rem;
         background-color: var(--primary-light);
-        border-radius: 8px;
+        border-radius: 12px;
     }
-
+    
     .amount-display {
         font-size: 2rem;
         font-weight: 700;
         color: var(--primary-color);
+    }
+    
+    /* Badges */
+    .time-badge {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: #4e6e4d;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .price-badge {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1rem;
+        background-color: rgba(78, 110, 77, 0.1);
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+    }
+    
+    .price-badge.paid {
+        background-color: rgba(72, 187, 120, 0.15);
+        color: #48bb78;
+    }
+    
+    .payment-method-badge {
+        background-color: rgba(56, 161, 219, 0.15);
+        color: #38a1db;
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .receipt-number {
+        font-family: monospace;
+        background-color: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    /* Empty state */
+    .empty-state {
+        padding: 3rem 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    /* Button styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+    
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+    
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    /* Modal styling */
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
     }
 </style>
 
@@ -334,6 +801,16 @@
                     document.getElementById('bookingIdInput').value = bookingId;
                 });
             }
+            
+            // Initialize the tabs
+            const triggerTabList = [].slice.call(document.querySelectorAll('#billingTabs a'));
+            triggerTabList.forEach(function(triggerEl) {
+                const tabTrigger = new bootstrap.Tab(triggerEl);
+                triggerEl.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    tabTrigger.show();
+                });
+            });
         });
     </script>
 }

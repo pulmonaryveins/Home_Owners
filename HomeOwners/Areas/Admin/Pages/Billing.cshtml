@@ -41,7 +41,9 @@
                     <a class="nav-link" asp-area="Admin" asp-page="/Announcement">Announcements</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Admin" asp-page="/Users">Reports</a>
+                    <a class="nav-link active" asp-area="Admin" asp-page="/Billing">
+                        Billing
+                    </a>
                 </li>
             </ul>
 
@@ -228,7 +230,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover billing-table mb-0">
+                    <table class="table table-hover booking-table mb-0">
                         <thead>
                             <tr>
                                 <th>Facility</th>
@@ -286,6 +288,14 @@
             
             <!-- Payment History Tab -->
             <div class="tab-pane fade" id="payments-tab">
+                <div class="payment-history-header">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-1">Payment History</h5>
+                            <p class="text-muted mb-0">A record of all payments for facility bookings.</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="card-body border-bottom">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -342,7 +352,7 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover billing-table mb-0">
+                    <table class="table table-hover booking-table mb-0">
                         <thead>
                             <tr>
                                 <th>Receipt #</th>
@@ -360,7 +370,7 @@
                                 @foreach (var payment in Model.RecentPayments)
                                 {
                                     <tr>
-                                        <td><span class="receipt-number">@payment.ReceiptNumber</span></td>
+                                        <td><code class="receipt-number">@payment.ReceiptNumber</code></td>
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <img src="@(string.IsNullOrEmpty(payment.Booking?.Facility?.ImageUrl) ? "/images/placeholder.jpg" : payment.Booking.Facility.ImageUrl)"
@@ -371,7 +381,18 @@
                                         <td><span class="fw-medium">@payment.Booking?.FullName</span></td>
                                         <td>@payment.PaymentDate.ToString("MMM dd, yyyy h:mm tt")</td>
                                         <td><span class="price-badge paid">₱@payment.AmountPaid.ToString("N2")</span></td>
-                                        <td><span class="payment-method-badge @payment.PaymentMethod.ToString().ToLower()">@payment.PaymentMethod</span></td>
+                                        <td>
+                                            <span class="payment-method-badge">
+                                                @{
+                                                    var icon = payment.PaymentMethod.ToString().ToLower() == "cash" ? "bi-cash" :
+                                                            payment.PaymentMethod.ToString().ToLower().Contains("card") ? "bi-credit-card" :
+                                                            payment.PaymentMethod.ToString().ToLower().Contains("bank") ? "bi-bank" :
+                                                            payment.PaymentMethod.ToString().ToLower().Contains("mobile") ? "bi-phone" :
+                                                            "bi-wallet2";
+                                                }
+                                                <i class="bi @icon me-1"></i> @payment.PaymentMethod
+                                            </span>
+                                        </td>
                                         <td>
                                             <div class="d-flex gap-2">
                                                 <a asp-page="./ViewPaymentReceipt" asp-route-id="@payment.Id" class="btn btn-sm btn-outline-primary">
@@ -503,22 +524,22 @@
         gap: 0.5rem;
     }
 
-        .navbar-nav .nav-link {
-            color: var(--text-light) !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.5rem 1rem !important;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
+    .navbar-nav .nav-link {
+        color: var(--text-light) !important;
+        font-weight: 500;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem !important;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
 
-            .navbar-nav .nav-link:hover,
-            .navbar-nav .nav-link.active {
-                background-color: rgba(255, 255, 255, 0.15);
-                transform: translateY(-1px);
-            }
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+    }
 
     .profile-menu .nav-link {
         padding: 0.5rem !important;
@@ -527,27 +548,28 @@
         border-radius: 4px;
     }
 
-        .profile-menu .nav-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-        }
+    .profile-menu .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+    }
 
     /* Billing summary cards */
     .billing-summary-card {
-        border-radius: 10px;
+        border-radius: 12px;
         border: none;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         transition: all 0.3s ease;
         overflow: hidden;
+        height: 100%;
     }
 
-        .billing-summary-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
+    .billing-summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
 
     .summary-icon {
-        width: 45px;
-        height: 45px;
+        width: 50px;
+        height: 50px;
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -555,10 +577,10 @@
         margin-bottom: 1rem;
     }
 
-        .summary-icon i {
-            font-size: 1.4rem;
-            color: white;
-        }
+    .summary-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
 
     .bg-pending {
         background-color: #f6ad55;
@@ -589,7 +611,64 @@
         font-size: 0.9rem;
     }
 
+    /* Card and Nav Pills */
+    .card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+    }
+    
+    .card-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1rem 1.5rem;
+    }
+    
+    .nav-pills .nav-link {
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-pills .nav-link:hover {
+        background-color: rgba(78, 110, 77, 0.05);
+    }
+    
+    .nav-pills .nav-link.active {
+        background-color: #4e6e4d;
+        color: white;
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+    
+    /* Payment section styling */
+    .payment-history-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
+    }
+
     /* Booking table styling */
+    .booking-table thead th {
+        background-color: #f9fafb;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 0.85rem 1.25rem;
+    }
+    
+    .booking-table tbody tr {
+        transition: all 0.2s ease;
+    }
+    
+    .booking-table tbody tr:hover {
+        background-color: rgba(78, 110, 77, 0.03);
+    }
+
     .booking-thumbnail {
         width: 54px;
         height: 40px;
@@ -618,74 +697,114 @@
     }
 
     .price-badge {
+        display: inline-block;
         font-weight: 700;
-        color: var(--danger-color);
-        font-size: 1.1rem;
+        color: var(--primary-color);
+        font-size: 1rem;
+        background-color: rgba(78, 110, 77, 0.1);
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
     }
 
-        .price-badge.paid {
-            color: var(--success-color);
-        }
+    .price-badge.paid {
+        background-color: rgba(72, 187, 120, 0.15);
+        color: #48bb78;
+    }
 
     .receipt-number {
         font-family: monospace;
-        background-color: rgba(0,0,0,0.05);
-        padding: 0.3rem 0.6rem;
-        border-radius: 6px;
-        font-size: 0.85rem;
+        background-color: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 0.9rem;
     }
 
     .payment-method-badge {
-        display: inline-block;
-        padding: 0.3rem 0.6rem;
+        background-color: rgba(56, 161, 219, 0.15);
+        color: #38a1db;
+        padding: 0.3rem 0.7rem;
         border-radius: 6px;
         font-size: 0.85rem;
         font-weight: 500;
+        display: inline-flex;
+        align-items: center;
     }
 
-        .payment-method-badge.cash {
-            background-color: rgba(72, 187, 120, 0.15);
-            color: #48bb78;
-        }
-
-        .payment-method-badge.creditcard,
-        .payment-method-badge.debitcard {
-            background-color: rgba(90, 103, 216, 0.15);
-            color: #5a67d8;
-        }
-
-        .payment-method-badge.banktransfer {
-            background-color: rgba(66, 153, 225, 0.15);
-            color: #4299e1;
-        }
-
-        .payment-method-badge.mobilepayment {
-            background-color: rgba(246, 173, 85, 0.15);
-            color: #f6ad55;
-        }
-
-        .payment-method-badge.other {
-            background-color: rgba(160, 174, 192, 0.15);
-            color: #718096;
-        }
-
-    /* Empty state styling */
+    /* Empty state */
     .empty-state {
-        padding: 2rem 0;
+        padding: 3rem 2rem;
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+    
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+    
+    .btn-outline-secondary {
         color: var(--text-muted);
+        border-color: #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
     }
 
     /* Modal styling */
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid rgba(0,0,0,0.08);
+        background-color: #f9fafb;
+    }
+    
     .payment-amount-display {
         padding: 1.5rem;
         background-color: var(--primary-light);
-        border-radius: 8px;
+        border-radius: 12px;
         margin: 1rem 0;
     }
-
+    
     .amount-display {
         font-size: 2rem;
         font-weight: 700;
@@ -701,6 +820,18 @@
         margin-bottom: 0;
         display: flex;
         align-items: center;
+    }
+
+    /* Form controls */
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(78, 110, 77, 0.25);
+    }
+
+    .search-form .input-group {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border-radius: 8px;
+        overflow: hidden;
     }
 </style>
 

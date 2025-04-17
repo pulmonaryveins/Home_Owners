@@ -29,6 +29,7 @@ namespace HomeOwners.Services
         {
             return await _context.ServiceRequests
                 .Include(sr => sr.Service)
+                .Include(sr => sr.ServicePersonnel)
                 .OrderByDescending(sr => sr.CreatedDate)
                 .ToListAsync();
         }
@@ -37,6 +38,7 @@ namespace HomeOwners.Services
         {
             return await _context.ServiceRequests
                 .Include(sr => sr.Service)
+                .Include(sr => sr.ServicePersonnel)
                 .Where(sr => sr.UserId == userId)
                 .OrderByDescending(sr => sr.CreatedDate)
                 .ToListAsync();
@@ -46,6 +48,7 @@ namespace HomeOwners.Services
         {
             return await _context.ServiceRequests
                 .Include(sr => sr.Service)
+                .Include(sr => sr.ServicePersonnel)
                 .Where(sr => sr.Status == ServiceRequestStatus.Pending)
                 .OrderByDescending(sr => sr.CreatedDate)
                 .ToListAsync();
@@ -55,6 +58,7 @@ namespace HomeOwners.Services
         {
             return await _context.ServiceRequests
                 .Include(sr => sr.Service)
+                .Include(sr => sr.ServicePersonnel)
                 .FirstOrDefaultAsync(sr => sr.Id == id);
         }
 
@@ -82,6 +86,16 @@ namespace HomeOwners.Services
             if (serviceRequest != null)
             {
                 serviceRequest.Status = status;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task AssignTeamToServiceRequestAsync(int requestId, int personnelId)
+        {
+            var serviceRequest = await _context.ServiceRequests.FindAsync(requestId);
+            if (serviceRequest != null)
+            {
+                serviceRequest.ServicePersonnelId = personnelId;
                 await _context.SaveChangesAsync();
             }
         }

@@ -224,7 +224,7 @@
                                     <th>Requester</th>
                                     <th>Contact</th>
                                     <th>Date & Time</th>
-                                    <th>Created On</th>
+                                    <th>Assigned Team</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -258,14 +258,25 @@
                                                     <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
                                                 </div>
                                             </td>
-                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                            <td>
+                                                @if (request.ServicePersonnelId.HasValue && request.ServicePersonnel != null)
+                                                {
+                                                    <div class="team-info">
+                                                        <span class="team-badge">
+                                                            <i class="bi bi-people-fill me-1"></i> @request.ServicePersonnel.TeamName
+                                                        </span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted"><i class="bi bi-dash-circle me-1"></i>Not assigned</span>
+                                                }
+                                            </td>
                                             <td>
                                                 <div class="d-flex gap-2">
-                                                    <form method="post" asp-page-handler="ApproveRequest" asp-route-id="@request.Id">
-                                                        <button type="submit" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Approve Request">
-                                                            <i class="bi bi-check-lg"></i> Approve
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#assignTeamModal@(request.Id)">
+                                                        <i class="bi bi-check-lg"></i> Assign & Approve
+                                                    </button>
                                                     <form method="post" asp-page-handler="RejectRequest" asp-route-id="@request.Id">
                                                         <button type="submit" class="btn btn-sm btn-danger" data-bs-toggle="tooltip" title="Reject Request">
                                                             <i class="bi bi-x-lg"></i> Reject
@@ -275,6 +286,66 @@
                                                             data-bs-toggle="modal" data-bs-target="#detailsModal@(request.Id)">
                                                         <i class="bi bi-eye"></i> Details
                                                     </button>
+                                                </div>
+
+                                                <!-- Add Team Assignment Modal -->
+                                                <div class="modal fade" id="assignTeamModal@(request.Id)" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Assign Team to Service Request</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <form method="post" asp-page-handler="ApproveRequest" asp-route-id="@request.Id">
+                                                                <div class="modal-body">
+                                                                    <div class="mb-3">
+                                                                        <div class="alert alert-info">
+                                                                            <i class="bi bi-info-circle-fill me-2"></i>
+                                                                            <strong>Important:</strong> You must assign a team before approving this service request.
+                                                                        </div>
+
+                                                                        <label class="form-label">Service Requested</label>
+                                                                        <div class="d-flex align-items-center mb-3 p-2 bg-light rounded">
+                                                                            <img src="@(string.IsNullOrEmpty(request.Service?.ImageUrl) ? "/images/placeholder.jpg" : request.Service.ImageUrl)"
+                                                                                 alt="@request.Service?.Name" class="request-thumbnail me-3">
+                                                                            <div>
+                                                                                <strong>@request.Service?.Name</strong>
+                                                                                <div class="small text-muted">Service ID: @request.ServiceId</div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <label class="form-label">Select Team</label>
+                                                                        @if (Model.AvailableTeams.ContainsKey(request.Id) && Model.AvailableTeams[request.Id].Any())
+                                                                        {
+                                                                            <select name="teamId" class="form-select" required>
+                                                                                <option value="">-- Select a team --</option>
+                                                                                @foreach (var team in Model.AvailableTeams[request.Id])
+                                                                                {
+                                                                                    <option value="@team.Id">@team.TeamName - @team.NumberOfPersonnel personnel</option>
+                                                                                }
+                                                                            </select>
+                                                                            <div class="form-text">Select a team that specializes in this service.</div>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <div class="alert alert-warning">
+                                                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                                                No teams available for this service. <a asp-area="Admin" asp-page="/ServicePersonnel" class="alert-link">Create a team</a> before approving.
+                                                                            </div>
+                                                                            <input type="hidden" name="teamId" value="0" />
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    <button type="submit" class="btn btn-success"
+                                                                    @((!Model.AvailableTeams.ContainsKey(request.Id) || !Model.AvailableTeams[request.Id].Any()) ? "disabled" : "")>
+                                                                        <i class="bi bi-check-lg me-1"></i> Assign & Approve
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 </div>
 
                                                 <!-- Modal for Details -->
@@ -325,6 +396,30 @@
                                                                             <span class="detail-label">Request Date:</span>
                                                                             <span class="detail-value">@request.CreatedDate.ToString("MMMM dd, yyyy h:mm tt")</span>
                                                                         </div>
+
+                                                                        <h6>Assigned Team</h6>
+                                                                        @if (request.ServicePersonnelId.HasValue && request.ServicePersonnel != null)
+                                                                        {
+                                                                            <div class="detail-item">
+                                                                                <span class="detail-label">Team Name:</span>
+                                                                                <span class="detail-value">@request.ServicePersonnel.TeamName</span>
+                                                                            </div>
+                                                                            <div class="detail-item">
+                                                                                <span class="detail-label">Number of Personnel:</span>
+                                                                                <span class="detail-value">@request.ServicePersonnel.NumberOfPersonnel</span>
+                                                                            </div>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <div class="alert alert-warning mb-0">
+                                                                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                                                No team assigned yet.
+                                                                                @if (request.Status == ServiceRequestStatus.Pending)
+                                                                                {
+                                                                                    <span>A team must be assigned before approval.</span>
+                                                                                }
+                                                                            </div>
+                                                                        }
                                                                     </div>
 
                                                                     @if (!string.IsNullOrEmpty(request.AdditionalDetails))
@@ -340,11 +435,9 @@
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                <form method="post" asp-page-handler="ApproveRequest" asp-route-id="@request.Id" class="d-inline">
-                                                                    <button type="submit" class="btn btn-success">
-                                                                        <i class="bi bi-check-lg me-1"></i> Approve
-                                                                    </button>
-                                                                </form>
+                                                                <button type="button" class="btn btn-success" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#assignTeamModal@(request.Id)">
+                                                                    <i class="bi bi-people me-1"></i> Assign Team
+                                                                </button>
                                                                 <form method="post" asp-page-handler="RejectRequest" asp-route-id="@request.Id" class="d-inline">
                                                                     <button type="submit" class="btn btn-danger">
                                                                         <i class="bi bi-x-lg me-1"></i> Reject
@@ -452,7 +545,7 @@
                                     <th>Requester</th>
                                     <th>Contact</th>
                                     <th>Date & Time</th>
-                                    <th>Created On</th>
+                                    <th>Assigned Team</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -487,7 +580,20 @@
                                                     <div><i class="bi bi-clock me-1"></i> @DateTime.Today.Add(request.PreferredTime).ToString("h:mm tt")</div>
                                                 </div>
                                             </td>
-                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
+                                            <td>
+                                                @if (request.ServicePersonnelId.HasValue && request.ServicePersonnel != null)
+                                                {
+                                                    <div class="team-info">
+                                                        <span class="team-badge">
+                                                            <i class="bi bi-people-fill me-1"></i> @request.ServicePersonnel.TeamName
+                                                        </span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted"><i class="bi bi-dash-circle me-1"></i>Not assigned</span>
+                                                }
+                                            </td>
                                             <td>
                                                 @if (request.Status == ServiceRequestStatus.Pending)
                                                 {
@@ -596,6 +702,8 @@
                                                                         </div>
                                                                     </div>
 
+
+
                                                                     @if (!string.IsNullOrEmpty(request.AdditionalDetails))
                                                                     {
                                                                         <div class="detail-section">
@@ -698,6 +806,25 @@
         --warning-color: #ffc107;
         --danger-color: #dc3545;
         --info-color: #17a2b8;
+    }
+
+    .team-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background-color: rgba(78, 110, 77, 0.1);
+        color: var(--primary-color);
+    }
+
+    .team-info {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+        color: var(--text-dark);
     }
 
     /* Navbar styling */

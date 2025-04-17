@@ -139,14 +139,14 @@
 
 <!-- Main Content Section -->
 <div class="container announcements-section">
+    <div class="page-header">
+        <h1 class="page-title">Community Announcements</h1>
+        <p class="text-muted">Stay updated with the latest news and events</p>
+    </div>
+    
     <!-- Announcements and Notifications -->
-    <div class="row">
+    <div class="row gx-4 gy-4">
         <div class="col-lg-8">
-            <div class="section-header">
-                <h2>Community Announcements</h2>
-                <p class="text-muted">Stay updated with the latest news and events</p>
-            </div>
-
             <!-- Announcements List -->
             <div class="announcements-list">
                 @if (Model.Any())
@@ -154,36 +154,39 @@
                     @foreach (var announcement in Model)
                     {
                         <div class="announcement-card shadow-sm @(announcement.IsUrgent ? "urgent" : "")">
-                            @if (announcement.IsUrgent)
-                            {
-                                <div class="announcement-badge">
-                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Urgent
+                            <div class="announcement-header">
+                                @if (announcement.IsUrgent)
+                                {
+                                    <div class="announcement-badge">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Urgent
+                                    </div>
+                                }
+                                <div class="announcement-category-badge">
+                                    <span class="badge bg-@(announcement.Category switch {
+                                        "Important" => "danger",
+                                        "Event" => "info",
+                                        "Update" => "success",
+                                        _ => "secondary"
+                                    })">
+                                        <i class="bi bi-@(announcement.Category switch {
+                                            "Important" => "info-circle",
+                                            "Event" => "calendar-event",
+                                            "Update" => "arrow-clockwise",
+                                            _ => "chat-text"
+                                        })"></i> @announcement.Category
+                                    </span>
                                 </div>
-                            }
-                            <div class="announcement-category-badge">
-                                <span class="badge bg-@(announcement.Category switch {
-                                    "Important" => "danger",
-                                    "Event" => "info",
-                                    "Update" => "success",
-                                    _ => "secondary"
-                                })">
-                                    <i class="bi bi-@(announcement.Category switch {
-                                        "Important" => "info-circle",
-                                        "Event" => "calendar-event",
-                                        "Update" => "arrow-clockwise",
-                                        _ => "chat-text"
-                                    })"></i> @announcement.Category
-                                </span>
+                                <h3>@announcement.Title</h3>
+                                <div class="announcement-meta">
+                                    <div class="meta-item">
+                                        <i class="bi bi-clock"></i> Posted on @announcement.PostedDate.ToString("MMM dd, yyyy")
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="bi bi-clock-history"></i> @announcement.PostedDate.ToString("h:mm tt")
+                                    </div>
+                                </div>
                             </div>
-                            <h3>@announcement.Title</h3>
-                            <div class="announcement-meta">
-                                <div class="meta-item">
-                                    <i class="bi bi-clock"></i> Posted on @announcement.PostedDate.ToString("MMM dd, yyyy")
-                                </div>
-                                <div class="meta-item">
-                                    <i class="bi bi-clock-history"></i> @announcement.PostedDate.ToString("h:mm tt")
-                                </div>
-                            </div>
+                            
                             <div class="announcement-content">
                                 <div class="scrollable-content">
                                     <p>@announcement.Content</p>
@@ -194,10 +197,13 @@
                             {
                                 <div class="event-date-box">
                                     <i class="bi bi-calendar-event"></i>
-                                    <span>
-                                        <strong>Event Date:</strong> @announcement.EventDateTime.Value.ToString("MMMM dd, yyyy") at 
-                                        <strong>@announcement.EventDateTime.Value.ToString("h:mm tt")</strong>
-                                    </span>
+                                    <div class="event-info">
+                                        <span class="event-label">Event Date</span>
+                                        <span class="event-date">
+                                            @announcement.EventDateTime.Value.ToString("MMMM dd, yyyy") at 
+                                            <strong>@announcement.EventDateTime.Value.ToString("h:mm tt")</strong>
+                                        </span>
+                                    </div>
                                 </div>
                             }
 
@@ -232,35 +238,39 @@
         <div class="col-lg-4">
             <!-- Upcoming Events Widget -->
             <div class="sidebar-widget calendar-widget shadow-sm">
-                <h3><i class="bi bi-calendar-week me-2"></i>Upcoming Events</h3>
-                <div class="upcoming-events">
-                    @if (ViewBag.UpcomingEvents != null && ((List<HomeOwners.Models.Event>)ViewBag.UpcomingEvents).Any())
-                    {
-                        foreach (var evt in ViewBag.UpcomingEvents)
+                <div class="widget-header">
+                    <h3><i class="bi bi-calendar-week me-2"></i>Upcoming Events</h3>
+                </div>
+                <div class="widget-body">
+                    <div class="upcoming-events">
+                        @if (ViewBag.UpcomingEvents != null && ((List<HomeOwners.Models.Event>)ViewBag.UpcomingEvents).Any())
                         {
-                            <div class="upcoming-event">
-                                <div class="event-date">
-                                    <span class="date">@evt.StartTime.Day</span>
-                                    <span class="month">@evt.StartTime.ToString("MMM")</span>
+                            foreach (var evt in ViewBag.UpcomingEvents)
+                            {
+                                <div class="upcoming-event">
+                                    <div class="event-date">
+                                        <span class="date">@evt.StartTime.Day</span>
+                                        <span class="month">@evt.StartTime.ToString("MMM")</span>
+                                    </div>
+                                    <div class="event-details">
+                                        <h4>@evt.Title</h4>
+                                        <p><i class="bi bi-clock"></i> @evt.StartTime.ToString("h:mm tt")</p>
+                                        @if (!string.IsNullOrEmpty(evt.Location))
+                                        {
+                                            <p class="event-location"><i class="bi bi-geo-alt"></i> @evt.Location</p>
+                                        }
+                                    </div>
                                 </div>
-                                <div class="event-details">
-                                    <h4>@evt.Title</h4>
-                                    <p><i class="bi bi-clock"></i> @evt.StartTime.ToString("h:mm tt")</p>
-                                    @if (!string.IsNullOrEmpty(evt.Location))
-                                    {
-                                        <p class="event-location"><i class="bi bi-geo-alt"></i> @evt.Location</p>
-                                    }
-                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="bi bi-calendar-x fs-1 text-muted"></i>
+                                <p class="mt-2 mb-0">No upcoming events</p>
                             </div>
                         }
-                    }
-                    else
-                    {
-                        <div class="empty-state">
-                            <i class="bi bi-calendar-x fs-1 text-muted"></i>
-                            <p class="mt-2 mb-0">No upcoming events</p>
-                        </div>
-                    }
+                    </div>
 
                     <div class="text-center mt-4">
                         <a href="@Url.Action("Calendar")" class="btn btn-primary">
@@ -272,156 +282,148 @@
 
             <!-- Active Polls Widget -->
             <div class="sidebar-widget polls-widget shadow-sm">
-                <h3><i class="bi bi-bar-chart-line me-2"></i>Active Polls</h3>
-                @if (ViewBag.ActivePolls != null && ((List<HomeOwners.Models.Poll>)ViewBag.ActivePolls).Any())
-                {
-                    foreach (var poll in ViewBag.ActivePolls)
+                <div class="widget-header">
+                    <h3><i class="bi bi-bar-chart-line me-2"></i>Community Polls</h3>
+                </div>
+                <div class="widget-body">
+                    @if (ViewBag.ActivePolls != null && ((List<HomeOwners.Models.Poll>)ViewBag.ActivePolls).Any())
                     {
-                        <div class="poll-card mb-3">
-                            <h4>@poll.Title</h4>
-                            <p>@poll.Question</p>
+                        foreach (var poll in ViewBag.ActivePolls)
+                        {
+                            <div class="poll-card">
+                                <h4>@poll.Title</h4>
+                                <p>@poll.Question</p>
 
-                            @if (User.Identity.IsAuthenticated)
-                            {
-                                <form asp-action="CastVote" asp-controller="Home" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="pollId" value="@poll.Id" />
-                                    <div class="poll-options">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="voteValue" id="poll-@poll.Id-yes" value="true" required>
-                                            <label class="form-check-label" for="poll-@poll.Id-yes">Yes</label>
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <form asp-action="CastVote" asp-controller="Home" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="pollId" value="@poll.Id" />
+                                        <div class="poll-options">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="voteValue" id="poll-@poll.Id-yes" value="true" required>
+                                                <label class="form-check-label" for="poll-@poll.Id-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="voteValue" id="poll-@poll.Id-no" value="false" required>
+                                                <label class="form-check-label" for="poll-@poll.Id-no">No</label>
+                                            </div>
                                         </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="voteValue" id="poll-@poll.Id-no" value="false" required>
-                                            <label class="form-check-label" for="poll-@poll.Id-no">No</label>
+
+                                        <button type="submit" class="btn btn-primary w-100 mt-3">Submit Vote</button>
+                                    </form>
+
+                                    <div class="poll-results mt-3">
+                                        <div class="vote-progress">
+                                            <div class="progress" style="height: 24px; border-radius: 12px; overflow: hidden;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: @(poll.YesPercentage)%"
+                                                    aria-valuenow="@poll.YesPercentage" aria-valuemin="0" aria-valuemax="100">
+                                                    Yes: @poll.YesPercentage%
+                                                </div>
+                                                <div class="progress-bar bg-danger" role="progressbar" style="width: @(poll.NoPercentage)%"
+                                                    aria-valuenow="@poll.NoPercentage" aria-valuemin="0" aria-valuemax="100">
+                                                    No: @poll.NoPercentage%
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <button type="submit" class="btn btn-primary w-100 mt-3">Submit Vote</button>
-                                </form>
-
-                                <div class="poll-results mt-3">
-                                    <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: @(poll.YesPercentage)%"
-                                             aria-valuenow="@poll.YesPercentage" aria-valuemin="0" aria-valuemax="100">
-                                            Yes: @poll.YesPercentage%
-                                        </div>
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: @(poll.NoPercentage)%"
-                                             aria-valuenow="@poll.NoPercentage" aria-valuemin="0" aria-valuemax="100">
-                                            No: @poll.NoPercentage%
+                                }
+                                else
+                                {
+                                    <div class="login-prompt">
+                                        <div class="alert alert-info">
+                                            <i class="bi bi-info-circle me-2"></i>
+                                            Please log in to vote in this poll.
                                         </div>
                                     </div>
+                                }
+
+                                <div class="poll-meta">
+                                    <span>
+                                        <i class="bi bi-clock-history me-1"></i> 
+                                        Ends in <strong>@poll.DaysRemaining</strong> days
+                                    </span>
+                                    <span>
+                                        <i class="bi bi-people me-1"></i> 
+                                        <strong>@poll.TotalVotes</strong> votes
+                                    </span>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-info">Please log in to vote in this poll.</div>
-                            }
-
-                            <p class="poll-meta">Ends in @poll.DaysRemaining days • @poll.TotalVotes votes</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-bar-chart-line fs-1 text-muted"></i>
+                            <p class="mt-2 mb-0">No active polls</p>
                         </div>
                     }
-                }
-                else
-                {
-                    <div class="empty-state">
-                        <i class="bi bi-bar-chart-line fs-1 text-muted"></i>
-                        <p class="mt-2 mb-0">No active polls</p>
-                    </div>
-                }
+                </div>
             </div>
 
-<!-- Footer Section -->
-<footer class="footer-section">
-    <div class="footer-wrapper">
-        <div class="container">
-            <div class="row">
-                <!-- Company Info -->
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h5 class="brand-text-footer">HOMEOWNERS</h5>
-                    <p class="footer-description">Your trusted partner in finding the perfect home. We provide comprehensive real estate services with a focus on quality and customer satisfaction.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-twitter-x"></i></a>
-                        <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
-                    </div>
+            <!-- Community Quick Links -->
+            <div class="sidebar-widget quick-links-widget shadow-sm">
+                <div class="widget-header">
+                    <h3><i class="bi bi-link-45deg me-2"></i>Quick Links</h3>
                 </div>
-
-                <!-- Quick Links -->
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h5>Quick Links</h5>
-                    <div class="row">
-                        <div class="col-6">
-                            <ul class="footer-links">
-                                <li><a asp-controller="Home" asp-action="Facilities">Facilities</a></li>
-                                <li><a asp-controller="Home" asp-action="Services">Services</a></li>
-                                <li><a asp-controller="Home" asp-action="Annoucements">Announcements</a></li>
-                                <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-6">
-                            <ul class="footer-links">
-                                <li><a href="#">About Us</a></li>
-                                <li><a href="#">Privacy Policy</a></li>
-                                <li><a href="#">Terms & Conditions</a></li>
-                                <li><a href="#">FAQ</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Newsletter & Contact -->
-                <div class="col-lg-4">
-                    <h5>Stay Connected</h5>
-                    <div class="newsletter-form mb-4">
-                        <p class="footer-description">Subscribe to our newsletter for updates and special offers.</p>
-                        <div class="input-group">
-                            <input type="email" class="form-control" placeholder="Enter your email">
-                            <button class="btn btn-primary" type="button">Subscribe</button>
-                        </div>
-                    </div>
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="bi bi-geo-alt"></i>
-                            <span>123 Real Estate Ave, Business District, CA 90210</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="bi bi-telephone"></i>
-                            <span>+1 (555) 123-4567</span>
-                        </div>
-                        <div class="contact-item">
-                            <i class="bi bi-envelope"></i>
-                            <span>contact@homeowners.com</span>
-                        </div>
+                <div class="widget-body">
+                    <div class="quick-links">
+                        <a href="#" class="quick-link-item">
+                            <i class="bi bi-megaphone"></i>
+                            <span>Community Rules</span>
+                        </a>
+                        <a href="#" class="quick-link-item">
+                            <i class="bi bi-calendar2-event"></i>
+                            <span>Community Calendar</span>
+                        </a>
+                        <a href="#" class="quick-link-item">
+                            <i class="bi bi-card-checklist"></i>
+                            <span>Maintenance Schedule</span>
+                        </a>
+                        <a href="#" class="quick-link-item">
+                            <i class="bi bi-chat-text"></i>
+                            <span>Discussion Forum</span>
+                        </a>
+                        <a href="#" class="quick-link-item">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Documents & Forms</span>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Copyright -->
-    <div class="footer-bottom">
-        <div class="container">
-            <hr class="footer-divider">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <p class="mb-0">&copy; 2025 HomeOwners. All rights reserved.</p>
-                <a href="#" class="back-to-top">
-                    Back to top <i class="bi bi-arrow-up"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</footer>
+</div>
 
 <!-- CSS Styles -->
 <style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --text-light: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        --transition: all 0.3s ease;
+        --font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    body {
+        font-family: var(--font-family);
+        background-color: #f7f9fc;
+        color: var(--text-dark);
+    }
+
     /* Navbar Styles */
     .navbar {
         background-color: rgba(78, 110, 77, 0.95) !important;
         backdrop-filter: blur(10px);
         padding: 0.75rem 0;
-        transition: all 0.3s ease;
+        transition: var(--transition);
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     }
 
@@ -442,45 +444,45 @@
         gap: 0.5rem;
     }
 
-        .navbar-nav .nav-link {
-            color: white !important;
-            font-weight: 500;
-            font-size: 0.95rem;
-            padding: 0.6rem 1rem !important;
-            border-radius: 4px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
+    .navbar-nav .nav-link {
+        color: white !important;
+        font-weight: 500;
+        font-size: 0.95rem;
+        padding: 0.6rem 1rem !important;
+        border-radius: 4px;
+        transition: var(--transition);
+        position: relative;
+    }
 
-            .navbar-nav .nav-link:hover,
-            .navbar-nav .nav-link.active {
-                background-color: rgba(255, 255, 255, 0.15);
-                transform: translateY(-1px);
-            }
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-1px);
+    }
 
-        .navbar-nav .dropdown-menu {
-            background-color: white;
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            border-top: 3px solid #4e6e4d;
-        }
+    .navbar-nav .dropdown-menu {
+        background-color: white;
+        border: none;
+        border-radius: 8px;
+        box-shadow: var(--box-shadow);
+        padding: 0.5rem;
+        margin-top: 0.5rem;
+        border-top: 3px solid var(--primary-color);
+    }
 
-        .navbar-nav .dropdown-item {
-            padding: 0.6rem 1rem;
-            color: #555;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
+    .navbar-nav .dropdown-item {
+        padding: 0.6rem 1rem;
+        color: var(--text-dark);
+        border-radius: 4px;
+        font-size: 0.9rem;
+        transition: var(--transition);
+    }
 
-            .navbar-nav .dropdown-item:hover {
-                background-color: rgba(78, 110, 77, 0.1);
-                color: #4e6e4d;
-                transform: translateX(3px);
-            }
+    .navbar-nav .dropdown-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        transform: translateX(3px);
+    }
 
     .dropdown-divider {
         margin: 0.5rem 0;
@@ -506,10 +508,9 @@
         color: white;
     }
 
-
     .profile-avatar {
-        width: 35px;
-        height: 35px;
+        width: 38px;
+        height: 38px;
         background-color: rgba(255, 255, 255, 0.15);
         border-radius: 50%;
         display: flex;
@@ -517,7 +518,7 @@
         justify-content: center;
         color: white;
         font-size: 1.3rem;
-        transition: all 0.3s ease;
+        transition: var(--transition);
         border: 2px solid rgba(255, 255, 255, 0.2);
     }
 
@@ -532,10 +533,10 @@
         padding: 0.75rem 0.5rem;
     }
 
-        .profile-dropdown .dropdown-header {
-            padding: 0.5rem 1rem;
-            border-bottom: none;
-        }
+    .profile-dropdown .dropdown-header {
+        padding: 0.5rem 1rem;
+        border-bottom: none;
+    }
 
     .user-info {
         display: flex;
@@ -545,12 +546,12 @@
 
     .user-name {
         font-weight: 600;
-        color: #333;
+        color: var(--text-dark);
         font-size: 1rem;
     }
 
     .user-role {
-        color: #777;
+        color: var(--text-muted);
         font-size: 0.8rem;
     }
 
@@ -559,69 +560,78 @@
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        color: #555;
-        transition: all 0.2s ease;
+        color: var(--text-dark);
+        transition: var(--transition);
         border-radius: 6px;
         margin: 0.2rem 0.5rem;
     }
 
-        .profile-dropdown .dropdown-item i {
-            font-size: 1.1rem;
-            color: #4e6e4d;
-            width: 20px;
-            text-align: center;
-        }
+    .profile-dropdown .dropdown-item i {
+        font-size: 1.1rem;
+        color: var(--primary-color);
+        width: 20px;
+        text-align: center;
+    }
 
-        .profile-dropdown .dropdown-item:hover {
-            background-color: rgba(78, 110, 77, 0.1);
-            color: #4e6e4d;
-            transform: translateX(3px);
-        }
+    .profile-dropdown .dropdown-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        transform: translateX(3px);
+    }
 
     .logout-item {
         color: #dc3545 !important;
     }
 
-        .logout-item i {
-            color: #dc3545 !important;
-        }
+    .logout-item i {
+        color: #dc3545 !important;
+    }
+
     /* Announcements Section Styles */
     .announcements-section {
-        padding-top: 120px;
+        padding-top: 100px;
         padding-bottom: 5rem;
     }
 
-    .section-header {
+    .page-header {
         margin-bottom: 2rem;
+        text-align: center;
     }
 
-    .section-header h2 {
-        color: #4e6e4d;
-        font-weight: 600;
-        font-size: 2.25rem;
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 2.5rem;
         margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
     }
 
     /* Announcement Card Design */
     .announcement-card {
         background: white;
-        border-radius: 12px;
-        padding: 1.75rem;
+        border-radius: var(--border-radius);
         margin-bottom: 1.5rem;
         position: relative;
         border: none;
-        transition: all 0.3s ease;
+        transition: var(--transition);
         overflow: hidden;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        flex-direction: column;
     }
 
     .announcement-card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+        box-shadow: var(--box-shadow);
     }
 
     .announcement-card.urgent {
         border-left: 4px solid #dc3545;
         background-color: #fff9f9;
+    }
+
+    .announcement-header {
+        padding: 1.75rem 1.75rem 0.5rem;
     }
 
     .announcement-badge {
@@ -637,6 +647,7 @@
         display: flex;
         align-items: center;
         box-shadow: 0 2px 10px rgba(220, 53, 69, 0.2);
+        z-index: 1;
     }
 
     .announcement-category-badge {
@@ -650,22 +661,25 @@
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
     }
 
     .announcement-card h3 {
-        color: #4e6e4d;
+        color: var(--primary-color);
         font-size: 1.5rem;
         margin-bottom: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
+        line-height: 1.3;
     }
 
     .announcement-meta {
         display: flex;
         flex-wrap: wrap;
         gap: 1.5rem;
-        color: #6c757d;
+        color: var(--text-muted);
         font-size: 0.9rem;
-        margin-bottom: 1.25rem;
+        margin-bottom: 0.75rem;
     }
 
     .meta-item {
@@ -675,9 +689,9 @@
     }
 
     .announcement-content {
-        color: #495057;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
+        padding: 0.5rem 1.75rem;
+        color: var(--text-dark);
+        flex-grow: 1;
     }
 
     /* Scrollable Content Area */
@@ -686,7 +700,7 @@
         overflow-y: auto;
         padding-right: 10px;
         position: relative;
-        transition: max-height 0.3s ease;
+        transition: max-height 0.4s ease;
     }
 
     .scrollable-content::-webkit-scrollbar {
@@ -717,7 +731,8 @@
         padding: 0.25rem 0.5rem;
         font-size: 0.875rem;
         cursor: pointer;
-        color: #4e6e4d;
+        color: var(--primary-color);
+        transition: var(--transition);
     }
 
     .expand-content-btn:hover {
@@ -725,58 +740,107 @@
     }
 
     .event-date-box {
-        background-color: rgba(78, 110, 77, 0.08);
-        border-left: 3px solid #4e6e4d;
-        padding: 1rem 1.25rem;
-        margin: 1.5rem 0;
-        border-radius: 0 6px 6px 0;
+        background-color: var(--primary-light);
+        border-left: 3px solid var(--primary-color);
+        margin: 1rem 1.75rem;
+        border-radius: 8px;
         display: flex;
         align-items: flex-start;
         gap: 0.75rem;
-        line-height: 1.5;
+        padding: 1rem;
     }
 
     .event-date-box i {
-        color: #4e6e4d;
-        font-size: 1.25rem;
+        color: var(--primary-color);
+        font-size: 1.5rem;
         margin-top: 0.125rem;
     }
 
-    .announcement-footer {
+    .event-info {
         display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        margin-top: 1.5rem;
-        padding-top: 1.25rem;
+        flex-direction: column;
+    }
+
+    .event-label {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .event-date {
+        color: var(--text-dark);
+    }
+
+    .announcement-footer {
+        padding: 1rem 1.75rem 1.75rem;
         border-top: 1px solid rgba(0,0,0,0.05);
+        margin-top: auto;
     }
 
     .announcement-actions {
         display: flex;
         gap: 0.5rem;
+        justify-content: flex-end;
+        flex-wrap: wrap;
     }
 
     /* Sidebar Widget Styling */
     .sidebar-widget {
         background: white;
-        border-radius: 12px;
-        padding: 1.75rem;
-        margin-bottom: 2rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.75rem;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        overflow: hidden;
     }
 
-    .sidebar-widget h3 {
-        color: #4e6e4d;
+    .sidebar-widget:hover {
+        box-shadow: var(--box-shadow);
+    }
+
+    .widget-header {
+        padding: 1.5rem 1.5rem 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .widget-header h3 {
+        color: var(--primary-color);
         font-size: 1.4rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0;
         font-weight: 600;
         display: flex;
         align-items: center;
     }
 
+    .widget-body {
+        padding: 1.5rem;
+    }
+
     /* Upcoming Events Section */
     .upcoming-events {
-        max-height: 500px;
+        max-height: 380px;
         overflow-y: auto;
+        margin: -0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .upcoming-events::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .upcoming-events::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .upcoming-events::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+
+    .upcoming-events::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
     }
     
     .upcoming-event {
@@ -784,14 +848,14 @@
         gap: 12px;
         padding: 16px;
         border-bottom: 1px solid rgba(0,0,0,0.05);
-        transition: all 0.2s ease;
+        transition: var(--transition);
         background: #f8f9fa;
         border-radius: 8px;
         margin-bottom: 1rem;
     }
     
     .upcoming-event:hover {
-        background-color: rgba(78, 110, 77, 0.05);
+        background-color: var(--primary-light);
         transform: translateY(-2px);
         box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
@@ -804,13 +868,13 @@
     .event-date .date {
         font-size: 1.75rem;
         font-weight: 700;
-        color: #4e6e4d;
+        color: var(--primary-color);
         line-height: 1;
     }
     
     .event-date .month {
         font-size: 0.85rem;
-        color: #6c757d;
+        color: var(--text-muted);
         text-transform: uppercase;
         font-weight: 500;
     }
@@ -822,12 +886,12 @@
     .event-details h4 {
         font-size: 1rem;
         font-weight: 600;
-        color: #333;
+        color: var(--text-dark);
         margin-bottom: 0.4rem;
     }
     
     .event-details p {
-        color: #6c757d;
+        color: var(--text-muted);
         font-size: 0.85rem;
         margin-bottom: 0.25rem;
         display: flex;
@@ -844,51 +908,136 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        color: #6c757d;
+        color: var(--text-muted);
         padding: 2rem 0;
     }
 
     /* Poll Card Styling */
     .poll-card {
         background: #f8f9fa;
-        border-radius: 8px;
+        border-radius: 12px;
         padding: 1.5rem;
+        transition: var(--transition);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 1.25rem;
+    }
+
+    .poll-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .poll-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
     .poll-card h4 {
-        color: #4e6e4d;
+        color: var (--primary-color);
         font-size: 1.1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+    }
+
+    .poll-card p {
+        color: var(--text-dark);
+        margin-bottom: 1.25rem;
+        line-height: 1.5;
     }
 
     .poll-options {
         margin: 1rem 0;
     }
 
+    .form-check {
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        border: 1px solid rgba(0,0,0,0.05);
+        transition: var(--transition);
+    }
+
+    .form-check:hover {
+        background: var(--primary-lighter);
+        border-color: var(--primary-light);
+        transform: translateX(3px);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .vote-progress {
+        margin-top: 0.75rem;
+    }
+
     .poll-meta {
         font-size: 0.9rem;
-        color: #666;
-        text-align: center;
+        color: var(--text-muted);
         margin-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .login-prompt {
+        margin: 1rem 0;
+    }
+
+    .login-prompt .alert {
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Quick links widget */
+    .quick-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .quick-link-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .quick-link-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        transform: translateX(5px);
+    }
+
+    .quick-link-item i {
+        font-size: 1.25rem;
+        color: var(--primary-color);
     }
 
     /* Button Styles */
     .btn-outline-primary {
-        color: #4e6e4d;
-        border-color: #4e6e4d;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
     }
 
     .btn-outline-primary:hover {
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
         color: white;
     }
 
     .btn-outline-primary:not(:disabled):not(.disabled):active,
     .btn-outline-primary:not(:disabled):not(.disabled).active {
         color: white;
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
     }
 
     .btn-outline-primary:focus,
@@ -897,289 +1046,26 @@
     }
 
     .btn-outline-secondary {
-        color: #6c757d;
+        color: var(--text-muted);
         border-color: #dee2e6;
     }
 
     .btn-outline-secondary:hover {
         background-color: #f8f9fa;
-        color: #495057;
+        color: var(--text-dark);
     }
 
     .btn-primary {
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: var(--transition);
     }
 
     .btn-primary:hover {
-        background-color: #3d5a3c;
-        border-color: #3d5a3c;
-    }
-
-    /* Forum Section Styles */
-    .forum-section {
-        padding: 4rem 0;
-        background-color: #fff;
-    }
-
-    .forum-categories {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .forum-categories .btn {
-        border-color: #4e6e4d;
-        color: #4e6e4d;
-    }
-
-    .forum-categories .btn.active {
-        background-color: #4e6e4d;
-        color: white;
-    }
-
-    .forum-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .forum-actions .btn {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .thread-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        border: 1px solid rgba(78, 110, 77, 0.1);
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .thread-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-
-    .thread-card.featured {
-        border-left: 4px solid #4e6e4d;
-    }
-
-    .thread-badge {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background-color: #4e6e4d;
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 500;
-    }
-
-    .thread-header {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    .thread-meta {
-        flex: 1;
-    }
-
-    .thread-meta h3 {
-        font-size: 1.2rem;
-        margin-bottom: 0.25rem;
-        color: #4e6e4d;
-    }
-
-    .meta-info {
-        font-size: 0.9rem;
-        color: #666;
-        display: flex;
-        gap: 1rem;
-        margin: 0;
-    }
-
-    .thread-preview {
-        color: #444;
-        margin-bottom: 1rem;
-    }
-
-    .thread-stats {
-        display: flex;
-        gap: 1.5rem;
-        color: #666;
-        font-size: 0.9rem;
-    }
-
-    .thread-stats span {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .thread-stats i {
-        color: #4e6e4d;
-        font-size: 1rem;
-    }
-
-    /* Footer Styles */
-    .footer-section {
-        background-color: #4e6e4d;
-        color: white;
-        width: 100vw;
-        position: relative;
-        left: 50%;
-        right: 50%;
-        margin-top: 5rem;
-        margin-left: -50vw;
-        margin-right: -50vw;
-        padding: 4rem 0 1rem;
-    }
-
-    .brand-text-footer {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-        letter-spacing: 1px;
-    }
-
-    .footer-description {
-        opacity: 0.9;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
-
-    .social-links {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .social-link {
-        width: 40px;
-        height: 40px;
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.2rem;
-        transition: all 0.3s ease;
-    }
-
-    .social-link:hover {
-        background-color: white;
-        color: #4e6e4d;
-        transform: translateY(-3px);
-    }
-
-    .footer-section h5 {
-        color: white;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        font-size: 1.2rem;
-    }
-
-    .footer-links {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .footer-links li {
-        margin-bottom: 0.8rem;
-    }
-
-    .footer-links a {
-        color: white;
-        opacity: 0.9;
-        text-decoration: none;
-        transition: all 0.3s ease;
-    }
-
-    .footer-links a:hover {
-        opacity: 1;
-        padding-left: 5px;
-    }
-
-    .newsletter-form .form-control {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        padding: 0.75rem;
-    }
-
-    .newsletter-form .form-control::placeholder {
-        color: rgba(255, 255, 255, 0.7);
-    }
-
-    .newsletter-form .btn {
-        background-color: white;
-        color: #4e6e4d;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-    }
-
-    .newsletter-form .btn:hover {
-        background-color: rgba(255, 255, 255, 0.9);
-        color: #4e6e4d;
-    }
-
-    .contact-info {
-        margin-top: 2rem;
-    }
-
-    .contact-item {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        align-items: flex-start;
-    }
-
-    .contact-item i {
-        font-size: 1.2rem;
-        opacity: 0.9;
-    }
-
-    .contact-item span {
-        opacity: 0.9;
-        line-height: 1.4;
-    }
-
-    .footer-divider {
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        margin: 2rem 0;
-    }
-
-    .back-to-top {
-        color: white;
-        text-decoration: none;
-        opacity: 0.9;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .back-to-top:hover {
-        color: white;
-        opacity: 1;
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
         transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
     }
 </style>
 

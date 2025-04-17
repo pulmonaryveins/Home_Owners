@@ -136,7 +136,28 @@ public class HomeController : Controller
                 return View(model);
             }
 
-            // Create a new booking entity
+            // Check for booking conflicts
+            if (await _bookingService.HasBookingConflictAsync(model.FacilityId, model.BookingDate, model.StartTime, model.EndTime))
+            {
+                var facility = await _facilityService.GetFacilityByIdAsync(model.FacilityId);
+                var facilityName = facility?.Name ?? "selected facility";
+                var formattedDate = model.BookingDate.ToString("MMMM d, yyyy");
+                var formattedStartTime = DateTime.Today.Add(model.StartTime).ToString("hh:mm tt");
+                var formattedEndTime = DateTime.Today.Add(model.EndTime).ToString("hh:mm tt");
+
+                // Create a specific message mentioning venue, date and time
+                TempData["StatusMessage"] = $"There's a reserved booking on {facilityName} on {formattedDate} from {formattedStartTime} to {formattedEndTime}. Please select a different time slot.";
+                TempData["StatusType"] = "Error";
+
+                // Set the model properties for redisplay
+                model.FacilityName = facility?.Name;
+                model.PricePerHour = facility?.PricePerHour ?? 0;
+                ViewBag.FacilityImage = facility?.ImageUrl;
+
+                return View(model);
+            }
+
+            // Create a new booking entity - automatically approve it instead of setting to Pending
             var booking = new Booking
             {
                 FacilityId = model.FacilityId,
@@ -151,19 +172,19 @@ public class HomeController : Controller
                 TotalPrice = model.TotalPrice,
                 SpecialRequests = model.SpecialRequests,
                 CreatedDate = DateTime.Now,
-                Status = BookingStatus.Pending
+                Status = BookingStatus.Approved  // Changed from Pending to Approved
             };
 
             await _bookingService.CreateBookingAsync(booking);
 
-            TempData["StatusMessage"] = "Your booking request has been submitted and is pending approval.";
+            // Update the success message to reflect that booking is now automatically approved
+            TempData["StatusMessage"] = "Your booking has been automatically approved and confirmed.";
             TempData["StatusType"] = "Success";
 
             return RedirectToAction("MyBookings");
         }
 
         // If we got this far, something failed, redisplay form
-        // Use a different variable name here too to be consistent
         var selectedFacility = await _facilityService.GetFacilityByIdAsync(model.FacilityId);
         model.FacilityName = selectedFacility?.Name;
         model.PricePerHour = selectedFacility?.PricePerHour ?? 0;

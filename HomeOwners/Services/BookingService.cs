@@ -1,4 +1,4 @@
-﻿// HomeOwners/Services/BookingService.cs
+﻿// HomeOwners/Services/BookingService.cs - Modified
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,6 @@ namespace HomeOwners.Services
         {
             _context = context;
         }
-
 
         public async Task<bool> HasActiveBookingsAsync(string userId)
         {
@@ -48,6 +47,19 @@ namespace HomeOwners.Services
             _context.Payments.RemoveRange(payments);
 
             await _context.SaveChangesAsync();
+        }
+
+        // New method to check for booking conflicts
+        public async Task<bool> HasBookingConflictAsync(int facilityId, DateTime bookingDate, TimeSpan startTime, TimeSpan endTime)
+        {
+            return await _context.Bookings
+                .Where(b => b.FacilityId == facilityId &&
+                            b.BookingDate.Date == bookingDate.Date &&
+                            (b.Status == BookingStatus.Approved || b.Status == BookingStatus.Pending) &&
+                            ((b.StartTime <= startTime && b.EndTime > startTime) ||  // New booking starts during existing booking
+                             (b.StartTime < endTime && b.EndTime >= endTime) ||      // New booking ends during existing booking
+                             (b.StartTime >= startTime && b.EndTime <= endTime)))    // Existing booking is completely within new booking
+                .AnyAsync();
         }
 
         public async Task<Booking> CreateBookingAsync(Booking booking)

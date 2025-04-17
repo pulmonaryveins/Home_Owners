@@ -41,13 +41,9 @@ namespace HomeOwners.Areas.Admin.Pages
         public async Task OnGetAsync(string searchString, int? serviceFilter, string statusFilter, int pageNumber = 1)
         {
             CurrentPage = pageNumber < 1 ? 1 : pageNumber;
-            StatusFilter = statusFilter;
-            
+
             ServicesList = await _serviceService.GetAllServicesAsync();
-            ServiceSelectList = new SelectList(ServicesList, "Id", "Name");
-            
             var allPersonnel = await _servicePersonnelService.GetAllServicePersonnelAsync();
-            TotalCount = allPersonnel.Count;
 
             // Apply filters if any
             if (!string.IsNullOrEmpty(searchString))
@@ -67,12 +63,12 @@ namespace HomeOwners.Areas.Admin.Pages
             // Apply status filter
             if (!string.IsNullOrEmpty(statusFilter))
             {
-                if (statusFilter.Equals("active", StringComparison.OrdinalIgnoreCase))
+                if (statusFilter.Equals("Active", StringComparison.OrdinalIgnoreCase))
                 {
                     allPersonnel = allPersonnel.Where(p => p.IsActive).ToList();
                     ViewData["StatusFilter"] = "Active";
                 }
-                else if (statusFilter.Equals("inactive", StringComparison.OrdinalIgnoreCase))
+                else if (statusFilter.Equals("Inactive", StringComparison.OrdinalIgnoreCase))
                 {
                     allPersonnel = allPersonnel.Where(p => !p.IsActive).ToList();
                     ViewData["StatusFilter"] = "Inactive";
@@ -82,7 +78,7 @@ namespace HomeOwners.Areas.Admin.Pages
             // Calculate total pages after filtering
             TotalCount = allPersonnel.Count;
             TotalPages = (int)Math.Ceiling(TotalCount / (double)PageSize);
-            
+
             // Apply pagination
             ServicePersonnelList = allPersonnel
                 .Skip((CurrentPage - 1) * PageSize)
@@ -116,7 +112,7 @@ namespace HomeOwners.Areas.Admin.Pages
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostEditAsync(int id, string teamName, int numberOfPersonnel, int serviceId, bool isActive = false)
+        public async Task<IActionResult> OnPostEditAsync(int id, string teamName, int numberOfPersonnel, int serviceId, string isActive)
         {
             if (id <= 0 || string.IsNullOrEmpty(teamName) || numberOfPersonnel <= 0 || serviceId <= 0)
             {
@@ -136,7 +132,9 @@ namespace HomeOwners.Areas.Admin.Pages
             personnel.TeamName = teamName;
             personnel.NumberOfPersonnel = numberOfPersonnel;
             personnel.ServiceId = serviceId;
-            personnel.IsActive = isActive;
+
+            // Fix for checkbox handling
+            personnel.IsActive = isActive == "true";
 
             await _servicePersonnelService.UpdateServicePersonnelAsync(personnel);
 

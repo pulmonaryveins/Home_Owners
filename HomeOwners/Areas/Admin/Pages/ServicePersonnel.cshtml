@@ -178,7 +178,7 @@
                         <input type="hidden" name="pageNumber" value="1" />
                     </form>
                 </div>
-                <div class="col-md-7 d-flex justify-content-md-end gap-2">
+                <div class="col-md-6 d-flex justify-content-md-end gap-2">
                     <!-- Service Filter -->
                     <div class="dropdown">
                         <button type="button"
@@ -189,12 +189,11 @@
                             <span class="ms-1">@(ViewData["ServiceFilter"] ?? "All Services")</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item @(ViewData["ServiceFilter"] == null ? "active" : "")" href="@Model.GetPageUrl(1, null, null, Model.StatusFilter)">All Services</a></li>
+                            <li><a class="dropdown-item" asp-page="./ServicePersonnel" asp-route-statusFilter="@ViewData["StatusFilter"]"><i class="bi bi-grid-3x3-gap"></i> All Services</a></li>
                             <li><hr class="dropdown-divider"></li>
                             @foreach (var service in Model.ServicesList)
                             {
-                                var isActive = ViewData["ServiceFilterId"]?.ToString() == service.Id.ToString();
-                                <li><a class="dropdown-item @(isActive ? "active" : "")" href="@Model.GetPageUrl(1, null, service.Id, Model.StatusFilter)">@service.Name</a></li>
+                                <li><a class="dropdown-item" asp-page="./ServicePersonnel" asp-route-serviceFilter="@service.Id" asp-route-statusFilter="@ViewData["StatusFilter"]"><i class="bi bi-briefcase"></i> @service.Name</a></li>
                             }
                         </ul>
                     </div>
@@ -209,10 +208,10 @@
                             <span class="ms-1">@(ViewData["StatusFilter"] ?? "All Status")</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item @(ViewData["StatusFilter"] == null ? "active" : "")" href="@Model.GetPageUrl(1, null, ViewData["ServiceFilterId"] as int?, null)">All Status</a></li>
+                            <li><a class="dropdown-item" asp-page="./ServicePersonnel" asp-route-serviceFilter="@ViewData["ServiceFilterId"]"><i class="bi bi-grid-3x3-gap"></i> All Status</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item @(ViewData["StatusFilter"]?.ToString() == "Active" ? "active" : "")" href="@Model.GetPageUrl(1, null, ViewData["ServiceFilterId"] as int?, "active")">Active</a></li>
-                            <li><a class="dropdown-item @(ViewData["StatusFilter"]?.ToString() == "Inactive" ? "active" : "")" href="@Model.GetPageUrl(1, null, ViewData["ServiceFilterId"] as int?, "inactive")">Inactive</a></li>
+                            <li><a class="dropdown-item" asp-page="./ServicePersonnel" asp-route-statusFilter="Active" asp-route-serviceFilter="@ViewData["ServiceFilterId"]"><i class="bi bi-check-circle"></i> Active</a></li>
+                            <li><a class="dropdown-item" asp-page="./ServicePersonnel" asp-route-statusFilter="Inactive" asp-route-serviceFilter="@ViewData["ServiceFilterId"]"><i class="bi bi-x-circle"></i> Inactive</a></li>
                         </ul>
                     </div>
                 </div>
@@ -319,14 +318,8 @@
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3 form-check">
-                                                                @if (team.IsActive)
-                                                                {
-                                                                    <input type="checkbox" name="IsActive" class="form-check-input" checked id="isActive@(team.Id)" />
-                                                                }
-                                                                else
-                                                                {
-                                                                    <input type="checkbox" name="IsActive" class="form-check-input" id="isActive@(team.Id)" />
-                                                                }
+                                                                <input type="hidden" name="IsActive" value="false" />
+                                                                <input type="checkbox" name="IsActive" class="form-check-input" id="isActive@(team.Id)" value="true" @(team.IsActive ? "checked" : "") />
                                                                 <label class="form-check-label" for="isActive@(team.Id)">Is Active</label>
                                                             </div>
                                                         </div>

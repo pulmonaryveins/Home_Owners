@@ -37,6 +37,7 @@ builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<ServiceService>();
 builder.Services.AddScoped<ServiceRequestService>();
 builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<ServicePersonnelService>();
 
 builder.Services.AddControllers(options =>
 {

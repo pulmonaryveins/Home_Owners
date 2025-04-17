@@ -33,6 +33,8 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<Service> Services { get; set; }
         public DbSet<ServiceRequest> ServiceRequests { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<ServicePersonnel> ServicePersonnel { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

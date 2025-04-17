@@ -700,9 +700,34 @@
                                                                             <span class="detail-label">Request Date:</span>
                                                                             <span class="detail-value">@request.CreatedDate.ToString("MMMM dd, yyyy h:mm tt")</span>
                                                                         </div>
+                                                                        
+                                                                        <!-- Added Assigned Team section -->
+                                                                        <div class="assigned-team mt-3">
+                                                                            <h6 class="mb-2">Assigned Team</h6>
+                                                                            @if (request.ServicePersonnelId.HasValue && request.ServicePersonnel != null)
+                                                                            {
+                                                                                <div class="detail-item">
+                                                                                    <span class="detail-label">Team Name:</span>
+                                                                                    <span class="detail-value">@request.ServicePersonnel.TeamName</span>
+                                                                                </div>
+                                                                                <div class="detail-item">
+                                                                                    <span class="detail-label">Number of Personnel:</span>
+                                                                                    <span class="detail-value">@request.ServicePersonnel.NumberOfPersonnel</span>
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <div class="alert alert-warning mb-0">
+                                                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                                                    No team assigned yet.
+                                                                                    @if (request.Status == ServiceRequestStatus.Pending)
+                                                                                    {
+                                                                                        <span>A team must be assigned before approval.</span>
+                                                                                    }
+                                                                                </div>
+                                                                            }
+                                                                        </div>
                                                                     </div>
-
-
 
                                                                     @if (!string.IsNullOrEmpty(request.AdditionalDetails))
                                                                     {
@@ -719,11 +744,7 @@
                                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                                 @if (request.Status == ServiceRequestStatus.Approved)
                                                                 {
-                                                                    <form method="post" asp-page-handler="MarkCompleted" asp-route-id="@request.Id" class="d-inline">
-                                                                        <button type="submit" class="btn btn-success">
-                                                                            <i class="bi bi-check-circle me-1"></i> Mark as Done
-                                                                        </button>
-                                                                    </form>
+                                                                    
                                                                 }
                                                                 @if (request.Status == ServiceRequestStatus.Pending)
                                                                 {

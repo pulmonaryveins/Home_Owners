@@ -34,6 +34,8 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<ServiceRequest> ServiceRequests { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<ServicePersonnel> ServicePersonnel { get; set; }
+        public DbSet<Poll> Polls { get; set; }
+        public DbSet<PollVote> PollVotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -1,0 +1,214 @@
+﻿@page
+@model HomeOwners.Areas.Admin.Pages.CreatePollModel
+@{
+    ViewData["Title"] = "Create Poll";
+}
+
+<div class="container mt-5 pt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">
+                    <i class="bi bi-bar-chart-line me-2"></i>Create New Poll
+                </h1>
+                <a asp-page="./ManagePolls" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i> Back to List
+                </a>
+            </div>
+
+            <div class="card shadow-sm poll-card">
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-4 validation-summary"></div>
+
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-info-circle me-2"></i>Poll Details
+                            </h5>
+
+                            <div class="mb-3">
+                                <label asp-for="Poll.Title" class="form-label">Title <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-type-h1"></i></span>
+                                    <input asp-for="Poll.Title" class="form-control" placeholder="Enter poll title" />
+                                </div>
+                                <span asp-validation-for="Poll.Title" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Poll.Question" class="form-label">Question <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-question-circle"></i></span>
+                                    <input asp-for="Poll.Question" class="form-control" placeholder="Enter poll question" />
+                                </div>
+                                <span asp-validation-for="Poll.Question" class="text-danger small"></span>
+                                <small class="text-muted">This should be a yes/no question.</small>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Poll.StartDate" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                                        <input asp-for="Poll.StartDate" class="form-control" type="date" />
+                                    </div>
+                                    <span asp-validation-for="Poll.StartDate" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="Poll.EndDate" class="form-label">End Date <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                                        <input asp-for="Poll.EndDate" class="form-control" type="date" />
+                                    </div>
+                                    <span asp-validation-for="Poll.EndDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h5 class="form-section-title">
+                                <i class="bi bi-sliders me-2"></i>Status Settings
+                            </h5>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input asp-for="Poll.IsActive" class="form-check-input" type="checkbox" checked />
+                                    <label asp-for="Poll.IsActive" class="form-check-label">
+                                        <i class="bi bi-eye me-1"></i> Active (visible to homeowners)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a asp-page="./ManagePolls" class="btn btn-outline-secondary me-md-2">
+                                <i class="bi bi-x me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Create Poll
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+    }
+
+    body {
+        background-color: #f5f7f9;
+    }
+
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 1.8rem;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .poll-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+    }
+
+    /* Form Styling */
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    .form-section-title {
+        color: var(--primary-dark);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+    }
+
+    .form-label {
+        color: var(--text-dark);
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-control, .form-select {
+        padding: 0.6rem 0.75rem;
+        border-color: rgba(0,0,0,0.1);
+        border-radius: 6px;
+    }
+
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.15);
+            border-color: var(--primary-color);
+        }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: rgba(0,0,0,0.1);
+        color: var(--text-muted);
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+        }
+
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #ced4da;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+    /* Validation Summary */
+    .validation-summary {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        background-color: rgba(220, 53, 69, 0.05);
+        border-left: 4px solid #dc3545;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

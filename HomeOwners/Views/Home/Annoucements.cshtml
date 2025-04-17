@@ -273,120 +273,63 @@
             <!-- Active Polls Widget -->
             <div class="sidebar-widget polls-widget shadow-sm">
                 <h3><i class="bi bi-bar-chart-line me-2"></i>Active Polls</h3>
-                <div class="poll-card">
-                    <h4>Community Garden Proposal</h4>
-                    <p>Would you support the creation of a community garden in the vacant lot?</p>
-                    <div class="poll-options">
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="pollGarden" id="pollYes">
-                            <label class="form-check-label" for="pollYes">Yes</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="pollGarden" id="pollNo">
-                            <label class="form-check-label" for="pollNo">No</label>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary w-100 mt-3">Submit Vote</button>
-                    <p class="poll-meta">Ends in 5 days • 125 votes</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                @if (ViewBag.ActivePolls != null && ((List<HomeOwners.Models.Poll>)ViewBag.ActivePolls).Any())
+                {
+                    foreach (var poll in ViewBag.ActivePolls)
+                    {
+                        <div class="poll-card mb-3">
+                            <h4>@poll.Title</h4>
+                            <p>@poll.Question</p>
 
-<!-- Community Forum Section -->
-<div class="container forum-section">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="section-header">
-                <h2>Community Forum</h2>
-                <p class="text-muted">Engage with your neighbors and participate in community discussions</p>
-            </div>
-            
-            <!-- Forum Categories -->
-            <div class="forum-categories mb-4">
-                <button class="btn btn-outline-primary active">All Topics</button>
-                <button class="btn btn-outline-primary">General Discussion</button>
-                <button class="btn btn-outline-primary">Community Issues</button>
-                <button class="btn btn-outline-primary">Events & Activities</button>
-                <button class="btn btn-outline-primary">Suggestions</button>
-            </div>
-            
-            <!-- New Thread Button -->
-            <div class="forum-actions mb-4">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newThreadModal">
-                    <i class="bi bi-plus-circle"></i> Start New Discussion
-                </button>
-            </div>
-            
-            <!-- Forum Threads -->
-            <div class="forum-threads">
-                <!-- Featured Thread -->
-                <div class="thread-card featured">
-                    <div class="thread-badge">Featured</div>
-                    <div class="thread-header">
-                        <img src="~/images/assets/cat2.jpg" alt="User Avatar" class="user-avatar">
-                        <div class="thread-meta">
-                            <h3>Community Clean-up Drive Initiative</h3>
-                            <p class="meta-info">
-                                <span class="author">Posted by Admin Cat</span>
-                                <span class="date">2 days ago</span>
-                                <span class="category">Events & Activities</span>
-                            </p>
-                        </div>
-                    </div>
-                    <p class="thread-preview">Let's organize a community clean-up drive this coming weekend. Looking for volunteers and suggestions...</p>
-                    <div class="thread-stats">
-                        <span><i class="bi bi-chat"></i> 15 replies</span>
-                        <span><i class="bi bi-eye"></i> 234 views</span>
-                        <span><i class="bi bi-hand-thumbs-up"></i> 45 likes</span>
-                    </div>
-                </div>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <form asp-action="CastVote" asp-controller="Home" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="pollId" value="@poll.Id" />
+                                    <div class="poll-options">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="voteValue" id="poll-@poll.Id-yes" value="true" required>
+                                            <label class="form-check-label" for="poll-@poll.Id-yes">Yes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="voteValue" id="poll-@poll.Id-no" value="false" required>
+                                            <label class="form-check-label" for="poll-@poll.Id-no">No</label>
+                                        </div>
+                                    </div>
 
-                <!-- Regular Threads -->
-                <div class="thread-card">
-                    <div class="thread-header">
-                        <img src="~/images/assets/cat.png" alt="User Avatar" class="user-avatar">
-                        <div class="thread-meta">
-                            <h3>Street Light Maintenance Request</h3>
-                            <p class="meta-info">
-                                <span class="author">Nerd Cat</span>
-                                <span class="date">1 day ago</span>
-                                <span class="category">Community Issues</span>
-                            </p>
-                        </div>
-                    </div>
-                    <p class="thread-preview">Several street lights on Block 3 need maintenance. Has anyone else noticed this issue?</p>
-                    <div class="thread-stats">
-                        <span><i class="bi bi-chat"></i> 8 replies</span>
-                        <span><i class="bi bi-eye"></i> 156 views</span>
-                        <span><i class="bi bi-hand-thumbs-up"></i> 12 likes</span>
-                    </div>
-                </div>
+                                    <button type="submit" class="btn btn-primary w-100 mt-3">Submit Vote</button>
+                                </form>
 
-                <div class="thread-card">
-                    <div class="thread-header">
-                        <img src="~/images/assets/cat3.jpg" alt="User Avatar" class="user-avatar">
-                        <div class="thread-meta">
-                            <h3>Weekend Basketball Tournament</h3>
-                            <p class="meta-info">
-                                <span class="author">El Gato</span>
-                                <span class="date">3 days ago</span>
-                                <span class="category">Events & Activities</span>
-                            </p>
+                                <div class="poll-results mt-3">
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: @(poll.YesPercentage)%"
+                                             aria-valuenow="@poll.YesPercentage" aria-valuemin="0" aria-valuemax="100">
+                                            Yes: @poll.YesPercentage%
+                                        </div>
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: @(poll.NoPercentage)%"
+                                             aria-valuenow="@poll.NoPercentage" aria-valuemin="0" aria-valuemax="100">
+                                            No: @poll.NoPercentage%
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">Please log in to vote in this poll.</div>
+                            }
+
+                            <p class="poll-meta">Ends in @poll.DaysRemaining days • @poll.TotalVotes votes</p>
                         </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-bar-chart-line fs-1 text-muted"></i>
+                        <p class="mt-2 mb-0">No active polls</p>
                     </div>
-                    <p class="thread-preview">Planning to organize a friendly basketball tournament. Who's interested in participating?</p>
-                    <div class="thread-stats">
-                        <span><i class="bi bi-chat"></i> 23 replies</span>
-                        <span><i class="bi bi-eye"></i> 312 views</span>
-                        <span><i class="bi bi-hand-thumbs-up"></i> 67 likes</span>
-                    </div>
-                </div>
+                }
             </div>
-        </div>
-    </div>
-</div>
 
 <!-- Footer Section -->
 <footer class="footer-section">

@@ -20,11 +20,13 @@ public class HomeController : Controller
     private readonly ServiceService _serviceService;
     private readonly ServiceRequestService _serviceRequestService;
     private readonly PaymentService _paymentService;
+    private readonly PollService _pollService;
 
 
 
 
-    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService, ServiceRequestService serviceRequestService, PaymentService paymentService)
+
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService, ServiceRequestService serviceRequestService, PaymentService paymentService, PollService pollService)
     {
         _logger = logger;
         _announcementService = announcementService;
@@ -34,6 +36,7 @@ public class HomeController : Controller
         _serviceService = serviceService;
         _serviceRequestService = serviceRequestService;
         _paymentService = paymentService;
+        _pollService = pollService;
     }
 
     public IActionResult Index()
@@ -56,10 +59,41 @@ public class HomeController : Controller
     {
         var announcements = await _announcementService.GetActiveAnnouncementsAsync();
         var upcomingEvents = await _eventService.GetUpcomingEventsAsync(3);
+        var activePolls = await _pollService.GetActivePollsAsync();
+
 
         ViewBag.UpcomingEvents = upcomingEvents;
+        ViewBag.ActivePolls = activePolls;
+
 
         return View(announcements);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CastVote(int pollId, bool voteValue)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        try
+        {
+            await _pollService.CastVoteAsync(pollId, userId, voteValue);
+            TempData["StatusMessage"] = "Vote submitted successfully!";
+            TempData["StatusType"] = "Success";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["StatusMessage"] = ex.Message;
+            TempData["StatusType"] = "Error";
+        }
+        catch (Exception)
+        {
+            TempData["StatusMessage"] = "An error occurred while processing your vote.";
+            TempData["StatusType"] = "Error";
+        }
+
+        return RedirectToAction("Annoucements");
     }
 
     public async Task<IActionResult> Calendar()

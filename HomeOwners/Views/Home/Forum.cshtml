@@ -1,0 +1,1005 @@
+﻿@model List<HomeOwners.Models.ForumPost>
+@{
+    ViewData["Title"] = "Community Forum";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/css/nav.css" asp-append-version="true" />
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">Neighborly</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">All Bookings</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
+                        <li><a class="dropdown-item" href="/Home/Forum">Community Forum</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Services">All Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">My Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">All Request</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Billing">Unpaid Bills</a></li>
+                        <li><a class="dropdown-item" href="/Home/Billing">Payment History</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Updated profile menu section -->
+            <div class="nav-items-right">
+                <!-- Profile Menu -->
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-person-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item logout-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<!-- Main Content Section -->
+<div class="container forum-section">
+    <div class="page-header">
+        <h1 class="page-title">Community Forum</h1>
+        <p class="text-muted">Connect with your neighbors, share ideas, and engage in community discussions</p>
+    </div>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+        <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                <span>@TempData["StatusMessage"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Left Column - Forum Posts -->
+        <div class="col-lg-8">
+            <!-- Enhanced Filter Bar -->
+            <div class="filter-bar-container mb-4">
+                <div class="filter-bar">
+                    <div class="filter-buttons">
+                        <a href="@Url.Action("CreateForumPost")" class="btn btn-primary">
+                            <i class="bi bi-plus-lg me-2"></i> New Discussion
+                        </a>
+
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="categoriesDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-filter me-1"></i> 
+                                @(string.IsNullOrEmpty(ViewBag.CurrentCategory) ? "All Categories" : ViewBag.CurrentCategory)
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                                <li><a class="dropdown-item @(string.IsNullOrEmpty(ViewBag.CurrentCategory) ? "active" : "")" href="@Url.Action("Forum", new { search = ViewBag.CurrentSearch })">All Categories</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentCategory == "General" ? "active" : "")" href="@Url.Action("Forum", new { category = "General", search = ViewBag.CurrentSearch })">General</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentCategory == "Question" ? "active" : "")" href="@Url.Action("Forum", new { category = "Question", search = ViewBag.CurrentSearch })">Questions</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentCategory == "Suggestion" ? "active" : "")" href="@Url.Action("Forum", new { category = "Suggestion", search = ViewBag.CurrentSearch })">Suggestions</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentCategory == "Event" ? "active" : "")" href="@Url.Action("Forum", new { category = "Event", search = ViewBag.CurrentSearch })">Events</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentCategory == "Support" ? "active" : "")" href="@Url.Action("Forum", new { category = "Support", search = ViewBag.CurrentSearch })">Support</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-sort-down me-1"></i> 
+                                @(ViewBag.CurrentSort ?? "Newest First")
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == "Newest First" ? "active" : "")" href="@Url.Action("Forum", new { category = ViewBag.CurrentCategory, search = ViewBag.CurrentSearch, sort = "Newest First" })">Newest First</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == "Oldest First" ? "active" : "")" href="@Url.Action("Forum", new { category = ViewBag.CurrentCategory, search = ViewBag.CurrentSearch, sort = "Oldest First" })">Oldest First</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == "Most Comments" ? "active" : "")" href="@Url.Action("Forum", new { category = ViewBag.CurrentCategory, search = ViewBag.CurrentSearch, sort = "Most Comments" })">Most Comments</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="search-box">
+                        <form method="get" action="@Url.Action("Forum")" class="search-form">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="search" placeholder="Search discussions..."
+                                       value="@ViewBag.CurrentSearch">
+                                @if (!string.IsNullOrEmpty(ViewBag.CurrentCategory))
+                                {
+                                    <input type="hidden" name="category" value="@ViewBag.CurrentCategory">
+                                }
+                                @if (!string.IsNullOrEmpty(ViewBag.CurrentSort))
+                                {
+                                    <input type="hidden" name="sort" value="@ViewBag.CurrentSort">
+                                }
+                                <button class="btn btn-outline-primary" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Active filters display -->
+                @if (!string.IsNullOrEmpty(ViewBag.CurrentCategory) || !string.IsNullOrEmpty(ViewBag.CurrentSearch))
+                {
+                    <div class="active-filters mt-2">
+                        <span class="filters-label">Active filters:</span>
+                        @if (!string.IsNullOrEmpty(ViewBag.CurrentCategory))
+                        {
+                            <a href="@Url.Action("Forum", new { search = ViewBag.CurrentSearch, sort = ViewBag.CurrentSort })" class="filter-badge category">
+                                Category: @ViewBag.CurrentCategory <i class="bi bi-x-circle"></i>
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch))
+                        {
+                            <a href="@Url.Action("Forum", new { category = ViewBag.CurrentCategory, sort = ViewBag.CurrentSort })" class="filter-badge search">
+                                Search: @ViewBag.CurrentSearch <i class="bi bi-x-circle"></i>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Forum Posts List -->
+            <div class="forum-posts">
+                @if (Model.Any())
+                {
+                    @foreach (var post in Model)
+                    {
+                        <div class="forum-post-card @(post.IsFlagged ? "flagged" : "")">
+                            <div class="post-category">
+                                <span class="category-badge @post.Category.ToLower()">@post.Category</span>
+                            </div>
+                            <div class="post-main">
+                                <div class="post-content">
+                                    <h3 class="post-title">
+                                        <a href="@Url.Action("ForumPost", new { id = post.Id })">@post.Title</a>
+                                    </h3>
+                                    <p class="post-excerpt">
+                                        @(post.Content.Length > 150 ? post.Content.Substring(0, 150) + "..." : post.Content)
+                                    </p>
+                                </div>
+                                <div class="post-meta">
+                                    <div class="user-info">
+                                        <div class="avatar">
+                                            <i class="bi bi-person-circle"></i>
+                                        </div>
+                                        <div class="user-details">
+                                            <span class="user-name">@post.UserName</span>
+                                            @if (!string.IsNullOrEmpty(post.FullName) && !string.IsNullOrEmpty(post.HouseNumber))
+                                            {
+                                                <span class="homeowner-info">
+                                                    <i class="bi bi-house me-1"></i>
+                                                    @post.FullName - House #@post.HouseNumber
+                                                </span>
+                                            }
+                                            <span class="post-date">
+                                                <i class="bi bi-clock me-1"></i>
+                                                @post.PostedDate.ToString("MMM dd, yyyy") at @post.PostedDate.ToString("h:mm tt")
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="post-stats">
+                                        <span class="comments">
+                                            <i class="bi bi-chat-text me-1"></i>
+                                            @(ViewBag.CommentCounts != null && ViewBag.CommentCounts.ContainsKey(post.Id)
+                                                ? ViewBag.CommentCounts[post.Id] : 0) Comments
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-chat-square-text display-4 text-muted"></i>
+                        <h4 class="mt-3">No discussions found</h4>
+                        <p class="text-muted mb-4">
+                            @if (!string.IsNullOrEmpty(ViewBag.CurrentCategory) || !string.IsNullOrEmpty(ViewBag.CurrentSearch))
+                            {
+                                <span>No posts match your current filters. Try changing your search criteria or </span>
+                                <a href="@Url.Action("Forum")">view all discussions</a>
+                            }
+                            else
+                            {
+                                <span>Be the first to start a discussion in the community forum</span>
+                            }
+                        </p>
+                        <a href="@Url.Action("CreateForumPost")" class="btn btn-primary">
+                            <i class="bi bi-plus-lg me-2"></i> Start a Discussion
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.Any() && ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        @if (ViewBag.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Forum", new { page = ViewBag.CurrentPage - 1, category = ViewBag.CurrentCategory, search = ViewBag.CurrentSearch, sort = ViewBag.CurrentSort })" aria-label="Previous">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                        {
+                            <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Forum", new { page = i, category = ViewBag.CurrentCategory, search = ViewBag.CurrentSearch, sort = ViewBag.CurrentSort })">@i</a>
+                            </li>
+                        }
+
+                        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("Forum", new { page = ViewBag.CurrentPage + 1, category = ViewBag.CurrentCategory, search = ViewBag.CurrentSearch, sort = ViewBag.CurrentSort })" aria-label="Next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="page-item disabled">
+                                <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+        </div>
+
+        <!-- Right Column - Sidebar -->
+        <div class="col-lg-4">
+            <!-- Community Guidelines Widget -->
+            <div class="sidebar-widget guidelines-widget">
+                <div class="widget-header">
+                    <h3><i class="bi bi-info-circle me-2"></i>Forum Guidelines</h3>
+                </div>
+                <div class="widget-body">
+                    <ul class="guidelines-list">
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Be respectful and courteous to others</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Stay on topic and post in the relevant category</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>No spam, self-promotion, or advertising</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Avoid sharing personal contact information</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Respect privacy and confidentiality</span>
+                        </li>
+                    </ul>
+                    <p class="mt-3 text-muted small">Posts that violate these guidelines may be removed by administrators.</p>
+                </div>
+            </div>
+
+            <!-- Most Active Discussions Widget -->
+            <div class="sidebar-widget active-discussions-widget">
+                <div class="widget-header">
+                    <h3><i class="bi bi-chat-dots me-2"></i>Popular Discussions</h3>
+                </div>
+                <div class="widget-body">
+                    @if (ViewBag.PopularPosts != null && ViewBag.PopularPosts.Count > 0)
+                    {
+                        <div class="popular-discussions">
+                            @foreach (var post in ViewBag.PopularPosts)
+                            {
+                                <a href="@Url.Action("ForumPost", new { id = post.Id })" class="popular-post">
+                                    <div class="post-info">
+                                        <div class="post-title">@post.Title</div>
+                                        <div class="post-meta">
+                                            <span class="post-author">@post.UserName</span>
+                                            <span class="post-date">@post.PostedDate.ToString("MMM dd")</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-count">
+                                        <i class="bi bi-chat-text"></i>
+                                        <span>@post.CommentCount</span>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state small">
+                            <i class="bi bi-chat-square-text fs-1 text-muted"></i>
+                            <p class="mt-2 mb-0">No popular discussions yet</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Forum Categories Widget -->
+            <div class="sidebar-widget categories-widget">
+                <div class="widget-header">
+                    <h3><i class="bi bi-grid me-2"></i>Categories</h3>
+                </div>
+                <div class="widget-body">
+                    <div class="category-list">
+                        <a href="@Url.Action("Forum", new { category = "General", search = ViewBag.CurrentSearch })" class="category-item general @(ViewBag.CurrentCategory == "General" ? "active" : "")">
+                            <span class="category-name">General</span>
+                            <span class="category-count">@(ViewBag.CategoryCounts != null && ViewBag.CategoryCounts.ContainsKey("General") ? ViewBag.CategoryCounts["General"] : 0)</span>
+                        </a>
+                        <a href="@Url.Action("Forum", new { category = "Question", search = ViewBag.CurrentSearch })" class="category-item question @(ViewBag.CurrentCategory == "Question" ? "active" : "")">
+                            <span class="category-name">Questions</span>
+                            <span class="category-count">@(ViewBag.CategoryCounts != null && ViewBag.CategoryCounts.ContainsKey("Question") ? ViewBag.CategoryCounts["Question"] : 0)</span>
+                        </a>
+                        <a href="@Url.Action("Forum", new { category = "Suggestion", search = ViewBag.CurrentSearch })" class="category-item suggestion @(ViewBag.CurrentCategory == "Suggestion" ? "active" : "")">
+                            <span class="category-name">Suggestions</span>
+                            <span class="category-count">@(ViewBag.CategoryCounts != null && ViewBag.CategoryCounts.ContainsKey("Suggestion") ? ViewBag.CategoryCounts["Suggestion"] : 0)</span>
+                        </a>
+                        <a href="@Url.Action("Forum", new { category = "Event", search = ViewBag.CurrentSearch })" class="category-item event @(ViewBag.CurrentCategory == "Event" ? "active" : "")">
+                            <span class="category-name">Events</span>
+                            <span class="category-count">@(ViewBag.CategoryCounts != null && ViewBag.CategoryCounts.ContainsKey("Event") ? ViewBag.CategoryCounts["Event"] : 0)</span>
+                        </a>
+                        <a href="@Url.Action("Forum", new { category = "Support", search = ViewBag.CurrentSearch })" class="category-item support @(ViewBag.CurrentCategory == "Support" ? "active" : "")">
+                            <span class="category-name">Support</span>
+                            <span class="category-count">@(ViewBag.CategoryCounts != null && ViewBag.CategoryCounts.ContainsKey("Support") ? ViewBag.CategoryCounts["Support"] : 0)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --text-light: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        --transition: all 0.3s ease;
+        
+        /* Category colors */
+        --general-color: #4e6e4d;
+        --question-color: #17a2b8;
+        --suggestion-color: #ffc107;
+        --event-color: #6f42c1;
+        --support-color: #dc3545;
+    }
+
+    .forum-section {
+        padding-top: 100px;
+        padding-bottom: 5rem;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    /* Enhanced Filter Bar */
+    .filter-bar-container {
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        padding: 1.25rem;
+    }
+
+    .filter-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .filter-buttons {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .search-form {
+        margin-bottom: 0;
+    }
+
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .filters-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .filter-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        text-decoration: none;
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        transition: var(--transition);
+    }
+
+    .filter-badge:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .filter-badge.search {
+        background-color: rgba(108, 117, 125, 0.1);
+        color: var(--text-muted);
+    }
+
+    .filter-badge.search:hover {
+        background-color: var(--text-muted);
+        color: white;
+    }
+
+    /* Forum Posts */
+    .forum-posts {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .forum-post-card {
+        background: white;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        display: flex;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .forum-post-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--box-shadow);
+    }
+
+    .forum-post-card.flagged {
+        border-left-color: #dc3545;
+        background-color: #fff9f9;
+    }
+
+    .post-category {
+        width: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--primary-light);
+        writing-mode: vertical-lr;
+        transform: rotate(180deg);
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.8rem;
+        color: var(--primary-color);
+    }
+
+    .category-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+
+    .category-badge.general {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: var(--general-color);
+    }
+
+    .category-badge.question {
+        background-color: rgba(23, 162, 184, 0.1);
+        color: var(--question-color);
+    }
+
+    .category-badge.suggestion {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: var(--suggestion-color);
+    }
+
+    .category-badge.event {
+        background-color: rgba(111, 66, 193, 0.1);
+        color: var(--event-color);
+    }
+
+    .category-badge.support {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: var (--support-color);
+    }
+
+    .post-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+
+    .post-content {
+        flex: 1;
+    }
+
+    .post-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+    }
+
+    .post-title a {
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .post-title a:hover {
+        color: var(--primary-color);
+    }
+
+    .post-excerpt {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+
+    .post-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: auto;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        padding-top: 1rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: left;
+        gap: 0.75rem;
+    }
+
+    .avatar {
+        width: 36px;
+        height: 36px;
+        background-color: var(--primary-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: 1.25rem;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--text-dark);
+        font-size: 0.9rem;
+    }
+
+    .homeowner-info {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+    }
+
+    .post-date {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .post-stats {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    /* Empty State */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        text-align: center;
+    }
+
+    /* Sidebar Widgets */
+    .sidebar-widget {
+        background: white;
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .widget-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .widget-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+    }
+
+    .widget-body {
+        padding: 1.5rem;
+    }
+
+    /* Guidelines Widget */
+    .guidelines-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .guidelines-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+    }
+
+    .guidelines-list li i {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        margin-top: 0.125rem;
+    }
+
+    /* Popular Discussions */
+    .popular-discussions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .popular-post {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .popular-post:hover {
+        background-color: var(--primary-light);
+        transform: translateX(3px);
+    }
+
+    .post-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .post-info .post-title {
+        font-size: 0.95rem;
+        margin: 0 0 0.25rem;
+        color: var(--text-dark);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .post-info .post-meta {
+        display: flex;
+        gap: 0.75rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin: 0;
+        padding: 0;
+        border: none;
+    }
+
+    .post-info .post-meta span {
+        white-space: nowrap;
+    }
+
+    .comment-count {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-width: 36px;
+        font-size: 0.85rem;
+        color: var(--primary-color);
+    }
+
+    .comment-count i {
+        font-size: 1.1rem;
+    }
+
+    /* Categories Widget */
+    .category-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .category-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-dark);
+        transition: var(--transition);
+        background-color: #f8f9fa;
+    }
+
+    .category-item:hover {
+        transform: translateX(3px);
+    }
+
+    .category-item.active {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .category-item.general:hover, .category-item.general.active {
+        background-color: rgba(78, 110, 77, 0.1);
+        color: var(--general-color);
+    }
+
+    .category-item.question:hover, .category-item.question.active {
+        background-color: rgba(23, 162, 184, 0.1);
+        color: var(--question-color);
+    }
+
+    .category-item.suggestion:hover, .category-item.suggestion.active {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: var(--suggestion-color);
+    }
+
+    .category-item.event:hover, .category-item.event.active {
+        background-color: rgba(111, 66, 193, 0.1);
+        color: var(--event-color);
+    }
+
+    .category-item.support:hover, .category-item.support.active {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: var(--support-color);
+    }
+
+    .category-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+        padding: 0 8px;
+        background-color: rgba(0,0,0,0.05);
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Pagination */
+    .pagination {
+        gap: 0.35rem;
+    }
+
+    .page-link {
+        color: var(--primary-color);
+        border-color: var(--primary-light);
+        border-radius: 0.25rem;
+        padding: 0.4rem 0.75rem;
+        transition: var(--transition);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .page-link:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Empty state for widgets */
+    .widget-body .empty-state {
+        padding: 1.5rem;
+        box-shadow: none;
+    }
+
+    /* Button styles */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    /* Dropdown active item */
+    .dropdown-item.active {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+</style>

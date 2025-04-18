@@ -1,0 +1,617 @@
+﻿@model HomeOwners.Models.ForumPost
+@{
+    ViewData["Title"] = "Create New Forum Post";
+}
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/css/nav.css" asp-append-version="true" />
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">Neighborly</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">All Bookings</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
+                        <li><a class="dropdown-item" href="/Home/Forum">Community Forum</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Services">All Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">My Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">All Request</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Billing">Unpaid Bills</a></li>
+                        <li><a class="dropdown-item" href="/Home/Billing">Payment History</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Updated profile menu section -->
+            <div class="nav-items-right">
+                <!-- Profile Menu -->
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-person-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item logout-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Main Content Section -->
+<div class="container forum-section">
+    <div class="breadcrumbs mb-3">
+        <a href="@Url.Action("Forum")">Forum</a> <i class="bi bi-chevron-right mx-2 small"></i> <span>Create New Post</span>
+    </div>
+
+    <!-- Error/Success Messages -->
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <span>@ViewBag.ErrorMessage</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <span>@ViewBag.SuccessMessage</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h1 class="card-title h4 mb-0">Create a New Discussion</h1>
+                </div>
+
+                <div class="card-body">
+                    <form method="post" action="@Url.Action("CreateForumPost", "Home")" id="createPostForm">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" id="Title" name="Title" class="form-control @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="Enter a title" value="@Model?.Title" required />
+                            <label for="Title">Title</label>
+                            <span asp-validation-for="Title" class="invalid-feedback"></span>
+                            <div class="form-text">Give your discussion a descriptive title (5-100 characters)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Category" class="form-label">Category</label>
+                            <select id="Category" name="Category" class="form-select @(ViewData.ModelState["Category"]?.Errors.Count > 0 ? "is-invalid" : "")">
+                                <option value="General" selected="@(Model?.Category == "General")">General Discussion</option>
+                                <option value="Question" selected="@(Model?.Category == "Question")">Question</option>
+                                <option value="Suggestion" selected="@(Model?.Category == "Suggestion")">Suggestion / Idea</option>
+                                <option value="Event" selected="@(Model?.Category == "Event")">Event Coordination</option>
+                                <option value="Support" selected="@(Model?.Category == "Support")">Help / Support</option>
+                            </select>
+                            <span asp-validation-for="Category" class="invalid-feedback"></span>
+                            <div class="form-text">Select the most appropriate category for your post</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="Content" class="form-label">Content</label>
+                            <textarea id="Content" name="Content" class="form-control @(ViewData.ModelState["Content"]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                      rows="8" placeholder="Write your post content here..." required>@Model?.Content</textarea>
+                            <span asp-validation-for="Content" class="invalid-feedback"></span>
+                            <div class="form-text">Provide details for your discussion (minimum 20 characters)</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="@Url.Action("Forum")" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-chat-text-fill me-1"></i> Create Post
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="forum-guidelines card mt-4 shadow-sm">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>Community Forum Guidelines</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="guidelines-list mb-0">
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <div>
+                                <strong>Be respectful and constructive</strong>
+                                <p class="small mb-0 text-muted">Treat others with respect, even in disagreement.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <div>
+                                <strong>Stay on topic</strong>
+                                <p class="small mb-0 text-muted">Keep discussions relevant to the selected category.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <div>
+                                <strong>Avoid duplicate posts</strong>
+                                <p class="small mb-0 text-muted">Check if your topic has already been discussed.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <div>
+                                <strong>Protect privacy</strong>
+                                <p class="small mb-0 text-muted">Do not share personal information of others without consent.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Category Information -->
+        <div class="col-lg-4 d-none d-lg-block">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-grid me-2"></i>Category Guide</h2>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item category-item" data-category="General">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="category-indicator general"></span>
+                                <h5 class="mb-0 ms-2">General Discussion</h5>
+                            </div>
+                            <p class="small text-muted mb-0">For topics that don't fit into other categories. Community-wide discussions and general conversations.</p>
+                        </div>
+                        <div class="list-group-item category-item" data-category="Question">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="category-indicator question"></span>
+                                <h5 class="mb-0 ms-2">Questions</h5>
+                            </div>
+                            <p class="small text-muted mb-0">When you need information or have questions about the community, rules, or neighborhood matters.</p>
+                        </div>
+                        <div class="list-group-item category-item" data-category="Suggestion">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="category-indicator suggestion"></span>
+                                <h5 class="mb-0 ms-2">Suggestions</h5>
+                            </div>
+                            <p class="small text-muted mb-0">Ideas for improvement, community initiatives, or suggestions for facilities and services.</p>
+                        </div>
+                        <div class="list-group-item category-item" data-category="Event">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="category-indicator event"></span>
+                                <h5 class="mb-0 ms-2">Events</h5>
+                            </div>
+                            <p class="small text-muted mb-0">Discussions about community events, gatherings, or coordination of social activities.</p>
+                        </div>
+                        <div class="list-group-item category-item" data-category="Support">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="category-indicator support"></span>
+                                <h5 class="mb-0 ms-2">Help & Support</h5>
+                            </div>
+                            <p class="small text-muted mb-0">For assistance with issues related to property, maintenance, or homeowner association support.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-lightbulb me-2"></i>Tips for Great Posts</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="tips-list">
+                        <li>
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Use a clear, specific title that summarizes your topic</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-list-ul"></i>
+                            <span>Structure your content with paragraphs for readability</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-search"></i>
+                            <span>Search first to avoid creating duplicate topics</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-chat-dots"></i>
+                            <span>Encourage discussion by ending with a question</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --text-light: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        --transition: all 0.3s ease;
+        
+        /* Category colors */
+        --general-color: #4e6e4d;
+        --question-color: #17a2b8;
+        --suggestion-color: #ffc107;
+        --event-color: #6f42c1;
+        --support-color: #dc3545;
+    }
+
+    .forum-section {
+        padding-top: 100px;
+        padding-bottom: 5rem;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    .breadcrumbs a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+
+    /* Card Styling */
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* Form Styling */
+    .form-label {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .form-control, .form-select {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(0,0,0,0.1);
+        transition: var(--transition);
+    }
+
+    .form-floating > .form-control {
+        padding: 1rem 1rem;
+        height: calc(3.5rem + 2px);
+    }
+
+    .form-floating > label {
+        padding: 1rem 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(78, 110, 77, 0.25);
+    }
+
+    .form-text {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+    }
+
+    /* Guidelines */
+    .forum-guidelines .card-header {
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .guidelines-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .guidelines-list li {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .guidelines-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .guidelines-list li i {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Category Guide */
+    .category-item {
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .category-item:hover {
+        background-color: var(--primary-lighter);
+    }
+
+    .category-item.active {
+        background-color: var(--primary-light);
+    }
+
+    .category-indicator {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .category-indicator.general {
+        background-color: var(--general-color);
+    }
+
+    .category-indicator.question {
+        background-color: var(--question-color);
+    }
+
+    .category-indicator.suggestion {
+        background-color: var(--suggestion-color);
+    }
+
+    .category-indicator.event {
+        background-color: var(--event-color);
+    }
+
+    .category-indicator.support {
+        background-color: var(--support-color);
+    }
+
+    /* Tips List */
+    .tips-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .tips-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .tips-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .tips-list li i {
+        color: var(--primary-color);
+        font-size: 1rem;
+        margin-top: 0.125rem;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.6rem 1.25rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: rgba(0,0,0,0.1);
+        padding: 0.6rem 1.25rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--text-dark);
+        border-color: rgba(0,0,0,0.15);
+    }
+
+    /* Validation styling */
+    .is-invalid {
+        border-color: #dc3545;
+        padding-right: calc(1.5em + 0.75rem);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right calc(0.375em + 0.1875rem) center;
+        background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+
+    .invalid-feedback {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Highlight the selected category in the guide
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initially highlight the selected category
+            highlightSelectedCategory();
+            
+            // Change highlight when category changes
+            document.getElementById('Category').addEventListener('change', function() {
+                highlightSelectedCategory();
+            });
+            
+            // Click on category item to select that category
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const category = this.getAttribute('data-category');
+                    document.getElementById('Category').value = category;
+                    highlightSelectedCategory();
+                });
+            });
+            
+            function highlightSelectedCategory() {
+                const selectedCategory = document.getElementById('Category').value;
+                
+                // Remove active class from all items
+                document.querySelectorAll('.category-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Add active class to selected category
+                const selectedItem = document.querySelector(`.category-item[data-category="${selectedCategory}"]`);
+                if (selectedItem) {
+                    selectedItem.classList.add('active');
+                }
+            }
+        });
+    </script>
+}

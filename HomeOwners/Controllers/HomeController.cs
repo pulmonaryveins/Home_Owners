@@ -7,6 +7,9 @@ using System.Security.Claims;
 using HomeOwners.ViewModels;
 using System;
 using HomeOwners.Filters;
+using Microsoft.EntityFrameworkCore;
+using HomeOwners.Areas.Identity.Data;
+using System.Security.Claims;
 
 namespace HomeOwners.Controllers;
 
@@ -20,11 +23,16 @@ public class HomeController : Controller
     private readonly ServiceService _serviceService;
     private readonly ServiceRequestService _serviceRequestService;
     private readonly PaymentService _paymentService;
+    private readonly PollService _pollService;
+    private readonly ForumService _forumService;
+    private readonly HomeDbContext _context;
 
 
 
 
-    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService, ServiceRequestService serviceRequestService, PaymentService paymentService)
+
+
+    public HomeController(ILogger<HomeController> logger, AnnouncementService announcementService, EventService eventService, FacilityService facilityService, BookingService bookingService, ServiceService serviceService, ServiceRequestService serviceRequestService, PaymentService paymentService, PollService pollService, ForumService forumService, HomeDbContext context)
     {
         _logger = logger;
         _announcementService = announcementService;
@@ -34,7 +42,12 @@ public class HomeController : Controller
         _serviceService = serviceService;
         _serviceRequestService = serviceRequestService;
         _paymentService = paymentService;
+        _pollService = pollService;
+        _forumService = forumService;
+        _context = context;
+
     }
+
 
     public IActionResult Index()
     {
@@ -56,10 +69,41 @@ public class HomeController : Controller
     {
         var announcements = await _announcementService.GetActiveAnnouncementsAsync();
         var upcomingEvents = await _eventService.GetUpcomingEventsAsync(3);
+        var activePolls = await _pollService.GetActivePollsAsync();
+
 
         ViewBag.UpcomingEvents = upcomingEvents;
+        ViewBag.ActivePolls = activePolls;
+
 
         return View(announcements);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CastVote(int pollId, bool voteValue)
+    {
+        var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        try
+        {
+            await _pollService.CastVoteAsync(pollId, userId, voteValue);
+            TempData["StatusMessage"] = "Vote submitted successfully!";
+            TempData["StatusType"] = "Success";
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["StatusMessage"] = ex.Message;
+            TempData["StatusType"] = "Error";
+        }
+        catch (Exception)
+        {
+            TempData["StatusMessage"] = "An error occurred while processing your vote.";
+            TempData["StatusType"] = "Error";
+        }
+
+        return RedirectToAction("Annoucements");
     }
 
     public async Task<IActionResult> Calendar()
@@ -533,5 +577,387 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    [RequireAuthentication]
+    public async Task<IActionResult> Forum(string category = null, string search = null, string sort = null, int page = 1)
+    {
+        const int pageSize = 10; // Number of posts per page
+
+        // Get filtered and sorted posts
+        var allPosts = await _forumService.GetForumPostsAsync(false, category, search, sort);
+
+        // Calculate pagination
+        var totalPosts = allPosts.Count;
+        var totalPages = (int)Math.Ceiling(totalPosts / (double)pageSize);
+        page = Math.Min(Math.Max(1, page), Math.Max(1, totalPages));
+
+        // Get posts for current page
+        var posts = allPosts.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        // Get comment counts for posts
+        var commentCounts = new Dictionary<int, int>();
+        foreach (var post in posts)
+        {
+            var comments = await _forumService.GetCommentsForPostAsync(post.Id);
+            commentCounts[post.Id] = comments.Count;
+        }
+
+        // Get popular posts for sidebar
+        var popularPosts = (await _forumService.GetForumPostsAsync())
+            .GroupJoin(
+                _context.ForumComments.Where(c => c.IsVisible),
+                post => post.Id,
+                comment => comment.ForumPostId,
+                (post, comments) => new { Post = post, CommentCount = comments.Count() })
+            .OrderByDescending(x => x.CommentCount)
+            .Take(5)
+            .Select(x => new {
+                x.Post.Id,
+                x.Post.Title,
+                x.Post.UserName,
+                x.Post.PostedDate,
+                CommentCount = x.CommentCount
+            })
+            .ToList();
+
+        // Get category counts for sidebar
+        var categoryGroups = (await _forumService.GetForumPostsAsync())
+            .GroupBy(p => p.Category)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        // Set ViewBag data for views
+        ViewBag.CommentCounts = commentCounts;
+        ViewBag.CurrentCategory = category;
+        ViewBag.CurrentSearch = search;
+        ViewBag.CurrentSort = sort ?? "Newest First";
+        ViewBag.PopularPosts = popularPosts;
+        ViewBag.CategoryCounts = categoryGroups;
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = totalPages;
+
+        return View(posts);
+    }
+
+    [RequireAuthentication]
+    public async Task<IActionResult> ForumPost(int id)
+    {
+        try
+        {
+            var post = await _forumService.GetForumPostByIdAsync(id);
+            if (post == null || (!post.IsVisible && post.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier)))
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var comments = await _forumService.GetCommentsForPostAsync(id);
+                // Ensure each comment has non-null properties
+                foreach (var comment in comments)
+                {
+                    if (comment.UserName == null) comment.UserName = "Unknown";
+                    // Keep EditedDate as is - we'll handle the null check in the view
+                }
+                ViewBag.Comments = comments;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching comments for post {PostId}", id);
+                ViewBag.Comments = new List<ForumComment>(); // Empty list as fallback
+            }
+
+            try
+            {
+                ViewBag.RelatedPosts = await _forumService.GetRelatedPostsAsync(id, 5);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching related posts for post {PostId}", id);
+                ViewBag.RelatedPosts = new List<ForumPost>(); // Empty list as fallback
+            }
+
+            return View(post);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching forum post {PostId}", id);
+            TempData["StatusMessage"] = "An error occurred while loading the post.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction("Forum");
+        }
+    }
+
+
+    [HttpGet]
+    [RequireAuthentication]
+    public IActionResult CreateForumPost()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [RequireAuthentication]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateForumPost(ForumPost post)
+    {
+        // Debug information
+        if (!User.Identity.IsAuthenticated)
+        {
+            TempData["StatusMessage"] = "You must be logged in to create posts.";
+            TempData["StatusType"] = "Error";
+            return View(post);
+        }
+
+        // Only validate the Title and Content fields which are user-provided
+        if (string.IsNullOrWhiteSpace(post.Title) || post.Title.Length < 5 ||
+            string.IsNullOrWhiteSpace(post.Content) || post.Content.Length < 10)
+        {
+            TempData["StatusMessage"] = "Please provide a valid title (at least 5 characters) and content (at least 10 characters).";
+            TempData["StatusType"] = "Error";
+            return View(post);
+        }
+
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = User.Identity.Name ?? "Unknown User";
+
+            // Get HomeOwner details from the database
+            var homeOwnerUser = await _context.HomeOwnerUsers.FirstOrDefaultAsync(h => h.Id == userId);
+
+            // Create a new ForumPost instance with all required fields
+            var newPost = new ForumPost
+            {
+                Title = post.Title,
+                Content = post.Content,
+                Category = post.Category,
+                UserId = userId,
+                UserName = userName,
+                FullName = homeOwnerUser?.FullName ?? "Resident",
+                HouseNumber = homeOwnerUser?.HouseNumber ?? "Unknown",
+                PostedDate = DateTime.Now,
+                IsVisible = true,
+                AdminNotes = ""  // Default empty value for required field
+            };
+
+            await _forumService.CreateForumPostAsync(newPost);
+
+            TempData["StatusMessage"] = "Your post has been created successfully.";
+            TempData["StatusType"] = "Success";
+
+            return RedirectToAction(nameof(Forum));
+        }
+        catch (Exception ex)
+        {
+            TempData["StatusMessage"] = "Error creating post: " + ex.Message;
+            TempData["StatusType"] = "Error";
+            return View(post);
+        }
+    }
+
+    [HttpPost]
+    [RequireAuthentication]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddComment(int postId, string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            TempData["StatusMessage"] = "Comment cannot be empty.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction(nameof(ForumPost), new { id = postId });
+        }
+
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userName = User.Identity.Name;
+
+            var comment = new ForumComment
+            {
+                ForumPostId = postId,
+                Content = content,
+                UserId = userId,
+                UserName = userName,
+                PostedDate = DateTime.Now,
+                IsVisible = true
+            };
+
+            await _forumService.AddCommentAsync(comment);
+
+            TempData["StatusMessage"] = "Your comment has been added.";
+            TempData["StatusType"] = "Success";
+        }
+        catch (Exception ex)
+        {
+            TempData["StatusMessage"] = "Error adding comment: " + ex.Message;
+            TempData["StatusType"] = "Error";
+        }
+
+        return RedirectToAction(nameof(ForumPost), new { id = postId });
+    }
+
+    [HttpGet]
+    [RequireAuthentication]
+    public async Task<IActionResult> EditForumPost(int id)
+    {
+        var post = await _forumService.GetForumPostByIdAsync(id);
+        if (post == null)
+        {
+            return NotFound();
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Ensure user can only edit their own posts
+        if (post.UserId != userId && !User.IsInRole("Admin"))
+        {
+            TempData["StatusMessage"] = "You can only edit your own posts.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction(nameof(ForumPost), new { id = post.Id });
+        }
+
+        return View(post);
+    }
+
+    [HttpPost]
+    [RequireAuthentication]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditForumPost(ForumPost post)
+    {
+        if (string.IsNullOrWhiteSpace(post.Title) || post.Title.Length < 5 ||
+            string.IsNullOrWhiteSpace(post.Content) || post.Content.Length < 10)
+        {
+            TempData["StatusMessage"] = "Please provide a valid title (at least 5 characters) and content (at least 10 characters).";
+            TempData["StatusType"] = "Error";
+            return View(post);
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var existingPost = await _forumService.GetForumPostByIdAsync(post.Id);
+
+        if (existingPost == null)
+        {
+            return NotFound();
+        }
+
+        // Ensure user can only edit their own posts
+        if (existingPost.UserId != userId && !User.IsInRole("Admin"))
+        {
+            TempData["StatusMessage"] = "You can only edit your own posts.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction(nameof(ForumPost), new { id = existingPost.Id });
+        }
+
+        // Update only the editable fields
+        existingPost.Title = post.Title;
+        existingPost.Content = post.Content;
+        existingPost.Category = post.Category;
+        existingPost.EditedDate = DateTime.Now;
+
+        await _forumService.UpdateForumPostAsync(existingPost);
+
+        TempData["StatusMessage"] = "Your post has been updated successfully.";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction(nameof(ForumPost), new { id = post.Id });
+    }
+
+    [HttpPost]
+    [RequireAuthentication]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditComment(int id, int postId, string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            TempData["StatusMessage"] = "Comment cannot be empty.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction(nameof(ForumPost), new { id = postId });
+        }
+
+        var comment = await _forumService.GetCommentByIdAsync(id);
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Ensure user can only edit their own comments
+        if (comment.UserId != userId && !User.IsInRole("Admin"))
+        {
+            TempData["StatusMessage"] = "You can only edit your own comments.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction(nameof(ForumPost), new { id = postId });
+        }
+
+        // Update the comment
+        comment.Content = content;
+        comment.EditedDate = DateTime.Now;
+
+        await _forumService.UpdateCommentAsync(comment);
+
+        TempData["StatusMessage"] = "Your comment has been updated.";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction(nameof(ForumPost), new { id = postId });
+    }
+
+    [HttpPost]
+    [RequireAuthentication]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteComment(int id, int postId)
+    {
+        var comment = await _forumService.GetCommentByIdAsync(id);
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Ensure user can only delete their own comments
+        if (comment.UserId != userId && !User.IsInRole("Admin"))
+        {
+            TempData["StatusMessage"] = "You can only delete your own comments.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction(nameof(ForumPost), new { id = postId });
+        }
+
+        await _forumService.DeleteCommentAsync(id);
+
+        TempData["StatusMessage"] = "Comment deleted successfully.";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction(nameof(ForumPost), new { id = postId });
+    }
+
+
+    [HttpPost]
+    [RequireAuthentication]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteForumPost(int id)
+    {
+        var post = await _forumService.GetForumPostByIdAsync(id);
+
+        if (post == null)
+        {
+            return NotFound();
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Ensure user can only delete their own posts
+        if (post.UserId != userId && !User.IsInRole("Admin"))
+        {
+            return Unauthorized();
+        }
+
+        await _forumService.DeleteForumPostAsync(id);
+
+        TempData["StatusMessage"] = "Post deleted successfully.";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction(nameof(Forum));
     }
 }

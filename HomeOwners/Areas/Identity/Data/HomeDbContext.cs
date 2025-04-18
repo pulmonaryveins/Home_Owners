@@ -33,6 +33,12 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<Service> Services { get; set; }
         public DbSet<ServiceRequest> ServiceRequests { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<ServicePersonnel> ServicePersonnel { get; set; }
+        public DbSet<Poll> Polls { get; set; }
+        public DbSet<PollVote> PollVotes { get; set; }
+        public DbSet<ForumPost> ForumPosts { get; set; }
+        public DbSet<ForumComment> ForumComments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

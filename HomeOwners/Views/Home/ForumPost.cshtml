@@ -1,0 +1,924 @@
+﻿@using System.Security.Claims
+@model HomeOwners.Models.ForumPost
+@{
+    ViewData["Title"] = Model.Title;
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var isAuthor = currentUserId == Model.UserId;
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/css/nav.css" asp-append-version="true" />
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">Neighborly</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">All Bookings</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
+                        <li><a class="dropdown-item" href="/Home/Forum">Community Forum</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Services">All Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">My Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">All Request</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Billing">Unpaid Bills</a></li>
+                        <li><a class="dropdown-item" href="/Home/Billing">Payment History</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Updated profile menu section -->
+            <div class="nav-items-right">
+                <!-- Profile Menu -->
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-person-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item logout-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content Section -->
+<div class="container forum-post-section">
+    <div class="breadcrumbs mb-3">
+        <a href="@Url.Action("Forum")">Forum</a>
+        <i class="bi bi-chevron-right mx-2 small"></i>
+        <a href="@Url.Action("Forum", new { category = Model.Category })">@Model.Category</a>
+        <i class="bi bi-chevron-right mx-2 small"></i>
+        <span>Post</span>
+    </div>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+        <div class="alert alert-@statusType alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                <span>@TempData["StatusMessage"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Main Thread Content -->
+        <div class="col-lg-8">
+            <div class="forum-post-detail card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="category-badge @Model.Category.ToLower()">@Model.Category</span>
+                    @if (isAuthor)
+                    {
+                        <div class="post-actions">
+                            <a href="@Url.Action("EditForumPost", new { id = Model.Id })" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deletePostModal">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
+                    }
+                </div>
+                <div class="card-body">
+                    <h1 class="post-title">@Model.Title</h1>
+                    <div class="post-meta">
+                        <div class="author-info">
+                            <div class="avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="author-details">
+                                <div class="author-name">@Model.UserName</div>
+                                <div class="author-role">
+                                    <i class="bi bi-house me-1"></i>
+                                    @Model.FullName - House #@Model.HouseNumber
+                                </div>
+                            </div>
+                        </div>
+                        <div class="post-date">
+                            <div><i class="bi bi-clock me-1"></i> Posted: @Model.PostedDate.ToString("MMM dd, yyyy") at @Model.PostedDate.ToString("h:mm tt")</div>
+                            @if (Model.EditedDate.HasValue)
+                            {
+                                <div class="text-muted small"><i class="bi bi-pencil me-1"></i> Edited: @Model.EditedDate.Value.ToString("MMM dd, yyyy") at @Model.EditedDate.Value.ToString("h:mm tt")</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="post-content mt-4">
+                        @Model.Content
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-chat-square-text me-2"></i> Comments (@(ViewBag.Comments?.Count ?? 0))</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Comment Form -->
+                    <form method="post" action="@Url.Action("AddComment", "Home")" class="comment-form mb-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="postId" value="@Model.Id" />
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Add a comment</label>
+                            <textarea class="form-control" id="content" name="content" rows="3" placeholder="Share your thoughts on this post..."></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-1"></i> Post Comment
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Comments List -->
+                    <div class="comments-list">
+                        @if (ViewBag.Comments != null && ViewBag.Comments.Count > 0)
+                        {
+                            foreach (var comment in ViewBag.Comments)
+                            {
+                                <div class="comment-item @(currentUserId == comment.UserId ? "own-comment" : "")">
+                                    <div class="comment-header">
+                                        <div class="commenter-info">
+                                            <div class="avatar">
+                                                <i class="bi bi-person-circle"></i>
+                                            </div>
+                                            <div>
+                                                <div class="commenter-name">@comment.UserName</div>
+                                                <div class="comment-date">
+                                                    <i class="bi bi-clock me-1"></i>
+                                                    @comment.PostedDate.ToString("MMM dd, yyyy") at @comment.PostedDate.ToString("h:mm tt")
+                                                    @if (comment?.EditedDate != null)
+                                                    {
+                                                        <span class="text-muted small ms-2">(edited)</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if (currentUserId == comment.UserId)
+                                        {
+                                            <div class="comment-actions dropdown">
+                                                <button class="btn btn-sm btn-link dropdown-toggle" type="button" id="commentActions@(comment.Id)" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="commentActions@(comment.Id)">
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editCommentModal"
+                                                                data-comment-id="@comment.Id" data-comment-content="@comment.Content">
+                                                            <i class="bi bi-pencil me-2"></i>Edit
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#deleteCommentModal"
+                                                                data-comment-id="@comment.Id">
+                                                            <i class="bi bi-trash me-2"></i>Delete
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="comment-content">
+                                        @comment.Content
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-comments text-center py-4">
+                                <i class="bi bi-chat-square text-muted display-4"></i>
+                                <p class="mt-3 mb-0 text-muted">No comments yet. Be the first to comment!</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Related Topics Widget -->
+            <div class="sidebar-widget related-topics-widget">
+                <div class="widget-header">
+                    <h3><i class="bi bi-link-45deg me-2"></i>Similar Discussions</h3>
+                </div>
+                <div class="widget-body">
+                    @if (ViewBag.RelatedPosts != null && ViewBag.RelatedPosts.Count > 0)
+                    {
+                        <div class="related-posts">
+                            @foreach (var relatedPost in ViewBag.RelatedPosts)
+                            {
+                                <a href="@Url.Action("ForumPost", new { id = relatedPost.Id })" class="related-post">
+                                    <div class="post-info">
+                                        @if (!string.IsNullOrEmpty(relatedPost.Category))
+                                        {
+                                            <span class="category-badge small @relatedPost.Category.ToLower()">@relatedPost.Category</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="category-badge small general">General</span>
+                                        }
+                                        <div class="post-title">@(relatedPost.Title ?? "Untitled Post")</div>
+                                        <div class="post-meta small">
+                                            <span class="post-author">@(relatedPost.UserName ?? "Unknown")</span>
+                                            @if (relatedPost.PostedDate != null)
+                                            {
+                                                <span class="post-date">@relatedPost.PostedDate.ToString("MMM dd")</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state small">
+                            <p class="text-muted mb-0">No related discussions found</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Forum Guidelines Widget -->
+            <div class="sidebar-widget guidelines-widget mt-4">
+                <div class="widget-header">
+                    <h3><i class="bi bi-info-circle me-2"></i>Discussion Guidelines</h3>
+                </div>
+                <div class="widget-body">
+                    <ul class="guidelines-list">
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Keep comments respectful and constructive</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Stay on topic and relevant to the discussion</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Avoid personal attacks or offensive language</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <span>Respect others' privacy and confidentiality</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="cta-card mt-4">
+                <div class="cta-content">
+                    <h4>Have something to share?</h4>
+                    <p>Start your own discussion in the community forum.</p>
+                    <a href="@Url.Action("CreateForumPost")" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-2"></i> New Discussion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Post Confirmation Modal -->
+<div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deletePostModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this post? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="@Url.Action("DeleteForumPost", "Home")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Delete Post</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Comment Modal -->
+<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCommentModalLabel">Edit Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="@Url.Action("EditComment", "Home")">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" id="editCommentId" name="id" value="" />
+                    <input type="hidden" name="postId" value="@Model.Id" />
+                    <div class="mb-3">
+                        <label for="editCommentContent" class="form-label">Comment</label>
+                        <textarea class="form-control" id="editCommentContent" name="content" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Comment Modal -->
+<div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCommentModalLabel">Delete Comment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this comment? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="@Url.Action("DeleteComment", "Home")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="deleteCommentId" name="id" value="" />
+                    <input type="hidden" name="postId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --text-light: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        --transition: all 0.3s ease;
+        /* Category colors */
+        --general-color: #4e6e4d;
+        --question-color: #17a2b8;
+        --suggestion-color: #ffc107;
+        --event-color: #6f42c1;
+        --support-color: #dc3545;
+    }
+
+    .forum-post-section {
+        padding-top: 100px;
+        padding-bottom: 5rem;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+        .breadcrumbs a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+            .breadcrumbs a:hover {
+                text-decoration: underline;
+            }
+
+    /* Card Styling */
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        background-color: white;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Post Detail Styling */
+    .post-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: var(--text-dark);
+    }
+
+    .post-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .author-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .avatar {
+        width: 42px;
+        height: 42px;
+        background-color: var(--primary-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .author-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .author-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--text-dark);
+    }
+
+    .author-role {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+    }
+
+    .post-date {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .post-content {
+        line-height: 1.7;
+        color: var(--text-dark);
+        white-space: pre-line;
+    }
+
+    /* Category Badge */
+    .category-badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+        .category-badge.general {
+            background-color: rgba(78, 110, 77, 0.1);
+            color: var(--general-color);
+        }
+
+        .category-badge.question {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: var(--question-color);
+        }
+
+        .category-badge.suggestion {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--suggestion-color);
+        }
+
+        .category-badge.event {
+            background-color: rgba(111, 66, 193, 0.1);
+            color: var(--event-color);
+        }
+
+        .category-badge.support {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--support-color);
+        }
+
+    /* Post Actions */
+    .post-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Comments Section */
+    .comments-section .card-header h4 {
+        color: var(--text-dark);
+        font-weight: 600;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .comment-form textarea {
+        border-radius: 8px;
+        resize: vertical;
+        border: 1px solid rgba(0,0,0,0.1);
+        transition: var(--transition);
+    }
+
+        .comment-form textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 110, 77, 0.25);
+        }
+
+    .comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .comment-item {
+        padding: 1rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        border-left: 3px solid #dee2e6;
+    }
+
+        .comment-item.own-comment {
+            background-color: var(--primary-lighter);
+            border-left-color: var(--primary-color);
+        }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+
+    .commenter-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .commenter-name {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .comment-date {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .comment-content {
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        line-height: 1.6;
+        white-space: pre-line;
+    }
+
+    .comment-actions .btn-link {
+        color: var(--text-muted);
+        padding: 0.25rem;
+    }
+
+    .comment-actions .dropdown-menu {
+        min-width: 120px;
+        padding: 0.25rem;
+        box-shadow: var(--card-shadow);
+        border: none;
+    }
+
+    .comment-actions .dropdown-item {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        border-radius: 4px;
+    }
+
+    /* Sidebar Widgets */
+    .sidebar-widget {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .widget-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .widget-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+        }
+
+    .widget-body {
+        padding: 1.5rem;
+    }
+
+    /* Related Posts */
+    .related-posts {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .related-post {
+        text-decoration: none;
+        color: inherit;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: var(--transition);
+    }
+
+        .related-post:hover {
+            background-color: var(--primary-light);
+            transform: translateX(3px);
+        }
+
+        .related-post .post-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            color: var(--text-dark);
+        }
+
+        .related-post .post-meta {
+            display: flex;
+            justify-content: space-between;
+            margin: 0;
+        }
+
+    /* Guidelines Widget */
+    .guidelines-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+        .guidelines-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+            .guidelines-list li:last-child {
+                margin-bottom: 0;
+            }
+
+            .guidelines-list li i {
+                color: var(--primary-color);
+                font-size: 1rem;
+                margin-top: 0.125rem;
+            }
+
+    /* Call to Action Card */
+    .cta-card {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    .cta-content {
+        padding: 2rem;
+        text-align: center;
+    }
+
+        .cta-content h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .cta-content p {
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-content .btn-primary {
+            background-color: white;
+            color: var(--primary-color);
+            border: none;
+        }
+
+            .cta-content .btn-primary:hover {
+                background-color: var(--text-light);
+                transform: translateY(-2px);
+            }
+
+    /* Modal Styling */
+    .modal-content {
+        border: none;
+        border-radius: var(--border-radius);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .modal-title {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .modal-footer {
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* Button Styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: var(--transition);
+    }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+        }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+    }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+        .btn-danger:hover {
+            background-color: #bb2d3b;
+            border-color: #b02a37;
+        }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Edit Comment Modal
+        const editCommentModal = document.getElementById('editCommentModal');
+        if (editCommentModal) {
+            editCommentModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const commentId = button.getAttribute('data-comment-id');
+                const commentContent = button.getAttribute('data-comment-content');
+
+                document.getElementById('editCommentId').value = commentId;
+                document.getElementById('editCommentContent').value = commentContent;
+            });
+        }
+
+        // Delete Comment Modal
+        const deleteCommentModal = document.getElementById('deleteCommentModal');
+        if (deleteCommentModal) {
+            deleteCommentModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const commentId = button.getAttribute('data-comment-id');
+
+                document.getElementById('deleteCommentId').value = commentId;
+            });
+        }
+    });
+</script>

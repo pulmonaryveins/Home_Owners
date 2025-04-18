@@ -46,7 +46,7 @@
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
                         <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
-                        <li><a class="dropdown-item" href="/Home/Annoucements#community">Community Forum</a></li>
+                        <li><a class="dropdown-item" href="/Home/Forum">Community Forum</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -190,8 +190,8 @@
                                     <th>Service</th>
                                     <th>Date</th>
                                     <th>Time</th>
+                                    <th>Assigned Team</th>
                                     <th>Status</th>
-                                    <th>Created On</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -213,6 +213,20 @@
                                                 <span class="time-badge">
                                                     @DateTime.Today.Add(request.PreferredTime).ToString("hh:mm tt")
                                                 </span>
+                                            </td>
+                                            <td>
+                                                @if (request.ServicePersonnelId.HasValue && request.ServicePersonnel != null)
+                                                {
+                                                    <div class="team-info">
+                                                        <span class="team-badge">
+                                                            <i class="bi bi-people-fill me-1"></i> @request.ServicePersonnel.TeamName
+                                                        </span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted"><i class="bi bi-dash-circle me-1"></i>Not assigned</span>
+                                                }
                                             </td>
                                             <td>
                                                 @if (request.Status == ServiceRequestStatus.Pending)
@@ -240,7 +254,6 @@
                                                     </span>
                                                 }
                                             </td>
-                                            <td><span class="text-muted">@request.CreatedDate.ToString("MMM dd, yyyy")</span></td>
                                             <td>
                                                 @if (request.Status == ServiceRequestStatus.Approved)
                                                 {
@@ -290,6 +303,7 @@
                                     <th>Service</th>
                                     <th>Date</th>
                                     <th>Time</th>
+                                    <th>Assigned Team</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -314,6 +328,20 @@
                                                 <span class="time-badge">
                                                     @DateTime.Today.Add(request.PreferredTime).ToString("hh:mm tt")
                                                 </span>
+                                            </td>
+                                            <td>
+                                                @if (request.ServicePersonnelId.HasValue && request.ServicePersonnel != null)
+                                                {
+                                                    <div class="team-info">
+                                                        <span class="team-badge">
+                                                            <i class="bi bi-people-fill me-1"></i> @request.ServicePersonnel.TeamName
+                                                        </span>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted"><i class="bi bi-dash-circle me-1"></i>Not assigned</span>
+                                                }
                                             </td>
                                             <td>
                                                 @if (request.Status == ServiceRequestStatus.Approved)
@@ -378,6 +406,25 @@
         --warning-color: #ffc107;
         --danger-color: #dc3545;
         --info-color: #17a2b8;
+    }
+
+    .team-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background-color: rgba(78, 110, 77, 0.1);
+        color: var(--primary-color);
+    }
+
+    .team-info {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+        color: var(--text-dark);
     }
 
     .alert-info {

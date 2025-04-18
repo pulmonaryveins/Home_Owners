@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HomeOwners.Models
 {
-
     public enum ServiceRequestStatus
     {
         Pending,
@@ -12,6 +11,7 @@ namespace HomeOwners.Models
         Rejected,
         Done
     }
+
     public class ServiceRequest
     {
         public int Id { get; set; }
@@ -19,6 +19,10 @@ namespace HomeOwners.Models
         [Required]
         public int ServiceId { get; set; }
         public Service Service { get; set; }
+
+        // New field for Team Personnel
+        public int? ServicePersonnelId { get; set; }
+        public ServicePersonnel ServicePersonnel { get; set; }
 
         [Required]
         public string UserId { get; set; }
@@ -55,5 +59,4 @@ namespace HomeOwners.Models
         [Display(Name = "Status")]
         public ServiceRequestStatus Status { get; set; } = ServiceRequestStatus.Pending;
     }
-
 }

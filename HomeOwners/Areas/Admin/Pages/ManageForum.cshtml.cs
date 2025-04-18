@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using HomeOwners.Models;
 using HomeOwners.Services;
@@ -21,7 +22,7 @@ namespace HomeOwners.Areas.Admin.Pages
             _forumService = forumService;
         }
 
-        public List<ForumPost> ForumPosts { get; set; }
+        public List<ForumPost> ForumPosts { get; set; } = new List<ForumPost>();
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public int TotalCount { get; set; }

@@ -1,6 +1,6 @@
 ﻿@model HomeOwners.Models.ForumPost
 @{
-    ViewData["Title"] = "Create New Forum Post";
+    ViewData["Title"] = "Edit Forum Post";
 }
 
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
@@ -141,11 +141,10 @@
     </div>
 </nav>
 
-
 <!-- Main Content Section -->
 <div class="container forum-section">
     <div class="breadcrumbs mb-3">
-        <a href="@Url.Action("Forum")">Forum</a> <i class="bi bi-chevron-right mx-2 small"></i> <span>Create New Post</span>
+        <a href="@Url.Action("Forum")">Forum</a> <i class="bi bi-chevron-right mx-2 small"></i> <span>Edit Post</span>
     </div>
 
     <!-- Error/Success Messages -->
@@ -175,17 +174,27 @@
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h1 class="card-title h4 mb-0">Create a New Discussion</h1>
+                    <h1 class="card-title h4 mb-0">Edit Discussion</h1>
                 </div>
 
                 <div class="card-body">
-                    <form method="post" action="@Url.Action("CreateForumPost", "Home")" id="createPostForm">
+                    <form method="post" action="@Url.Action("EditForumPost", "Home")" id="editPostForm">
                         @Html.AntiForgeryToken()
+                        <input type="hidden" name="Id" value="@Model.Id" />
+                        <input type="hidden" name="UserId" value="@Model.UserId" />
+                        <input type="hidden" name="UserName" value="@Model.UserName" />
+                        <input type="hidden" name="FullName" value="@Model.FullName" />
+                        <input type="hidden" name="HouseNumber" value="@Model.HouseNumber" />
+                        <input type="hidden" name="PostedDate" value="@Model.PostedDate.ToString("yyyy-MM-ddTHH:mm:ss")" />
+                        <input type="hidden" name="IsVisible" value="@Model.IsVisible.ToString().ToLower()" />
+                        <input type="hidden" name="IsFlagged" value="@Model.IsFlagged.ToString().ToLower()" />
+                        <input type="hidden" name="AdminNotes" value="@Model.AdminNotes" />
+
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="form-floating mb-3">
-                            <input type="text" id="Title" name="Title" class="form-control @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "is-invalid" : "")" 
-                                   placeholder="Enter a title" value="@Model?.Title" required />
+                            <input type="text" id="Title" name="Title" class="form-control @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                   placeholder="Enter a title" value="@Model.Title" required />
                             <label for="Title">Title</label>
                             <span asp-validation-for="Title" class="invalid-feedback"></span>
                             <div class="form-text">Give your discussion a descriptive title (5-100 characters)</div>
@@ -194,11 +203,11 @@
                         <div class="mb-3">
                             <label for="Category" class="form-label">Category</label>
                             <select id="Category" name="Category" class="form-select @(ViewData.ModelState["Category"]?.Errors.Count > 0 ? "is-invalid" : "")">
-                                <option value="General" selected="@(Model?.Category == "General")">General Discussion</option>
-                                <option value="Question" selected="@(Model?.Category == "Question")">Question</option>
-                                <option value="Suggestion" selected="@(Model?.Category == "Suggestion")">Suggestion / Idea</option>
-                                <option value="Event" selected="@(Model?.Category == "Event")">Event Coordination</option>
-                                <option value="Support" selected="@(Model?.Category == "Support")">Help / Support</option>
+                                <option value="General" selected="@(Model.Category == "General")">General Discussion</option>
+                                <option value="Question" selected="@(Model.Category == "Question")">Question</option>
+                                <option value="Suggestion" selected="@(Model.Category == "Suggestion")">Suggestion / Idea</option>
+                                <option value="Event" selected="@(Model.Category == "Event")">Event Coordination</option>
+                                <option value="Support" selected="@(Model.Category == "Support")">Help / Support</option>
                             </select>
                             <span asp-validation-for="Category" class="invalid-feedback"></span>
                             <div class="form-text">Select the most appropriate category for your post</div>
@@ -206,133 +215,21 @@
 
                         <div class="mb-4">
                             <label for="Content" class="form-label">Content</label>
-                            <textarea id="Content" name="Content" class="form-control @(ViewData.ModelState["Content"]?.Errors.Count > 0 ? "is-invalid" : "")" 
-                                      rows="8" placeholder="Write your post content here..." required>@Model?.Content</textarea>
+                            <textarea id="Content" name="Content" class="form-control @(ViewData.ModelState["Content"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                      rows="8" placeholder="Write your post content here..." required>@Model.Content</textarea>
                             <span asp-validation-for="Content" class="invalid-feedback"></span>
                             <div class="form-text">Provide details for your discussion (minimum 20 characters)</div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="@Url.Action("Forum")" class="btn btn-outline-secondary">
+                            <a href="@Url.Action("ForumPost", new { id = Model.Id })" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left me-1"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-chat-text-fill me-1"></i> Create Post
+                                <i class="bi bi-save me-1"></i> Save Changes
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-
-            <div class="forum-guidelines card mt-4 shadow-sm">
-                <div class="card-header bg-white">
-                    <h2 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>Community Forum Guidelines</h2>
-                </div>
-                <div class="card-body">
-                    <ul class="guidelines-list mb-0">
-                        <li>
-                            <i class="bi bi-check-circle"></i>
-                            <div>
-                                <strong>Be respectful and constructive</strong>
-                                <p class="small mb-0 text-muted">Treat others with respect, even in disagreement.</p>
-                            </div>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle"></i>
-                            <div>
-                                <strong>Stay on topic</strong>
-                                <p class="small mb-0 text-muted">Keep discussions relevant to the selected category.</p>
-                            </div>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle"></i>
-                            <div>
-                                <strong>Avoid duplicate posts</strong>
-                                <p class="small mb-0 text-muted">Check if your topic has already been discussed.</p>
-                            </div>
-                        </li>
-                        <li>
-                            <i class="bi bi-check-circle"></i>
-                            <div>
-                                <strong>Protect privacy</strong>
-                                <p class="small mb-0 text-muted">Do not share personal information of others without consent.</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column - Category Information -->
-        <div class="col-lg-4 d-none d-lg-block">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h2 class="h5 mb-0"><i class="bi bi-grid me-2"></i>Category Guide</h2>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item category-item" data-category="General">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="category-indicator general"></span>
-                                <h5 class="mb-0 ms-2">General Discussion</h5>
-                            </div>
-                            <p class="small text-muted mb-0">For topics that don't fit into other categories. Community-wide discussions and general conversations.</p>
-                        </div>
-                        <div class="list-group-item category-item" data-category="Question">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="category-indicator question"></span>
-                                <h5 class="mb-0 ms-2">Questions</h5>
-                            </div>
-                            <p class="small text-muted mb-0">When you need information or have questions about the community, rules, or neighborhood matters.</p>
-                        </div>
-                        <div class="list-group-item category-item" data-category="Suggestion">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="category-indicator suggestion"></span>
-                                <h5 class="mb-0 ms-2">Suggestions</h5>
-                            </div>
-                            <p class="small text-muted mb-0">Ideas for improvement, community initiatives, or suggestions for facilities and services.</p>
-                        </div>
-                        <div class="list-group-item category-item" data-category="Event">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="category-indicator event"></span>
-                                <h5 class="mb-0 ms-2">Events</h5>
-                            </div>
-                            <p class="small text-muted mb-0">Discussions about community events, gatherings, or coordination of social activities.</p>
-                        </div>
-                        <div class="list-group-item category-item" data-category="Support">
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="category-indicator support"></span>
-                                <h5 class="mb-0 ms-2">Help & Support</h5>
-                            </div>
-                            <p class="small text-muted mb-0">For assistance with issues related to property, maintenance, or homeowner association support.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-white">
-                    <h2 class="h5 mb-0"><i class="bi bi-lightbulb me-2"></i>Tips for Great Posts</h2>
-                </div>
-                <div class="card-body">
-                    <ul class="tips-list">
-                        <li>
-                            <i class="bi bi-pencil-square"></i>
-                            <span>Use a clear, specific title that summarizes your topic</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-list-ul"></i>
-                            <span>Structure your content with paragraphs for readability</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-search"></i>
-                            <span>Search first to avoid creating duplicate topics</span>
-                        </li>
-                        <li>
-                            <i class="bi bi-chat-dots"></i>
-                            <span>Encourage discussion by ending with a question</span>
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -352,7 +249,6 @@
         --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
         --transition: all 0.3s ease;
-        
         /* Category colors */
         --general-color: #4e6e4d;
         --question-color: #17a2b8;
@@ -372,14 +268,14 @@
         color: var(--text-muted);
     }
 
-    .breadcrumbs a {
-        color: var(--primary-color);
-        text-decoration: none;
-    }
+        .breadcrumbs a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
 
-    .breadcrumbs a:hover {
-        text-decoration: underline;
-    }
+            .breadcrumbs a:hover {
+                text-decoration: underline;
+            }
 
     /* Card Styling */
     .card {
@@ -435,99 +331,6 @@
         margin-top: 0.35rem;
     }
 
-    /* Guidelines */
-    .forum-guidelines .card-header {
-        border-left: 4px solid var(--primary-color);
-    }
-
-    .guidelines-list {
-        padding: 0;
-        margin: 0;
-        list-style: none;
-    }
-
-    .guidelines-list li {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.25rem;
-    }
-
-    .guidelines-list li:last-child {
-        margin-bottom: 0;
-    }
-
-    .guidelines-list li i {
-        color: var(--primary-color);
-        font-size: 1.1rem;
-        margin-top: 0.25rem;
-    }
-
-    /* Category Guide */
-    .category-item {
-        transition: var(--transition);
-        cursor: pointer;
-    }
-
-    .category-item:hover {
-        background-color: var(--primary-lighter);
-    }
-
-    .category-item.active {
-        background-color: var(--primary-light);
-    }
-
-    .category-indicator {
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        display: inline-block;
-    }
-
-    .category-indicator.general {
-        background-color: var(--general-color);
-    }
-
-    .category-indicator.question {
-        background-color: var(--question-color);
-    }
-
-    .category-indicator.suggestion {
-        background-color: var(--suggestion-color);
-    }
-
-    .category-indicator.event {
-        background-color: var(--event-color);
-    }
-
-    .category-indicator.support {
-        background-color: var(--support-color);
-    }
-
-    /* Tips List */
-    .tips-list {
-        padding: 0;
-        margin: 0;
-        list-style: none;
-    }
-
-    .tips-list li {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-    }
-
-    .tips-list li:last-child {
-        margin-bottom: 0;
-    }
-
-    .tips-list li i {
-        color: var(--primary-color);
-        font-size: 1rem;
-        margin-top: 0.125rem;
-    }
-
     /* Buttons */
     .btn-primary {
         background-color: var(--primary-color);
@@ -537,12 +340,12 @@
         transition: var(--transition);
     }
 
-    .btn-primary:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
-    }
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+        }
 
     .btn-outline-secondary {
         color: var(--text-muted);
@@ -552,11 +355,11 @@
         transition: var(--transition);
     }
 
-    .btn-outline-secondary:hover {
-        background-color: #f8f9fa;
-        color: var(--text-dark);
-        border-color: rgba(0,0,0,0.15);
-    }
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            color: var(--text-dark);
+            border-color: rgba(0,0,0,0.15);
+        }
 
     /* Validation styling */
     .is-invalid {
@@ -578,40 +381,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        // Highlight the selected category in the guide
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initially highlight the selected category
-            highlightSelectedCategory();
-            
-            // Change highlight when category changes
-            document.getElementById('Category').addEventListener('change', function() {
-                highlightSelectedCategory();
-            });
-            
-            // Click on category item to select that category
-            document.querySelectorAll('.category-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const category = this.getAttribute('data-category');
-                    document.getElementById('Category').value = category;
-                    highlightSelectedCategory();
-                });
-            });
-            
-            function highlightSelectedCategory() {
-                const selectedCategory = document.getElementById('Category').value;
-                
-                // Remove active class from all items
-                document.querySelectorAll('.category-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                
-                // Add active class to selected category
-                const selectedItem = document.querySelector(`.category-item[data-category="${selectedCategory}"]`);
-                if (selectedItem) {
-                    selectedItem.classList.add('active');
-                }
-            }
-        });
-    </script>
 }

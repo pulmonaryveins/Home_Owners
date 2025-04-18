@@ -1,0 +1,369 @@
+﻿@model HomeOwners.Models.ForumPost
+@{
+    ViewData["Title"] = "Create New Forum Post";
+}
+
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/css/nav.css" asp-append-version="true" />
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" href="/">
+            <span class="brand-text">Neighborly</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Facilities">All Facilities</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">My Bookings</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyBookings">All Bookings</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Annoucements">All Announcements</a></li>
+                        <li><a class="dropdown-item" href="/Home/Calendar">View Calendar</a></li>
+                        <li><a class="dropdown-item" href="/Home/Forum">Community Forum</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Services">All Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">My Services</a></li>
+                        <li><a class="dropdown-item" href="/Home/MyServiceRequests">All Request</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Home/Billing">Unpaid Bills</a></li>
+                        <li><a class="dropdown-item" href="/Home/Billing">Payment History</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Home/Contact">Contact</a>
+                </li>
+            </ul>
+
+            <!-- Updated profile menu section -->
+            <div class="nav-items-right">
+                <!-- Profile Menu -->
+                <div class="nav-item dropdown profile-menu">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                    <span class="user-role">HomeOwner</span>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Home/Profile">
+                                    <i class="bi bi-person-gear"></i> Profile Settings
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="dropdown-item logout-item">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <a class="profile-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="profile-avatar">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Register
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+<!-- Main Content Section -->
+<div class="container forum-section">
+    <div class="breadcrumbs mb-3">
+        <a href="@Url.Action("Forum")">Forum</a> <i class="bi bi-chevron-right mx-2 small"></i> <span>Create New Post</span>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h1 class="card-title h4 mb-0">Create a New Discussion</h1>
+                </div>
+
+                <div class="card-body">
+                    <form method="post" action="@Url.Action("CreateForumPost", "Home")">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label for="Title" class="form-label">Title</label>
+                            <input type="text" id="Title" name="Title" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Category" class="form-label">Category</label>
+                            <select id="Category" name="Category" class="form-select">
+                                <option value="General">General Discussion</option>
+                                <option value="Question">Question</option>
+                                <option value="Suggestion">Suggestion / Idea</option>
+                                <option value="Event">Event Coordination</option>
+                                <option value="Support">Help / Support</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="Content" class="form-label">Content</label>
+                            <textarea id="Content" name="Content" class="form-control" rows="8" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Create Post</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="forum-guidelines card mt-4 shadow-sm">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0"><i class="bi bi-info-circle me-2"></i>Community Forum Guidelines</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="guidelines-list mb-0">
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <div>
+                                <strong>Be respectful and constructive</strong>
+                                <p class="small mb-0 text-muted">Treat others with respect, even in disagreement.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <div>
+                                <strong>Stay on topic</strong>
+                                <p class="small mb-0 text-muted">Keep discussions relevant to the selected category.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <div>
+                                <strong>Avoid duplicate posts</strong>
+                                <p class="small mb-0 text-muted">Check if your topic has already been discussed.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle"></i>
+                            <div>
+                                <strong>Protect privacy</strong>
+                                <p class="small mb-0 text-muted">Do not share personal information of others without consent.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --text-light: #f8f9fa;
+        --border-radius: 12px;
+        --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --card-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        --transition: all 0.3s ease;
+    }
+
+    .forum-section {
+        padding-top: 100px;
+        padding-bottom: 5rem;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+        .breadcrumbs a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+            .breadcrumbs a:hover {
+                text-decoration: underline;
+            }
+
+    /* Card Styling */
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* Form Styling */
+    .form-label {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .form-control, .form-select {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(0,0,0,0.1);
+        transition: var(--transition);
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(78, 110, 77, 0.25);
+        }
+
+    .form-text {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+    }
+
+    /* Guidelines */
+    .forum-guidelines .card-header {
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .guidelines-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+        .guidelines-list li {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+            .guidelines-list li:last-child {
+                margin-bottom: 0;
+            }
+
+            .guidelines-list li i {
+                color: var(--primary-color);
+                font-size: 1.1rem;
+                margin-top: 0.25rem;
+            }
+
+    /* Buttons */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        padding: 0.6rem 1.25rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(78, 110, 77, 0.3);
+        }
+
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: rgba(0,0,0,0.1);
+        padding: 0.6rem 1.25rem;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            color: var(--text-dark);
+            border-color: rgba(0,0,0,0.15);
+        }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

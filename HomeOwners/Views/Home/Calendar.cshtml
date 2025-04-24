@@ -148,12 +148,20 @@
             </h2>
             <p class="text-muted mb-0 mt-1">Stay up-to-date with all community events and activities</p>
         </div>
-        <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#requestEventModal">
-            <i class="bi bi-calendar-plus me-1"></i> Request New Event
-        </a>
+        <div class="d-flex gap-2">
+            <a href="/Home/Annoucements" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-1"></i> Back to Announcements
+            </a>
+            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#requestEventModal">
+                <i class="bi bi-calendar-plus me-1"></i> Request New Event
+            </a>
+        </div>
     </div>
 
-    <div class="card dashboard-card shadow-sm mb-4">
+    <div class="row mb-4">
+        <div class="col-lg-3">
+            <!-- Move the Upcoming Events section here -->
+            <div class="card dashboard-card shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="card-title mb-0">
                         <i class="bi bi-calendar-event me-2"></i> Upcoming Events
@@ -173,7 +181,7 @@
                                     <div class="event-details">
                                         <h4>@evt.Title</h4>
                                         <p>
-                                            <i class="bi bi-clock"></i> 
+                                            <i class="bi bi-clock"></i>
                                             @evt.StartTime.ToString("h:mm tt") - @evt.EndTime.ToString("h:mm tt")
                                         </p>
                                         @if (!string.IsNullOrEmpty(evt.Location))
@@ -197,15 +205,13 @@
                         }
                     </div>
                 </div>
-                <div class="card-footer bg-white">
+                <div class="card-footer bg-white py-3">
                     <button id="addToMyCalendar" class="btn btn-primary w-100">
                         <i class="bi bi-cloud-download me-2"></i> Sync to My Calendar
                     </button>
                 </div>
             </div>
-    
-    <div class="row mb-4">
-        <div class="col-lg-3">
+
             <div class="card dashboard-card shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="card-title mb-0">
@@ -304,12 +310,6 @@
                 <div class="card-body p-0">
                     <div id="homeownerCalendar" class="admin-calendar"></div>
                 </div>
-            </div>
-            
-            <div class="mt-4 d-flex justify-content-between align-items-center">
-                <a href="@Url.Action("Annoucements")" class="btn btn-outline-primary">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Announcements
-                </a>
             </div>
         </div>
     </div>
@@ -1119,58 +1119,78 @@
         padding: 8px 4px;
     }
 
-    /* Upcoming events styling */
+    /* Updated Upcoming Events Styling to match the Announcements page */
     .upcoming-events {
-        max-height: 500px;
+        max-height: 400px;
         overflow-y: auto;
+        scrollbar-width: thin;
     }
 
+    .upcoming-events::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .upcoming-events::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .upcoming-events::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+
+    .upcoming-events::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+    
     .upcoming-event {
         display: flex;
         gap: 12px;
         padding: 16px;
         border-bottom: 1px solid rgba(0,0,0,0.05);
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin: 0.75rem;
     }
-
+    
     .upcoming-event:hover {
-        background-color: rgba(78, 110, 77, 0.05);
+        background-color: rgba(78, 110, 77, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
-
-    .upcoming-event:last-child {
-        border-bottom: none;
-    }
-
+    
     .event-date {
         min-width: 50px;
         text-align: center;
     }
-
+    
     .event-date .date {
         font-size: 1.75rem;
         font-weight: 700;
         color: var(--primary-color);
         line-height: 1;
     }
-
+    
     .event-date .month {
         font-size: 0.85rem;
         color: var(--text-muted);
         text-transform: uppercase;
         font-weight: 500;
     }
-
+    
     .event-details {
         flex: 1;
     }
-
+    
     .event-details h4 {
         font-size: 1rem;
         font-weight: 600;
         color: var(--text-dark);
         margin-bottom: 0.4rem;
     }
-
+    
     .event-details p {
         color: var(--text-muted);
         font-size: 0.85rem;
@@ -1179,14 +1199,12 @@
         align-items: center;
         gap: 0.5rem;
     }
-
-    /* Modal styling */
-    .modal-header {
-        background-color: var(--primary-color);
-        color: white;
+    
+    .event-location {
+        font-style: italic;
     }
-
-    /* Empty state styling */
+    
+    /* Empty State Styling */
     .empty-state {
         display: flex;
         flex-direction: column;
@@ -1194,44 +1212,10 @@
         color: var(--text-muted);
         padding: 2rem 0;
     }
-
-    /* Event details modal */
-    .event-details-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .event-detail-item {
-        display: flex;
-        gap: 1rem;
-    }
-
-    .event-detail-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background-color: var(--primary-lighter);
-        color: var(--primary-color);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem;
-    }
-
-    .event-detail-content {
-        flex: 1;
-    }
-
-    .event-detail-label {
-        display: block;
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .event-detail-value {
-        color: var(--text-dark);
-        font-weight: 500;
+    
+    /* Updated card footer */
+    .card-footer {
+        border-top: 1px solid rgba(0,0,0,0.05);
+        background-color: white;
     }
 </style>

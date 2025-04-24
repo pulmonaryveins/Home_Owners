@@ -233,6 +233,7 @@
                         <th>Posted Date</th>
                         <th>Status</th>
                         <th>Priority</th>
+                        <th>Pinned</th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -292,9 +293,30 @@
                                     }
                                 </td>
                                 <td>
+                                    @if (announcement.IsPinned)
+                                    {
+                                        <span class="pin-badge pinned">
+                                            <i class="bi bi-pin-angle-fill me-1"></i>Pinned
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pin-badge unpinned">
+                                            <i class="bi bi-pin-angle me-1"></i>Not Pinned
+                                        </span>
+                                    }
+                                </td>
+                                <td>
                                     <div class="action-buttons">
-                                        <a asp-page="./EditAnnouncement" asp-route-id="@announcement.Id" 
-                                           class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="tooltip" 
+                                        <form method="post" asp-page-handler="TogglePin" asp-route-id="@announcement.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-sm @(announcement.IsPinned ? "btn-outline-info" : "btn-outline-secondary") action-btn"
+                                                    data-bs-toggle="tooltip" title="@(announcement.IsPinned ? "Unpin Announcement" : "Pin Announcement")">
+                                                <i class="bi @(announcement.IsPinned ? "bi-pin-angle-fill" : "bi-pin-angle")"></i>
+                                            </button>
+                                        </form>
+
+                                        <a asp-page="./EditAnnouncement" asp-route-id="@announcement.Id"
+                                           class="btn btn-sm btn-outline-primary action-btn" data-bs-toggle="tooltip"
                                            title="Edit Announcement">
                                             <i class="bi bi-pencil"></i>
                                         </a>
@@ -855,6 +877,25 @@
     .navbar-toggler i {
         font-size: 1.5rem;
     }
+    /* Add this to your CSS section */
+    .pin-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+        .pin-badge.pinned {
+            background-color: rgba(13, 202, 240, 0.1);
+            color: #0dcaf0;
+        }
+
+        .pin-badge.unpinned {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
 </style>
 
 <script>

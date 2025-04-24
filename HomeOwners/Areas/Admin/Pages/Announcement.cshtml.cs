@@ -64,5 +64,30 @@ namespace HomeOwners.Areas.Admin.Pages
 
             return RedirectToPage();
         }
+
+        public async Task<IActionResult> OnPostTogglePinAsync(int id)
+        {
+            var announcement = await _announcementService.GetAnnouncementByIdAsync(id);
+
+            if (announcement == null)
+            {
+                return NotFound();
+            }
+
+            if (announcement.IsPinned)
+            {
+                await _announcementService.UnpinAnnouncementAsync(id);
+                TempData["StatusMessage"] = $"Announcement '{announcement.Title}' unpinned successfully.";
+            }
+            else
+            {
+                await _announcementService.PinAnnouncementAsync(id);
+                TempData["StatusMessage"] = $"Announcement '{announcement.Title}' pinned successfully.";
+            }
+
+            TempData["StatusType"] = "Success";
+
+            return RedirectToPage();
+        }
     }
 }

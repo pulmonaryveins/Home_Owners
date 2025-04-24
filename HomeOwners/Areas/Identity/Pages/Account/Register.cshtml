@@ -19,72 +19,86 @@
     </div>
 </div>
 
-<div class="auth-header">
-    <h2>Create Account</h2>
-    <p>Fill in your details to get started</p>
+<div class="auth-header text-center mb-4">
+    <h2 class="mb-2">Create Account</h2>
+    <p class="text-muted">Fill in your details to get started</p>
 </div>
 
 <div asp-validation-summary="ModelOnly" class="text-danger text-center" role="alert"></div>
 
 <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-    <div class="form-floating">
-        <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="username" />
-        <label asp-for="Input.Username">Username</label>
-        <span asp-validation-for="Input.Username" class="text-danger"></span>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="username" />
+                <label asp-for="Input.Username">Username</label>
+                <span asp-validation-for="Input.Username" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input asp-for="Input.FullName" class="form-control" aria-required="true" placeholder="Full Name" />
+                <label asp-for="Input.FullName">Full Name</label>
+                <span asp-validation-for="Input.FullName" class="text-danger"></span>
+            </div>
+        </div>
     </div>
 
-    <div class="form-floating">
-        <input asp-for="Input.FullName" class="form-control" aria-required="true" placeholder="Full Name" />
-        <label asp-for="Input.FullName">Full Name</label>
-        <span asp-validation-for="Input.FullName" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating">
+    <div class="form-floating mb-3">
         <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true" placeholder="name@example.com" />
         <label asp-for="Input.Email">Email address</label>
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
 
-    <div class="form-floating">
-        <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" aria-required="true" placeholder="Phone Number" />
-        <label asp-for="Input.PhoneNumber">Phone Number</label>
-        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" aria-required="true" placeholder="Phone Number" />
+                <label asp-for="Input.PhoneNumber">Phone Number</label>
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input asp-for="Input.HouseNumber" class="form-control" aria-required="true" placeholder="House Number" />
+                <label asp-for="Input.HouseNumber">House Number</label>
+                <span asp-validation-for="Input.HouseNumber" class="text-danger"></span>
+            </div>
+        </div>
     </div>
 
-    <div class="form-floating">
-        <input asp-for="Input.HouseNumber" class="form-control" aria-required="true" placeholder="House Number" />
-        <label asp-for="Input.HouseNumber">House Number</label>
-        <span asp-validation-for="Input.HouseNumber" class="text-danger"></span>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <label asp-for="Input.Password">Password</label>
+                <span asp-validation-for="Input.Password" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+            </div>
+        </div>
     </div>
 
-    <div class="form-floating">
-        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-        <label asp-for="Input.Password">Password</label>
-        <span asp-validation-for="Input.Password" class="text-danger"></span>
-    </div>
+    <button id="registerSubmit" type="submit" class="w-100 btn btn-primary mt-2">Create Account</button>
 
-    <div class="form-floating">
-        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-        <label asp-for="Input.ConfirmPassword">Confirm Password</label>
-        <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-    </div>
-
-    <button id="registerSubmit" type="submit" class="w-100 btn btn-primary mt-3">Create Account</button>
-
-    <div class="auth-links">
-        <p>Already have an account? <a asp-page="./Login">Sign in</a></p>
+    <div class="auth-links text-center mt-4">
+        <p class="text-muted">Already have an account? <a asp-page="./Login" class="text-decoration-none">Sign in</a></p>
     </div>
 </form>
 
 <style>
     body {
         margin-bottom: 60px;
-        position: relative; /* Added for pseudo-element positioning */
+        position: relative;
         min-height: 100vh;
-        background: none; /* Remove background from body */
+        background: none;
     }
 
-        /* Add blurred background */
         body::before {
             content: '';
             position: fixed;
@@ -100,34 +114,71 @@
             z-index: -1;
         }
 
+    .form-floating {
+        position: relative;
+    }
+
+    .form-control {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 1.1rem 0.75rem 0.5rem;
+        height: calc(3.5rem + 2px);
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(78, 110, 77, 0.25);
+            border-color: rgba(78, 110, 77, 0.5);
+        }
+
+    .form-floating label {
+        padding: 1rem 0.75rem;
+    }
+
     .btn-primary {
         padding: 0.8rem 1.5rem;
         font-weight: 500;
-        border-radius: 6px;
+        border-radius: 8px;
         transition: all 0.3s ease;
         background-color: #4e6e4d;
+        border-color: #4e6e4d;
+        letter-spacing: 0.5px;
     }
 
         .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
-            background-color: #4e6e4d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 110, 77, 0.3);
+            background-color: #3d5a3c;
+            border-color: #3d5a3c;
         }
 
     .toast {
         background-color: white;
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
     }
 
     .toast-header {
         background-color: #4e6e4d !important;
+        border-radius: 8px 8px 0 0;
     }
+
+    .text-primary {
+        color: #4e6e4d !important;
+    }
+
+    a {
+        color: #4e6e4d;
+    }
+
+        a:hover {
+            color: #3d5a3c;
+        }
 </style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Add this to your existing Scripts section
         document.addEventListener('DOMContentLoaded', function () {
             const statusMessage = '@Model.StatusMessage';
             if (statusMessage) {

@@ -571,6 +571,9 @@
         list-style: none;
         padding: 0;
         margin: 0;
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
     }
 
     .activity-item {
@@ -620,6 +623,83 @@
         font-size: 0.75rem;
         color: var(--text-muted);
         opacity: 0.8;
+    }
+
+    /* Event list */
+    .event-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+
+    .event-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        transition: background-color 0.2s ease;
+    }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-item:hover {
+            background-color: var(--primary-lighter);
+        }
+
+    .event-date {
+        width: 50px;
+        height: 50px;
+        background-color: var(--primary-light);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-right: 1rem;
+        color: var(--primary-color);
+    }
+
+    .event-month {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .event-day {
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+
+    .event-content {
+        flex: 1;
+    }
+
+    .event-title {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        color: var(--text-dark);
+    }
+
+    .event-details {
+        display: flex;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        gap: 1rem;
+    }
+
+        .event-details span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+    .event-actions {
+        margin-left: 0.5rem;
     }
 
     /* Community Engagement List */
@@ -728,80 +808,6 @@
                 align-items: center;
             }
 
-    /* Event list */
-    .event-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .event-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        transition: background-color 0.2s ease;
-    }
-
-        .event-item:last-child {
-            border-bottom: none;
-        }
-
-        .event-item:hover {
-            background-color: var(--primary-lighter);
-        }
-
-    .event-date {
-        width: 50px;
-        height: 50px;
-        background-color: var(--primary-light);
-        border-radius: 8px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        margin-right: 1rem;
-        color: var(--primary-color);
-    }
-
-    .event-month {
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-
-    .event-day {
-        font-size: 1.2rem;
-        font-weight: 700;
-    }
-
-    .event-content {
-        flex: 1;
-    }
-
-    .event-title {
-        font-weight: 500;
-        margin-bottom: 0.25rem;
-        color: var(--text-dark);
-    }
-
-    .event-details {
-        display: flex;
-        font-size: 0.8rem;
-        color: var(--text-muted);
-        gap: 1rem;
-    }
-
-        .event-details span {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-    .event-actions {
-        margin-left: 0.5rem;
-    }
-
     /* User Approval List */
     .user-approval-list {
         list-style: none;
@@ -902,6 +908,29 @@
 
         .btn-outline-primary:hover {
             color: white;
+        }
+
+    /* Custom scrollbar styling */
+    .activity-list::-webkit-scrollbar,
+    .event-list::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .activity-list::-webkit-scrollbar-track,
+    .event-list::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.02);
+    }
+
+    .activity-list::-webkit-scrollbar-thumb,
+    .event-list::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.1);
+        border-radius: 4px;
+    }
+
+        .activity-list::-webkit-scrollbar-thumb:hover,
+        .event-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(78, 110, 77, 0.3);
         }
 </style>
 

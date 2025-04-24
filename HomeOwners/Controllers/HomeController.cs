@@ -65,18 +65,75 @@ public class HomeController : Controller
     }
 
     [RequireAuthentication]
-    public async Task<IActionResult> Annoucements()
+    public IActionResult Annoucements(string category = null, string search = null, string sort = null, int page = 1)
     {
-        var announcements = await _announcementService.GetActiveAnnouncementsAsync();
-        var upcomingEvents = await _eventService.GetUpcomingEventsAsync(3);
-        var activePolls = await _pollService.GetActivePollsAsync();
-
-
-        ViewBag.UpcomingEvents = upcomingEvents;
-        ViewBag.ActivePolls = activePolls;
-
-
-        return View(announcements);
+        // Set ViewBag values for the view to use in filtering UI
+        ViewBag.CurrentCategory = category;
+        ViewBag.CurrentSearch = search;
+        ViewBag.CurrentSort = sort ?? "Newest First";
+        ViewBag.CurrentPage = page;
+        
+        // Get the base announcement list
+        var announcements = _context.Announcements.AsQueryable();
+        
+        // Apply category filter if specified
+        if (!string.IsNullOrEmpty(category))
+        {
+            announcements = announcements.Where(a => a.Category == category);
+        }
+        
+        // Apply search filter if specified
+        if (!string.IsNullOrEmpty(search))
+        {
+            search = search.ToLower();
+            announcements = announcements.Where(a => 
+                a.Title.ToLower().Contains(search) || 
+                a.Content.ToLower().Contains(search));
+        }
+        
+        // Apply sorting
+        switch (sort)
+        {
+            case "Oldest First":
+                announcements = announcements.OrderBy(a => a.PostedDate);
+                break;
+            case "Newest First":
+            default:
+                announcements = announcements.OrderByDescending(a => a.PostedDate);
+                break;
+        }
+        
+        // Pagination
+        int pageSize = 5; // Adjust as needed
+        int totalItems = announcements.Count();
+        int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+        
+        ViewBag.TotalPages = totalPages;
+        
+        // Ensure page is within valid range
+        if (page < 1) page = 1;
+        if (page > totalPages && totalPages > 0) page = totalPages;
+        
+        // Get events for the Events widget
+        ViewBag.UpcomingEvents = _context.Events
+            .Where(e => e.StartTime > DateTime.Now)
+            .OrderBy(e => e.StartTime)
+            .Take(5)
+            .ToList();
+        
+        // Get active polls for the Polls widget
+        ViewBag.ActivePolls = _context.Polls
+            .Where(p => p.IsActive)
+            .Take(3)
+            .ToList();
+        
+        // Return the paged announcements
+        var pagedAnnouncements = announcements
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+        
+        return View(pagedAnnouncements);
     }
 
     [HttpPost]

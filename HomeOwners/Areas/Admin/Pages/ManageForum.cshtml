@@ -261,7 +261,7 @@
                             {
                                 @foreach (var post in Model.ForumPosts)
                                 {
-                                    <tr class="align-middle @(post.IsFlagged ? "table-danger" : (!post.IsVisible ? "table-secondary" : ""))">
+                                    <tr class="align-middle @(post.IsFlagged ? "table-danger" : (!post.IsVisible ? "table-secondary" : (post.IsPinned ? "table-info" : "")))">
                                         <td>
                                             <div class="post-title-cell">
                                                 <div class="fw-medium">@post.Title</div>
@@ -345,6 +345,25 @@
                                                         </button>
                                                     </form>
                                                 }
+
+                                                <!-- Pin/Unpin Button -->
+                                                <form method="post" class="d-inline">
+                                                    <input type="hidden" name="id" value="@post.Id" />
+                                                    @if (post.IsPinned)
+                                                    {
+                                                        <button type="submit" class="btn btn-sm btn-success action-btn"
+                                                                asp-page-handler="TogglePinPost" title="Unpin Post">
+                                                            <i class="bi bi-pin-fill"></i>
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="submit" class="btn btn-sm btn-outline-success action-btn"
+                                                                asp-page-handler="TogglePinPost" title="Pin Post">
+                                                            <i class="bi bi-pin"></i>
+                                                        </button>
+                                                    }
+                                                </form>
 
                                                 @if (post.IsFlagged)
                                                 {
@@ -521,9 +540,78 @@
             </form>
         </div>
     </div>
+</div
+
+
+<!-- Manage Comments Modal -->
+<div class="modal fade" id="manageCommentsModal" tabindex="-1" aria-labelledby="manageCommentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manageCommentsModalLabel">
+                    <i class="bi bi-chat-dots me-2"></i>Manage Comments
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Managing comments for post: <strong id="postTitleComments"></strong></p>
+                
+                <div id="commentsLoading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading comments...</p>
+                </div>
+                
+                <div id="commentsContainer">
+                    <!-- Comments will be loaded here via AJAX -->
+                </div>
+                
+                <div id="noCommentsMessage" class="alert alert-info my-3 d-none">
+                    <i class="bi bi-info-circle me-2"></i>This post has no comments.
+                </div>
+
+                <input type="hidden" id="currentPostId" value="" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Delete Post Modal -->
+<!-- Delete Comment Modal -->
+<div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteCommentModalLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Delete Comment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete this comment?</p>
+                <div class="comment-preview p-3 bg-light rounded">
+                    <p id="commentPreview" class="mb-0"></p>
+                </div>
+                <p class="mb-0 mt-3 text-danger fw-medium">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" asp-page-handler="DeleteComment">
+                    <input type="hidden" id="commentIdToDelete" name="commentId" value="" />
+                    <input type="hidden" id="postIdForComment" name="postId" value="" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Delete Comment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Post Modal 
 <div class="modal fade" id="deletePostModal" tabindex="-1" aria-labelledby="deletePostModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -548,7 +636,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <style>
     :root {
@@ -865,6 +953,49 @@
     .table-secondary {
         --bs-table-accent-bg: rgba(108, 117, 125, 0.05) !important;
     }
+
+    /* Add to existing styles in the page */
+    .table tr.pinned-post {
+        background-color: rgba(13, 202, 240, 0.05);
+    }
+
+    .pinned-indicator {
+        color: #0dcaf0;
+        margin-right: 0.25rem;
+    }
+
+    /* Comment styles for the modal */
+    .comment-item {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid #eee;
+        background-color: #f9f9f9;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-author {
+        font-weight: 500;
+    }
+
+    .comment-date {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+
+    .comment-content {
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
 </style>
 
 @section Scripts {
@@ -896,6 +1027,86 @@
 
                 document.getElementById('postIdToDelete').value = postId
                 document.getElementById('postTitleDelete').textContent = postTitle
+            })
+            
+            // Handle manage comments modal
+            var manageCommentsModal = document.getElementById('manageCommentsModal')
+            manageCommentsModal.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget
+                var postId = button.getAttribute('data-post-id')
+                var postTitle = button.getAttribute('data-post-title')
+                
+                document.getElementById('postTitleComments').textContent = postTitle
+                document.getElementById('currentPostId').value = postId
+                
+                // Show loading spinner
+                document.getElementById('commentsLoading').classList.remove('d-none')
+                document.getElementById('commentsContainer').innerHTML = ''
+                document.getElementById('noCommentsMessage').classList.add('d-none')
+                
+                // Fetch comments for this post
+                fetch(`/api/forum/posts/${postId}/comments`)
+                    .then(response => response.json())
+                    .then(comments => {
+                        // Hide loading spinner
+                        document.getElementById('commentsLoading').classList.add('d-none')
+                        
+                        if (comments.length === 0) {
+                            document.getElementById('noCommentsMessage').classList.remove('d-none')
+                            return
+                        }
+                        
+                        // Render comments
+                        const commentsHtml = comments.map(comment => `
+                            <div class="comment-item" id="comment-${comment.id}">
+                                <div class="comment-header">
+                                    <div class="comment-author">
+                                        <i class="bi bi-person-circle me-1"></i>${comment.userName} 
+                                        <small class="text-muted">(${comment.houseNumber || 'Unknown'})</small>
+                                    </div>
+                                    <div class="comment-date">
+                                        ${new Date(comment.postedDate).toLocaleString()}
+                                        ${comment.editedDate ? ' (edited)' : ''}
+                                    </div>
+                                </div>
+                                <div class="comment-content">${comment.content}</div>
+                                <div class="comment-actions">
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-comment-btn"
+                                            data-bs-toggle="modal" data-bs-target="#deleteCommentModal"
+                                            data-comment-id="${comment.id}" 
+                                            data-post-id="${postId}"
+                                            data-comment-content="${comment.content.substring(0, 100)}${comment.content.length > 100 ? '...' : ''}">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')
+                        
+                        document.getElementById('commentsContainer').innerHTML = commentsHtml
+                        
+                        // Add event listeners for delete buttons
+                        document.querySelectorAll('.delete-comment-btn').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const commentId = this.getAttribute('data-comment-id')
+                                const postId = this.getAttribute('data-post-id')
+                                const commentContent = this.getAttribute('data-comment-content')
+                                
+                                document.getElementById('commentIdToDelete').value = commentId
+                                document.getElementById('postIdForComment').value = postId
+                                document.getElementById('commentPreview').textContent = commentContent
+                            })
+                        })
+                    })
+                    .catch(error => {
+                        console.error('Error fetching comments:', error)
+                        document.getElementById('commentsLoading').classList.add('d-none')
+                        document.getElementById('commentsContainer').innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                Error loading comments. Please try again.
+                            </div>
+                        `
+                    })
             })
         })
     </script>

@@ -188,5 +188,43 @@ namespace HomeOwners.Areas.Admin.Pages
 
             return RedirectToPage();
         }
+
+        public async Task<IActionResult> OnPostTogglePinPostAsync(int id)
+        {
+            var post = await _forumService.GetForumPostByIdAsync(id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            await _forumService.TogglePostPinAsync(id);
+
+            if (post.IsPinned)
+            {
+                TempData["StatusMessage"] = "Post has been unpinned.";
+            }
+            else
+            {
+                TempData["StatusMessage"] = "Post has been pinned and will appear at the top of the forum.";
+            }
+            TempData["StatusType"] = "Success";
+
+            return RedirectToPage();
+        }
+        public async Task<IActionResult> OnPostDeleteCommentAsync(int commentId, int postId)
+        {
+            var comment = await _forumService.GetCommentByIdAsync(commentId);
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            await _forumService.DeleteCommentAsync(commentId);
+
+            TempData["StatusMessage"] = "Comment has been permanently deleted.";
+            TempData["StatusType"] = "Success";
+
+            return RedirectToPage();
+        }
     }
 }

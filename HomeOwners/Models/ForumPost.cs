@@ -42,6 +42,8 @@ namespace HomeOwners.Models
 
         public bool IsFlagged { get; set; } = false;
 
+        public bool IsPinned { get; set; } = false;
+
         public string? AdminNotes { get; set; }
     }
 }

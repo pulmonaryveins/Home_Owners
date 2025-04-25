@@ -9,7 +9,7 @@
                 <div class="card-header">
                     <div class="auth-logo-container mb-3">
                         <div class="auth-logo">
-                            <img src="/images/assets/GREEN.png" class="d-block w-100 h-100" alt="Community Living">
+                            <img src="/images/assets/GREEN.png" class="img-fluid" alt="Community Living">
                         </div>
                     </div>
                     <ul class="nav nav-tabs card-header-tabs">
@@ -52,12 +52,18 @@
     }
 
     .auth-logo {
-        width: 150px;
-        height: 1px;
+        width: 200px;
+        height: 90px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
+
+        .auth-logo img {
+            max-width: 180%;
+            max-height: 180%;
+            object-fit: contain;
+        }
 
         .auth-logo .brand-text {
             font-size: 2rem;
@@ -99,5 +105,4 @@
 
 @section Scripts {
     @await RenderSectionAsync("Scripts", required: false)
-}
 }

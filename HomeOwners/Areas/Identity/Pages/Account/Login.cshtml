@@ -22,13 +22,13 @@
 <div asp-validation-summary="ModelOnly" class="text-danger text-center" role="alert"></div>
 
 <form id="account" method="post">
-    <div class="form-floating">
+    <div class="form-floating mb-3">
         <input asp-for="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="username" />
         <label asp-for="Input.Username">Username</label>
         <span asp-validation-for="Input.Username" class="text-danger"></span>
     </div>
 
-    <div class="form-floating">
+    <div class="form-floating mb-3">
         <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
         <label asp-for="Input.Password">Password</label>
         <span asp-validation-for="Input.Password" class="text-danger"></span>
@@ -39,14 +39,14 @@
             <input class="form-check-input" asp-for="Input.RememberMe" />
             <label class="form-check-label" asp-for="Input.RememberMe">Remember me</label>
         </div>
-        <a id="forgot-password" class="text-primary" asp-page="./ForgotPassword">Forgot password?</a>
+        <a id="forgot-password" class="text-primary" asp-page="">Forgot password?</a>
     </div>
 
     <button id="login-submit" type="submit" class="w-100 btn btn-primary">Sign In</button>
 
-    <div class="auth-links">
+    <div class="auth-links text-center mt-4">
         <p class="text-muted">
-            Don't have an account?<a asp-page="./Register"> Sign Up</a>
+            Don't have an account?<a asp-page="./Register" class="ms-1 text-decoration-none">Sign Up</a>
         </p>
     </div>
 </form>
@@ -61,8 +61,8 @@
         <div class="d-grid gap-2">
             @foreach (var provider in Model.ExternalLogins!)
             {
-                <button type="submit" class="btn btn-outline-secondary" name="provider" value="@provider.Name">
-                    <i class="bi bi-@(provider.Name.ToLower())"></i>
+                <button type="submit" class="btn btn-outline-secondary social-login-btn" name="provider" value="@provider.Name">
+                    <i class="bi bi-@(provider.Name.ToLower()) me-2"></i>
                     Sign in with @provider.DisplayName
                 </button>
             }
@@ -73,12 +73,11 @@
 <style>
     body {
         margin-bottom: 60px;
-        position: relative; /* Added for pseudo-element positioning */
+        position: relative;
         min-height: 100vh;
-        background: none; /* Remove background from body */
+        background: none;
     }
 
-        /* Add blurred background */
         body::before {
             content: '';
             position: fixed;
@@ -94,24 +93,99 @@
             z-index: -1;
         }
 
+    .form-floating {
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+
+    .form-control {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        padding: 1.1rem 0.75rem 0.5rem;
+        height: calc(3.5rem + 2px);
+        transition: all 0.3s ease;
+    }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(78, 110, 77, 0.25);
+            border-color: rgba(78, 110, 77, 0.5);
+        }
+
+    .form-floating label {
+        padding: 1rem 0.75rem;
+    }
+
+    .form-check-input:checked {
+        background-color: #4e6e4d;
+        border-color: #4e6e4d;
+    }
+
     .btn-primary {
         padding: 0.8rem 1.5rem;
         font-weight: 500;
-        border-radius: 6px;
+        border-radius: 8px;
         transition: all 0.3s ease;
         background-color: #4e6e4d;
+        border-color: #4e6e4d;
+        letter-spacing: 0.5px;
     }
 
         .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
-            background-color: #4e6e4d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 110, 77, 0.3);
+            background-color: #3d5a3c;
+            border-color: #3d5a3c;
         }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 2rem 0;
+        color: #6c757d;
+    }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-divider span {
+            padding: 0 1rem;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+    .social-login-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+        .social-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+    .text-primary {
+        color: #4e6e4d !important;
+    }
 
     .alert-info {
         background-color: rgba(78, 110, 77, 0.1);
         border-color: rgba(78, 110, 77, 0.2);
         color: #4e6e4d;
+        border-radius: 8px;
+        padding: 1rem;
     }
 </style>
 

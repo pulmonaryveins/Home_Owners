@@ -188,7 +188,6 @@
 </div>
 
 
-
 <div class="container marketing">
     <div class="row">
         <div class="col-lg-4">
@@ -197,7 +196,7 @@
             </div>
             <h2 class="fw-normal">User Management</h2>
             <p>Manage your profile and connect with the community.</p>
-            <p><a class="btn btn-primary w-100" asp-controller="Home" asp-action="UserManagement">Manage Account &raquo;</a></p>
+            <p><a class="btn btn-primary w-100" asp-controller="Identity" asp-action="Home/Profile">Manage Account &raquo;</a></p>
         </div>
         <div class="col-lg-4">
             <div class="icon-circle">
@@ -213,7 +212,47 @@
             </div>
             <h2 class="fw-normal">Community Forum</h2>
             <p>Engage in discussions, share ideas, and raise concerns.</p>
-            <p><a class="btn btn-primary w-100" asp-controller="Home" asp-action="Annoucements">Join the Discussion &raquo;</a></p>
+            <p><a class="btn btn-primary w-100" asp-controller="Home" asp-action="Forum">Join the Discussion &raquo;</a></p>
+        </div>
+    </div>
+
+    <hr class="featurette-divider">
+
+
+    <div class="container services-section about-section">
+        <h2 class="text-center section-title">About Us</h2>
+        <p class="lead text-center section-subtitle">Building trust through excellence in community management since 2010</p>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="bi bi-bullseye"></i>
+                    </div>
+                    <h3>Our Mission</h3>
+                    <p>To empower homeowners and community administrators with efficient tools for managing and enhancing residential living experiences.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h3>Who We Are</h3>
+                    <p>We are a dedicated team focused on enhancing residential communities by providing digital solutions for homeowner management, facility reservations, and communication.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="bi bi-gift"></i>
+                    </div>
+                    <h3>What We Offer</h3>
+                    <p>From secure billing and payment portals to real-time announcements and facility booking, our platform offers a wide range of features designed to simplify community living.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -255,45 +294,7 @@
 
     <hr class="featurette-divider">
 </div>
-
-
-<div class="container services-section about-section">
-    <h2 class="text-center section-title">About Us</h2>
-    <p class="lead text-center section-subtitle">Building trust through excellence in community management since 2010</p>
-
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-bullseye"></i>
-                </div>
-                <h3>Our Mission</h3>
-                <p>To empower homeowners and community administrators with efficient tools for managing and enhancing residential living experiences.</p>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-people"></i>
-                </div>
-                <h3>Who We Are</h3>
-                <p>We are a dedicated team focused on enhancing residential communities by providing digital solutions for homeowner management, facility reservations, and communication.</p>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="service-card">
-                <div class="service-icon">
-                    <i class="bi bi-gift"></i>
-                </div>
-                <h3>What We Offer</h3>
-                <p>From secure billing and payment portals to real-time announcements and facility booking, our platform offers a wide range of features designed to simplify community living.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
+s
 
 <div class="container facilities-section">
     <h2 class="text-center section-title">Featured Facilities</h2>
@@ -351,6 +352,88 @@
 
     <hr class="featurette-divider">
 </div>
+
+<footer class="footer-section">
+    <div class="footer-wrapper">
+        <div class="container">
+            <div class="row">
+                <!-- Company Info -->
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5 class="brand-text-footer">Neighborly</h5>
+                    <p class="footer-description">Your trusted partner in finding the perfect home. We provide comprehensive real estate services with a focus on quality and customer satisfaction.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="social-link"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h5>Quick Links</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <ul class="footer-links">
+                                <li><a asp-controller="Home" asp-action="Facilities">Facilities</a></li>
+                                <li><a asp-controller="Home" asp-action="Services">Services</a></li>
+                                <li><a asp-controller="Home" asp-action="Annoucements">Annoucements</a></li>
+                                <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <ul class="footer-links">
+                                <li><a href="#">About Us</a></li>
+                                <li><a href="#">Contact</a></li>
+                                <li><a href="#">Privacy Policy</a></li>
+                                <li><a href="#">Terms & Conditions</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Newsletter & Contact -->
+                <div class="col-lg-4">
+                    <h5>Stay Connected</h5>
+                    <div class="newsletter-form mb-4">
+                        <p class="footer-description">Subscribe to our newsletter for updates and special offers.</p>
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Enter your email">
+                            <button class="btn btn-primary" type="button">Subscribe</button>
+                        </div>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>123 Real Estate Ave, Business District, CA 90210</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-telephone"></i>
+                            <span>+1 (555) 123-4567</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="bi bi-envelope"></i>
+                            <span>contact@homeowners.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Copyright -->
+    <div class="footer-bottom">
+        <div class="container">
+            <hr class="footer-divider">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <p class="mb-0">&copy; 2025 Neighborly. All rights reserved.</p>
+                <a href="#" class="back-to-top">
+                    Back to top <i class="bi bi-arrow-up"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
 
 <style>
     .facilities-section {

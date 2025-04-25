@@ -127,7 +127,7 @@
         <h1 class="welcome-title">Welcome, @(User.Identity?.Name ?? "Admin")!</h1>
         <p class="welcome-subtitle">Here's what's happening in your community today</p>
     </div>
-    
+
     <!-- Stats Summary Cards -->
     <div class="row stats-cards">
         <div class="col-md-3 col-sm-6">
@@ -161,15 +161,15 @@
         <div class="col-md-3 col-sm-6">
             <div class="stat-card">
                 <div class="stat-card-content">
-                    <div class="stat-card-title">Pending Approvals</div>
-                    <div class="stat-card-value">@Model.PendingApprovals</div>
-                    <div class="stat-card-change @(Model.PendingApprovalsChange > 0 ? "negative" : "positive")">
-                        <i class="bi @(Model.PendingApprovalsChange > 0 ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i> 
-                        @Math.Abs(Model.PendingApprovalsChange)% from last week
+                    <div class="stat-card-title">Active Facilities</div>
+                    <div class="stat-card-value">@Model.ActiveFacilities</div>
+                    <div class="stat-card-change @(Model.ActiveFacilitiesChange > 0 ? "positive" : "negative")">
+                        <i class="bi @(Model.ActiveFacilitiesChange > 0 ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i>
+                        @Math.Abs(Model.ActiveFacilitiesChange)% from last week
                     </div>
                 </div>
                 <div class="stat-card-icon approval-icon">
-                    <i class="bi bi-clock-history"></i>
+                    <i class="bi bi-building"></i>
                 </div>
             </div>
         </div>
@@ -177,14 +177,14 @@
             <div class="stat-card">
                 <div class="stat-card-content">
                     <div class="stat-card-title">Monthly Revenue</div>
-                    <div class="stat-card-value">$@Model.MonthlyRevenue.ToString("N0")</div>
+                    <div class="stat-card-value">₱@Model.MonthlyRevenue.ToString("N0")</div>
                     <div class="stat-card-change @(Model.RevenueChange >= 0 ? "positive" : "negative")">
-                        <i class="bi @(Model.RevenueChange >= 0 ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i> 
+                        <i class="bi @(Model.RevenueChange >= 0 ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i>
                         @Math.Abs(Model.RevenueChange)% from last month
                     </div>
                 </div>
                 <div class="stat-card-icon revenue-icon">
-                    <i class="bi bi-currency-dollar"></i>
+                    <i class="bi bi-currency-exchange"></i>
                 </div>
             </div>
         </div>
@@ -302,47 +302,52 @@
         <div class="col-md-4">
             <div class="card dashboard-card">
                 <div class="card-header">
-                    <h5><i class="bi bi-bell me-2"></i>Pending User Approvals</h5>
+                    <h5><i class="bi bi-bell me-2"></i>Community Engagement</h5>
                 </div>
                 <div class="card-body p-0">
-                    <ul class="user-approval-list">
-                        @if (Model.PendingUserApprovals.Any())
-                        {
-                            @foreach (var user in Model.PendingUserApprovals)
-                            {
-                                <li class="user-approval-item">
-                                    <div class="user-info">
-                                        <div class="user-avatar">
-                                            <i class="bi bi-person-circle"></i>
-                                        </div>
-                                        <div class="user-details">
-                                            <div class="user-name">@user.FullName</div>
-                                            <div class="user-meta">
-                                                <span>House #@user.HouseNumber</span>
-                                                <span>@user.RequestDate.ToString("MMM d, yyyy")</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="user-actions">
-                                        <button class="btn btn-sm btn-outline-success me-1" onclick="approveUser('@user.Id')">
-                                            <i class="bi bi-check-lg"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="rejectUser('@user.Id')">
-                                            <i class="bi bi-x-lg"></i>
-                                        </button>
-                                    </div>
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <li class="no-data-item">
-                                <div class="no-data-content">
-                                    <i class="bi bi-check2-circle"></i>
-                                    <p>No pending approvals</p>
+                    <ul class="engagement-list">
+                        <li class="engagement-item">
+                            <div class="engagement-info">
+                                <div class="engagement-avatar bg-warning">
+                                    <i class="bi bi-bar-chart-line"></i>
                                 </div>
-                            </li>
-                        }
+                                <div class="engagement-details">
+                                    <div class="engagement-title">Active Polls</div>
+                                    <div class="engagement-value">@Model.ActivePolls</div>
+                                </div>
+                            </div>
+                            <div class="engagement-actions">
+                                <a href="/Admin/ManagePolls" class="btn btn-sm btn-outline-primary">Manage</a>
+                            </div>
+                        </li>
+                        <li class="engagement-item">
+                            <div class="engagement-info">
+                                <div class="engagement-avatar bg-info">
+                                    <i class="bi bi-chat-left-text"></i>
+                                </div>
+                                <div class="engagement-details">
+                                    <div class="engagement-title">Forum Posts</div>
+                                    <div class="engagement-value">@Model.ForumPosts</div>
+                                </div>
+                            </div>
+                            <div class="engagement-actions">
+                                <a href="/Admin/ManageForum" class="btn btn-sm btn-outline-primary">Manage</a>
+                            </div>
+                        </li>
+                        <li class="engagement-item">
+                            <div class="engagement-info">
+                                <div class="engagement-avatar bg-success">
+                                    <i class="bi bi-chat-dots"></i>
+                                </div>
+                                <div class="engagement-details">
+                                    <div class="engagement-title">Forum Comments</div>
+                                    <div class="engagement-value">@Model.ForumComments</div>
+                                </div>
+                            </div>
+                            <div class="engagement-actions">
+                                <a href="/Admin/ManageForum" class="btn btn-sm btn-outline-primary">Manage</a>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -436,7 +441,7 @@
     .stats-cards {
         margin-bottom: 1.5rem;
     }
-    
+
     .stat-card {
         background: white;
         border-radius: 10px;
@@ -450,48 +455,48 @@
         overflow: hidden;
         position: relative;
     }
-    
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-    }
-    
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
     .stat-card-content {
         z-index: 1;
     }
-    
+
     .stat-card-title {
         font-size: 0.9rem;
         color: var(--text-muted);
         margin-bottom: 0.5rem;
         font-weight: 500;
     }
-    
+
     .stat-card-value {
         font-size: 1.75rem;
         font-weight: 600;
         color: var(--text-dark);
         margin-bottom: 0.5rem;
     }
-    
+
     .stat-card-change {
         font-size: 0.8rem;
         display: flex;
         align-items: center;
     }
-    
-    .stat-card-change.positive {
-        color: var(--success-color);
-    }
-    
-    .stat-card-change.negative {
-        color: var(--danger-color);
-    }
-    
-    .stat-card-change.neutral {
-        color: var(--text-muted);
-    }
-    
+
+        .stat-card-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-card-change.negative {
+            color: var(--danger-color);
+        }
+
+        .stat-card-change.neutral {
+            color: var(--text-muted);
+        }
+
     .stat-card-icon {
         font-size: 2rem;
         width: 50px;
@@ -502,19 +507,19 @@
         border-radius: 12px;
         color: white;
     }
-    
+
     .user-icon {
         background-color: var(--primary-color);
     }
-    
+
     .service-icon {
         background-color: var(--info-color);
     }
-    
+
     .approval-icon {
         background-color: var(--warning-color);
     }
-    
+
     .revenue-icon {
         background-color: var(--success-color);
     }
@@ -523,66 +528,69 @@
     .chart-card {
         margin-bottom: 1.5rem;
     }
-    
-    .chart-card .card-header {
-        background-color: white;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        padding: 1rem 1.25rem;
-    }
-    
-    .chart-card .card-header h5 {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        display: flex;
-        align-items: center;
-    }
-    
-    .chart-card .dropdown-toggle {
-        background: transparent;
-        color: var(--text-muted);
-        border: 1px solid rgba(0,0,0,0.1);
-        font-size: 0.85rem;
-    }
-    
-    .chart-card .dropdown-toggle:hover {
-        background-color: var(--primary-lighter);
-        color: var(--primary-color);
-    }
-    
+
+        .chart-card .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 1rem 1.25rem;
+        }
+
+            .chart-card .card-header h5 {
+                margin: 0;
+                font-size: 1rem;
+                font-weight: 600;
+                color: var(--primary-color);
+                display: flex;
+                align-items: center;
+            }
+
+        .chart-card .dropdown-toggle {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+        }
+
+            .chart-card .dropdown-toggle:hover {
+                background-color: var(--primary-lighter);
+                color: var(--primary-color);
+            }
+
     .chart-container {
         position: relative;
         height: 250px;
         overflow: hidden;
     }
-    
-    .chart-container canvas {
-        max-width: 100%;
-    }
+
+        .chart-container canvas {
+            max-width: 100%;
+        }
 
     /* Activity List */
     .activity-list {
         list-style: none;
         padding: 0;
         margin: 0;
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
     }
-    
+
     .activity-item {
         display: flex;
         padding: 1rem 1.25rem;
         border-bottom: 1px solid rgba(0,0,0,0.05);
         transition: background-color 0.2s ease;
     }
-    
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-    
-    .activity-item:hover {
-        background-color: var(--primary-lighter);
-    }
-    
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item:hover {
+            background-color: var(--primary-lighter);
+        }
+
     .activity-icon {
         width: 36px;
         height: 36px;
@@ -594,78 +602,27 @@
         margin-right: 1rem;
         flex-shrink: 0;
     }
-    
+
     .activity-content {
         flex: 1;
     }
-    
+
     .activity-title {
         font-weight: 500;
         margin-bottom: 0.25rem;
         color: var(--text-dark);
     }
-    
+
     .activity-subtitle {
         font-size: 0.85rem;
         color: var(--text-muted);
         margin-bottom: 0.25rem;
     }
-    
+
     .activity-time {
         font-size: 0.75rem;
         color: var(--text-muted);
         opacity: 0.8;
-    }
-
-    .bg-primary {
-        background-color: var(--primary-color) !important;
-    }
-
-    .bg-success {
-        background-color: var(--success-color) !important;
-    }
-    
-    .bg-warning {
-        background-color: var(--warning-color) !important;
-    }
-    
-    .bg-danger {
-        background-color: var(--danger-color) !important;
-    }
-    
-    .bg-info {
-        background-color: var(--info-color) !important;
-    }
-
-    /* Dashboard cards */
-    .dashboard-card {
-        height: 100%;
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-        overflow: hidden;
-        margin-bottom: 1.5rem;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-    }
-
-    .dashboard-card .card-header {
-        background-color: white;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        padding: 1rem 1.25rem;
-    }
-
-    .dashboard-card .card-header h5 {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        display: flex;
-        align-items: center;
     }
 
     /* Event list */
@@ -673,6 +630,9 @@
         list-style: none;
         padding: 0;
         margin: 0;
+        max-height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
     }
 
     .event-item {
@@ -683,13 +643,13 @@
         transition: background-color 0.2s ease;
     }
 
-    .event-item:last-child {
-        border-bottom: none;
-    }
+        .event-item:last-child {
+            border-bottom: none;
+        }
 
-    .event-item:hover {
-        background-color: var(--primary-lighter);
-    }
+        .event-item:hover {
+            background-color: var(--primary-lighter);
+        }
 
     .event-date {
         width: 50px;
@@ -732,15 +692,121 @@
         gap: 1rem;
     }
 
-    .event-details span {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-    }
+        .event-details span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
 
     .event-actions {
         margin-left: 0.5rem;
     }
+
+    /* Community Engagement List */
+    .engagement-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .engagement-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        transition: background-color 0.2s ease;
+    }
+
+        .engagement-item:last-child {
+            border-bottom: none;
+        }
+
+        .engagement-item:hover {
+            background-color: var(--primary-lighter);
+        }
+
+    .engagement-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .engagement-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin-right: 1rem;
+    }
+
+    .engagement-details {
+        flex: 1;
+    }
+
+    .engagement-title {
+        font-weight: 500;
+        color: var(--text-dark);
+    }
+
+    .engagement-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .bg-primary {
+        background-color: var(--primary-color) !important;
+    }
+
+    .bg-success {
+        background-color: var(--success-color) !important;
+    }
+
+    .bg-warning {
+        background-color: var(--warning-color) !important;
+    }
+
+    .bg-danger {
+        background-color: var(--danger-color) !important;
+    }
+
+    .bg-info {
+        background-color: var(--info-color) !important;
+    }
+
+    /* Dashboard cards */
+    .dashboard-card {
+        height: 100%;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 1rem 1.25rem;
+        }
+
+            .dashboard-card .card-header h5 {
+                margin: 0;
+                font-size: 1rem;
+                font-weight: 600;
+                color: var(--primary-color);
+                display: flex;
+                align-items: center;
+            }
 
     /* User Approval List */
     .user-approval-list {
@@ -758,13 +824,13 @@
         transition: background-color 0.2s ease;
     }
 
-    .user-approval-item:last-child {
-        border-bottom: none;
-    }
+        .user-approval-item:last-child {
+            border-bottom: none;
+        }
 
-    .user-approval-item:hover {
-        background-color: var(--primary-lighter);
-    }
+        .user-approval-item:hover {
+            background-color: var(--primary-lighter);
+        }
 
     .no-data-item {
         display: flex;
@@ -777,11 +843,11 @@
         color: var(--text-muted);
     }
 
-    .no-data-content i {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-        color: var(--primary-color);
-    }
+        .no-data-content i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
 
     /* Payment status */
     .payment-status-legend {
@@ -801,17 +867,17 @@
         border-radius: 50%;
     }
 
-    .status-dot.paid {
-        background-color: var(--success-color);
-    }
+        .status-dot.paid {
+            background-color: var(--success-color);
+        }
 
-    .status-dot.pending {
-        background-color: var(--warning-color);
-    }
+        .status-dot.pending {
+            background-color: var(--warning-color);
+        }
 
-    .status-dot.overdue {
-        background-color: var(--danger-color);
-    }
+        .status-dot.overdue {
+            background-color: var(--danger-color);
+        }
 
     .status-label {
         font-size: 0.8rem;
@@ -830,19 +896,42 @@
         border-color: var(--primary-color);
     }
 
-    .btn-primary:hover, .btn-outline-primary:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-    }
+        .btn-primary:hover, .btn-outline-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
 
     .btn-outline-primary {
         color: var(--primary-color);
         background-color: transparent;
     }
 
-    .btn-outline-primary:hover {
-        color: white;
+        .btn-outline-primary:hover {
+            color: white;
+        }
+
+    /* Custom scrollbar styling */
+    .activity-list::-webkit-scrollbar,
+    .event-list::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
     }
+
+    .activity-list::-webkit-scrollbar-track,
+    .event-list::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.02);
+    }
+
+    .activity-list::-webkit-scrollbar-thumb,
+    .event-list::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.1);
+        border-radius: 4px;
+    }
+
+        .activity-list::-webkit-scrollbar-thumb:hover,
+        .event-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(78, 110, 77, 0.3);
+        }
 </style>
 
 <script>
@@ -851,7 +940,7 @@
         // Set chart defaults to match theme
         Chart.defaults.color = '#6c757d';
         Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif";
-        
+
         // Activity Trends Chart
         const activityTrendsCtx = document.getElementById('activityTrendsChart');
         if (activityTrendsCtx) {
@@ -876,7 +965,7 @@
                     }
                 ]
             };
-            
+
             new Chart(activityTrendsCtx, {
                 type: 'line',
                 data: activityData,
@@ -916,7 +1005,7 @@
                 }
             });
         }
-        
+
         // Service Requests Chart
         const serviceRequestsCtx = document.getElementById('serviceRequestsChart');
         if (serviceRequestsCtx) {
@@ -928,7 +1017,7 @@
                     borderWidth: 0
                 }]
             };
-            
+
             new Chart(serviceRequestsCtx, {
                 type: 'doughnut',
                 data: serviceData,
@@ -950,7 +1039,7 @@
                 }
             });
         }
-        
+
         // Facility Usage Chart
         const facilityUsageCtx = document.getElementById('facilityUsageChart');
         if (facilityUsageCtx) {
@@ -963,7 +1052,7 @@
                     borderRadius: 4
                 }]
             };
-            
+
             new Chart(facilityUsageCtx, {
                 type: 'bar',
                 data: facilityData,
@@ -992,7 +1081,7 @@
                 }
             });
         }
-        
+
         // Payment Status Chart
         const paymentStatusCtx = document.getElementById('paymentStatusChart');
         if (paymentStatusCtx) {
@@ -1000,15 +1089,15 @@
                 labels: ['Paid', 'Pending', 'Overdue'],
                 datasets: [{
                     data: [
-                        @Model.PaymentStats.PaidPercentage, 
-                        @Model.PaymentStats.PendingPercentage, 
-                        @Model.PaymentStats.OverduePercentage
+    @Model.PaymentStats.PaidPercentage,
+    @Model.PaymentStats.PendingPercentage,
+    @Model.PaymentStats.OverduePercentage
                     ],
                     backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
                     borderWidth: 0
                 }]
             };
-            
+
             new Chart(paymentStatusCtx, {
                 type: 'pie',
                 data: paymentData,

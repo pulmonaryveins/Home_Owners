@@ -27,7 +27,8 @@ namespace HomeOwners.Services
         {
             return await _context.Announcements
                 .Where(a => a.IsActive)
-                .OrderByDescending(a => a.IsUrgent)
+                .OrderByDescending(a => a.IsPinned) // Pinned announcements first
+                .ThenByDescending(a => a.IsUrgent)
                 .ThenByDescending(a => a.PostedDate)
                 .ToListAsync();
         }
@@ -96,6 +97,27 @@ namespace HomeOwners.Services
             if (announcement != null)
             {
                 _context.Announcements.Remove(announcement);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // Add these methods for pinning/unpinning announcements
+        public async Task PinAnnouncementAsync(int id)
+        {
+            var announcement = await _context.Announcements.FindAsync(id);
+            if (announcement != null)
+            {
+                announcement.IsPinned = true;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task UnpinAnnouncementAsync(int id)
+        {
+            var announcement = await _context.Announcements.FindAsync(id);
+            if (announcement != null)
+            {
+                announcement.IsPinned = false;
                 await _context.SaveChangesAsync();
             }
         }

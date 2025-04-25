@@ -114,11 +114,13 @@
                             
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <div class="form-check">
-                                        <input asp-for="Announcement.IsActive" class="form-check-input" type="checkbox" />
-                                        <label asp-for="Announcement.IsActive" class="form-check-label">
-                                            <i class="bi bi-eye me-1"></i> Active (visible to users)
-                                        </label>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input asp-for="Announcement.IsPinned" class="form-check-input" type="checkbox" />
+                                            <label asp-for="Announcement.IsPinned" class="form-check-label">
+                                                <i class="bi bi-pin-angle me-1"></i> Pin to Top
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">

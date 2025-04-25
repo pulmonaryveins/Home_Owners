@@ -7,13 +7,18 @@
         <div class="col-md-8 col-lg-6 col-xl-5">
             <div class="card login-logout-card">
                 <div class="card-header">
+                    <div class="auth-logo-container mb-3">
+                        <div class="auth-logo">
+                            <img src="/images/assets/GREEN.png" class="d-block w-100 h-100" alt="Community Living">
+                        </div>
+                    </div>
                     <ul class="nav nav-tabs card-header-tabs">
                         <li class="nav-item">
-                            <a class="nav-link @(Context.Request.Path.Value?.EndsWith("Login") ?? false ? "active" : "")" 
+                            <a class="nav-link @(Context.Request.Path.Value?.EndsWith("Login") ?? false ? "active" : "")"
                                href="/Identity/Account/Login">Sign In</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(Context.Request.Path.Value?.EndsWith("Register") ?? false ? "active" : "")" 
+                            <a class="nav-link @(Context.Request.Path.Value?.EndsWith("Register") ?? false ? "active" : "")"
                                href="/Identity/Account/Register">Sign Up</a>
                         </li>
                     </ul>
@@ -26,6 +31,73 @@
     </div>
 </div>
 
+<style>
+    .login-logout-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: #fff;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1.5rem 1.5rem 0.5rem;
+    }
+
+    .auth-logo-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .auth-logo {
+        width: 150px;
+        height: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .auth-logo .brand-text {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #4e6e4d, #3d5a3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+    .nav-tabs {
+        border-bottom: none;
+    }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s ease;
+        }
+
+            .nav-tabs .nav-link:hover {
+                color: #4e6e4d;
+                background-color: rgba(78, 110, 77, 0.05);
+            }
+
+            .nav-tabs .nav-link.active {
+                color: #4e6e4d;
+                background-color: #fff;
+                border-bottom: 3px solid #4e6e4d;
+            }
+
+    .card-body {
+        padding: 2rem;
+    }
+</style>
+
 @section Scripts {
     @await RenderSectionAsync("Scripts", required: false)
+}
 }

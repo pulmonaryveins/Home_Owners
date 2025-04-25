@@ -31,10 +31,15 @@ namespace HomeOwners.Areas.Admin.Pages
         public double NewUsersPercentage { get; set; }
         public int ActiveServices { get; set; }
         public double ServiceGrowthRate { get; set; }
-        public int PendingApprovals { get; set; }
-        public double PendingApprovalsChange { get; set; }
+        public int ActiveFacilities { get; set; }  // Changed from PendingApprovals
+        public double ActiveFacilitiesChange { get; set; }  // Changed from PendingApprovalsChange
         public decimal MonthlyRevenue { get; set; }
         public double RevenueChange { get; set; }
+
+        // Community Engagement Properties
+        public int ActivePolls { get; set; }
+        public int ForumPosts { get; set; }
+        public int ForumComments { get; set; }
 
         // Charts Data
         public ActivityTrendsData ActivityTrends { get; set; }
@@ -81,27 +86,21 @@ namespace HomeOwners.Areas.Admin.Pages
                 ServiceGrowthRate = 100;
             }
 
-            // Get pending approvals (bookings, service requests, user registrations)
-            var pendingBookings = await _context.Bookings.Where(b => b.Status == BookingStatus.Pending).CountAsync();
-            var pendingServiceRequests = await _context.ServiceRequests.Where(s => s.Status == ServiceRequestStatus.Pending).CountAsync();
-            PendingApprovals = pendingBookings + pendingServiceRequests;
+            // Get active facilities (replacing pending approvals)
+            ActiveFacilities = await _context.Facilities.Where(f => f.IsActive).CountAsync();
 
-            // Calculate change in pending approvals
-            var lastWeekPendingBookings = await _context.Bookings
-                .Where(b => b.Status == BookingStatus.Pending && b.CreatedDate <= DateTime.Now.AddDays(-7))
+            // Calculate change in active facilities
+            var lastWeekActiveFacilities = await _context.Facilities
+                .Where(f => f.IsActive && f.CreatedDate <= DateTime.Now.AddDays(-7))
                 .CountAsync();
-            var lastWeekPendingServiceRequests = await _context.ServiceRequests
-                .Where(s => s.Status == ServiceRequestStatus.Pending && s.CreatedDate <= DateTime.Now.AddDays(-7))
-                .CountAsync();
-            var lastWeekPendingApprovals = lastWeekPendingBookings + lastWeekPendingServiceRequests;
 
-            if (lastWeekPendingApprovals > 0)
+            if (lastWeekActiveFacilities > 0)
             {
-                PendingApprovalsChange = Math.Round(((double)PendingApprovals - lastWeekPendingApprovals) / lastWeekPendingApprovals * 100, 1);
+                ActiveFacilitiesChange = Math.Round(((double)ActiveFacilities - lastWeekActiveFacilities) / lastWeekActiveFacilities * 100, 1);
             }
             else
             {
-                PendingApprovalsChange = 0;
+                ActiveFacilitiesChange = 0;
             }
 
             // Calculate monthly revenue
@@ -124,6 +123,18 @@ namespace HomeOwners.Areas.Admin.Pages
             {
                 RevenueChange = 100;
             }
+
+            // Get community engagement data (Polls and Forum)
+            ActivePolls = await _context.Polls
+                .Where(p => p.IsActive && p.StartDate <= DateTime.Now && p.EndDate >= DateTime.Now)
+                .CountAsync();
+
+            ForumPosts = await _context.ForumPosts
+                .Where(p => p.IsVisible)  // Changed from p.IsActive
+                .CountAsync();
+
+            ForumComments = await _context.ForumComments
+                .CountAsync();
 
             // Prepare activity trends data
             ActivityTrends = new ActivityTrendsData();
@@ -237,6 +248,24 @@ namespace HomeOwners.Areas.Admin.Pages
                 });
             }
 
+            // Get recent forum posts
+            var recentForumPosts = await _context.ForumPosts
+                .OrderByDescending(p => p.PostedDate)  
+                .Take(2)
+                .ToListAsync();
+
+            foreach (var post in recentForumPosts)
+            {
+                RecentActivities.Add(new DashboardActivity
+                {
+                    Title = $"Forum Post: {post.Title}",
+                    Subtitle = $"by {post.UserName}",
+                    Time = FormatTimeAgo(post.PostedDate),  
+                    Icon = "bi-chat-left-text",
+                    IconClass = "bg-warning"
+                });
+            }
+
             // Get recent payments
             var recentPayments = await _context.Payments
                 .Include(p => p.Booking)
@@ -250,7 +279,7 @@ namespace HomeOwners.Areas.Admin.Pages
                 RecentActivities.Add(new DashboardActivity
                 {
                     Title = $"Payment: {payment.Booking?.Facility?.Name}",
-                    Subtitle = $"${payment.AmountPaid} - {payment.PaymentMethod}",
+                    Subtitle = $"₱{payment.AmountPaid} - {payment.PaymentMethod}", // Changed $ to ₱
                     Time = FormatTimeAgo(payment.PaymentDate),
                     Icon = "bi-credit-card",
                     IconClass = "bg-success"
@@ -295,7 +324,7 @@ namespace HomeOwners.Areas.Admin.Pages
         }
     }
 
-    // Supporting model classes
+    // Supporting model classes remain the same
     public class ActivityTrendsData
     {
         public List<string> Labels { get; set; }
@@ -340,5 +369,4 @@ namespace HomeOwners.Areas.Admin.Pages
         Approved,
         Rejected
     }
-    
 }

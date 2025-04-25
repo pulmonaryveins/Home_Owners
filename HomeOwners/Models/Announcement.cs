@@ -33,6 +33,9 @@ namespace HomeOwners.Models
         [Display(Name = "Is Urgent")]
         public bool IsUrgent { get; set; }
 
+        [Display(Name = "Is Pinned")]
+        public bool IsPinned { get; set; }
+
         [Display(Name = "Category")]
         public string Category { get; set; } // Event, Important, Update, etc.
 

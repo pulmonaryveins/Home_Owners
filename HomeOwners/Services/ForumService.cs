@@ -69,7 +69,7 @@ namespace HomeOwners.Services
                 switch (sort)
                 {
                     case "Oldest First":
-                        query = query.OrderBy(p => p.PostedDate);
+                        query = query.OrderByDescending(p => p.IsPinned).ThenBy(p => p.PostedDate);
                         break;
                     case "Most Comments":
                         // Join with comments to count and order by number of comments
@@ -79,19 +79,20 @@ namespace HomeOwners.Services
                                 post => post.Id,
                                 comment => comment.ForumPostId,
                                 (post, comments) => new { Post = post, CommentCount = comments.Count() })
-                            .OrderByDescending(x => x.CommentCount)
+                            .OrderByDescending(x => x.Post.IsPinned)  // First by pinned status
+                            .ThenByDescending(x => x.CommentCount)    // Then by comment count
                             .Select(x => x.Post)
                             .ToListAsync();
                     case "Newest First":
                     default:
-                        query = query.OrderByDescending(p => p.PostedDate);
+                        query = query.OrderByDescending(p => p.IsPinned).ThenByDescending(p => p.PostedDate);
                         break;
                 }
             }
             else
             {
-                // Default sorting is newest first
-                query = query.OrderByDescending(p => p.PostedDate);
+                // Default sorting is newest first, with pinned posts first
+                query = query.OrderByDescending(p => p.IsPinned).ThenByDescending(p => p.PostedDate);
             }
 
             return await query.ToListAsync();
@@ -130,6 +131,21 @@ namespace HomeOwners.Services
                 .Where(p => p.UserId == userId)
                 .OrderByDescending(p => p.PostedDate)
                 .ToListAsync();
+        }
+
+        // Toggle post pin status
+        public async Task<ForumPost> TogglePostPinAsync(int postId)
+        {
+            var post = await _context.ForumPosts.FindAsync(postId);
+            if (post == null)
+            {
+                return null;
+            }
+
+            // Toggle the IsPinned property
+            post.IsPinned = !post.IsPinned;
+            await _context.SaveChangesAsync();
+            return post;
         }
 
         // Get related posts based on category and tags

@@ -76,7 +76,7 @@
                         Billing
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Billing">All Invoices</a></li>
+                        <li><a class="dropdown-item active" asp-area="Admin" asp-page="/Billing">All Invoices</a></li>
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/Billing">Payment History</a></li>
                     </ul>
                 </li>
@@ -716,6 +716,10 @@
         background-color: rgba(78, 110, 77, 0.03);
     }
 
+    .dropdown-item.active, .dropdown-item:active {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
     .booking-thumbnail {
         width: 54px;
         height: 40px;

@@ -65,7 +65,7 @@
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Announcement</a></li>
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/Calendar">Manage Events</a></li>
-                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ManageForum">Manage Forum</a></li>
+                        <li><a class="dropdown-item active" asp-area="Admin" asp-page="/ManageForum">Manage Forum</a></li>
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/ManagePolls">Manage Polls</a></li>
                     </ul>
                 </li>
@@ -651,6 +651,11 @@
         --warning-color: #ffc107;
         --danger-color: #dc3545;
         --info-color: #17a2b8;
+    }
+
+    .dropdown-item.active, .dropdown-item:active {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
     }
 
     body {

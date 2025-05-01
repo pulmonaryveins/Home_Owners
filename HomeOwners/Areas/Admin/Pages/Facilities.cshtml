@@ -43,7 +43,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/Services">Manage Services</a></li>
-                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ServiceRequests/Categories">Service Request</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ServiceRequests">Service Request</a></li>
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/ServicePersonnel">Service Personnel</a></li>
                     </ul>
                 </li>
@@ -53,7 +53,7 @@
                         Facilities
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Facilities">Manage Facilities</a></li>
+                        <li><a class="dropdown-item active" asp-area="Admin" asp-page="/Facilities">Manage Facilities</a></li>
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/BookingRequests">Booking Requests</a></li>
                     </ul>
                 </li>
@@ -597,6 +597,11 @@
         transition: all 0.2s ease;
     }
 
+    .dropdown-item.active, .dropdown-item:active {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+
     .facility-row:hover {
         background-color: rgba(78, 110, 77, 0.03);
     }
@@ -776,15 +781,6 @@
         border-color: var(--primary-lighter);
     }
 
-    /* Dropdown styles */
-    .dropdown-item.active {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .dropdown-item:active {
-        background-color: var(--primary-color);
-    }
 
     /* Updated action buttons */
     .action-buttons {

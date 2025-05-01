@@ -55,7 +55,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/Facilities">Manage Facilities</a></li>
-                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/BookingRequests">Booking Requests</a></li>
+                        <li><a class="dropdown-item active" asp-area="Admin" asp-page="/BookingRequests">Booking Requests</a></li>
                     </ul>
                 </li>
                 <li class="nav-item dropdown">
@@ -832,6 +832,8 @@
         font-size: 1.75rem;
     }
 
+
+
     /* New Styling for Booking Requests */
     .card {
         border: none;
@@ -1047,14 +1049,9 @@
         border-color: var(--primary-lighter);
     }
 
-    /* Dropdown styles */
-    .dropdown-item.active {
-        background-color: var(--primary-color);
-        color: white;
-    }
-
-    .dropdown-item:active {
-        background-color: var(--primary-color);
+    .dropdown-item.active, .dropdown-item:active {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
     }
 
     /* Updated page header */

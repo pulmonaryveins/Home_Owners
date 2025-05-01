@@ -63,7 +63,7 @@
                         Announcements
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Announcement</a></li>
+                        <li><a class="dropdown-item active" asp-area="Admin" asp-page="/Announcement">Manage Announcement</a></li>
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/Calendar">Manage Events</a></li>
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/ManageForum">Manage Forum</a></li>
                         <li><a class="dropdown-item" asp-area="Admin" asp-page="/ManagePolls">Manage Polls</a></li>
@@ -477,6 +477,11 @@
         --info-color: #17a2b8;
     }
 
+    .dropdown-item.active, .dropdown-item:active {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+    }
+
     body {
         background-color: #f5f7f9;
     }
@@ -569,14 +574,7 @@
         font-size: 1.1rem;
     }
 
-    .dropdown-item.active {
-        background-color: var(--primary-color);
-        color: white;
-    }
 
-    .dropdown-item:active {
-        background-color: var(--primary-color);
-    }
 
     /* Page header styling */
     .page-title {

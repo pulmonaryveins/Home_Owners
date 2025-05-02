@@ -93,6 +93,9 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            // Clear existing entity tracking
+            _context.ChangeTracker.Clear();
+
             Username = user.UserName;
             Email = user.Email;
             PhoneNumber = user.PhoneNumber;
@@ -100,8 +103,11 @@ namespace HomeOwners.Areas.Identity.Pages.Home
             // Instead of direct casting, query specific user types from the database
             var userId = user.Id;
 
-            // Try to get HomeOwnerUser
-            var homeOwner = await _context.HomeOwnerUsers.FirstOrDefaultAsync(h => h.Id == userId);
+            // Try to get HomeOwnerUser with AsNoTracking to ensure fresh data
+            var homeOwner = await _context.HomeOwnerUsers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h => h.Id == userId);
+
             if (homeOwner != null)
             {
                 FullName = homeOwner.FullName;
@@ -145,145 +151,266 @@ namespace HomeOwners.Areas.Identity.Pages.Home
         {
             if (!ModelState.IsValid)
             {
+                await LoadUserDataAsync(); // Reload data before returning the page
                 return Page();
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                TempData["StatusMessage"] = "Error: User not found.";
-                TempData["StatusType"] = "Error";
-                return Page();
-            }
+            // Capture original values for logging
+            string originalUsername = null;
+            string originalEmail = null;
+            string originalPhone = null;
+            string originalFullName = null;
+            string originalHouseNumber = null;
 
-            bool hasChanges = false;
-
-            if (user.UserName != Username)
+            try
             {
-                hasChanges = true;
-                var setUsernameResult = await _userManager.SetUserNameAsync(user, Username);
-                if (!setUsernameResult.Succeeded)
+                // Get a fresh reference to the user to avoid stale data
+                var userId = _userManager.GetUserId(User);
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user == null)
                 {
-                    foreach (var error in setUsernameResult.Errors)
-                    {
-                        ModelState.AddModelError(string.Empty, error.Description);
-                    }
-                    TempData["StatusMessage"] = "Error: Username could not be updated.";
+                    TempData["StatusMessage"] = "Error: User not found.";
                     TempData["StatusType"] = "Error";
                     return Page();
                 }
-            }
 
-            if (user.Email != Email)
-            {
-                hasChanges = true;
-                var setEmailResult = await _userManager.SetEmailAsync(user, Email);
-                if (!setEmailResult.Succeeded)
+                // Store original values for logging
+                originalUsername = user.UserName;
+                originalEmail = user.Email;
+                originalPhone = user.PhoneNumber;
+
+                bool hasChanges = false;
+                bool identityChanges = false;
+
+                // Use separate try-catch blocks for Identity updates vs. HomeOwnerUser updates
+                try
                 {
-                    foreach (var error in setEmailResult.Errors)
+                    // Process identity-related changes
+                    if (user.UserName != Username)
                     {
-                        ModelState.AddModelError(string.Empty, error.Description);
+                        var setUsernameResult = await _userManager.SetUserNameAsync(user, Username);
+                        if (!setUsernameResult.Succeeded)
+                        {
+                            foreach (var error in setUsernameResult.Errors)
+                            {
+                                ModelState.AddModelError(string.Empty, error.Description);
+                            }
+                            TempData["StatusMessage"] = "Error: Username could not be updated.";
+                            TempData["StatusType"] = "Error";
+                            await LoadUserDataAsync();
+                            return Page();
+                        }
+                        identityChanges = true;
                     }
-                    TempData["StatusMessage"] = "Error: Email could not be updated.";
-                    TempData["StatusType"] = "Error";
-                    return Page();
-                }
-            }
 
-            if (user.PhoneNumber != PhoneNumber)
-            {
-                hasChanges = true;
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, PhoneNumber);
-                if (!setPhoneResult.Succeeded)
-                {
-                    foreach (var error in setPhoneResult.Errors)
+                    if (user.Email != Email)
                     {
-                        ModelState.AddModelError(string.Empty, error.Description);
+                        var setEmailResult = await _userManager.SetEmailAsync(user, Email);
+                        if (!setEmailResult.Succeeded)
+                        {
+                            foreach (var error in setEmailResult.Errors)
+                            {
+                                ModelState.AddModelError(string.Empty, error.Description);
+                            }
+                            TempData["StatusMessage"] = "Error: Email could not be updated.";
+                            TempData["StatusType"] = "Error";
+                            await LoadUserDataAsync();
+                            return Page();
+                        }
+                        identityChanges = true;
                     }
-                    TempData["StatusMessage"] = "Error: Phone number could not be updated.";
-                    TempData["StatusType"] = "Error";
-                    return Page();
-                }
-            }
 
-            // Update user type-specific properties
-            var userId = user.Id;
-
-            // Try to get HomeOwnerUser
-            var homeOwner = await _context.HomeOwnerUsers.FirstOrDefaultAsync(h => h.Id == userId);
-            if (homeOwner != null)
-            {
-                bool homeOwnerChanged = false;
-
-                if (homeOwner.FullName != FullName)
-                {
-                    homeOwner.FullName = FullName;
-                    homeOwnerChanged = true;
-                }
-
-                if (homeOwner.HouseNumber != HouseNumber)
-                {
-                    homeOwner.HouseNumber = HouseNumber;
-                    homeOwnerChanged = true;
-                }
-
-                if (homeOwnerChanged)
-                {
-                    hasChanges = true;
-                    _context.HomeOwnerUsers.Update(homeOwner);
-                    await _context.SaveChangesAsync();
-                }
-            }
-            else
-            {
-                // Check for ApplicationUser
-                var appUser = await _context.Set<HomeOwners.Models.Users.ApplicationUser>().FirstOrDefaultAsync(a => a.Id == userId);
-                if (appUser != null && appUser.FullName != FullName)
-                {
-                    appUser.FullName = FullName;
-                    hasChanges = true;
-                    _context.Set<HomeOwners.Models.Users.ApplicationUser>().Update(appUser);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    // Check for AdminUser
-                    var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(a => a.Id == userId);
-                    if (adminUser != null && adminUser.FullName != FullName)
+                    if (user.PhoneNumber != PhoneNumber)
                     {
-                        adminUser.FullName = FullName;
+                        var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, PhoneNumber);
+                        if (!setPhoneResult.Succeeded)
+                        {
+                            foreach (var error in setPhoneResult.Errors)
+                            {
+                                ModelState.AddModelError(string.Empty, error.Description);
+                            }
+                            TempData["StatusMessage"] = "Error: Phone number could not be updated.";
+                            TempData["StatusType"] = "Error";
+                            await LoadUserDataAsync();
+                            return Page();
+                        }
+                        identityChanges = true;
+                    }
+
+                    if (identityChanges)
+                    {
                         hasChanges = true;
-                        _context.AdminUsers.Update(adminUser);
+                        // Update identity in DbContext
+                        _context.Update(user);
                         await _context.SaveChangesAsync();
                     }
-                    else
+                }
+                catch (Exception ex)
+                {
+                    TempData["StatusMessage"] = $"Error updating identity data: {ex.Message}";
+                    TempData["StatusType"] = "Error";
+                    await LoadUserDataAsync();
+                    return Page();
+                }
+
+                // Process HomeOwnerUser changes in a separate try-catch block
+                try
+                {
+                    // Create a new database context to ensure a fresh connection for the HomeOwnerUser update
+                    using (var scope = new Microsoft.Extensions.DependencyInjection.ServiceCollection()
+                        .AddDbContext<HomeDbContext>(options =>
+                            options.UseSqlServer(_context.Database.GetConnectionString()))
+                        .BuildServiceProvider()
+                        .CreateScope())
                     {
-                        // Check for StaffUser
-                        var staffUser = await _context.StaffUsers.FirstOrDefaultAsync(s => s.Id == userId);
-                        if (staffUser != null && staffUser.FullName != FullName)
+                        var freshDbContext = scope.ServiceProvider.GetRequiredService<HomeDbContext>();
+
+                        // Get a fresh reference to the HomeOwnerUser
+                        var homeOwner = await freshDbContext.HomeOwnerUsers
+                            .FirstOrDefaultAsync(h => h.Id == userId);
+
+                        if (homeOwner != null)
                         {
-                            staffUser.FullName = FullName;
-                            hasChanges = true;
-                            _context.StaffUsers.Update(staffUser);
-                            await _context.SaveChangesAsync();
+                            // Store original values
+                            originalFullName = homeOwner.FullName;
+                            originalHouseNumber = homeOwner.HouseNumber;
+
+                            bool homeOwnerChanged = false;
+
+                            if (homeOwner.FullName != FullName)
+                            {
+                                homeOwner.FullName = FullName;
+                                homeOwnerChanged = true;
+                            }
+
+                            if (homeOwner.HouseNumber != HouseNumber)
+                            {
+                                homeOwner.HouseNumber = HouseNumber;
+                                homeOwnerChanged = true;
+                            }
+
+                            if (homeOwnerChanged)
+                            {
+                                hasChanges = true;
+
+                                // Explicitly mark entity as modified
+                                freshDbContext.Entry(homeOwner).State = EntityState.Modified;
+
+                                // Use a dedicated transaction with higher isolation level
+                                using (var transaction = await freshDbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted))
+                                {
+                                    try
+                                    {
+                                        // Force immediate execution
+                                        int rowsAffected = await freshDbContext.SaveChangesAsync();
+
+                                        // Verify changes were actually saved
+                                        if (rowsAffected == 0)
+                                        {
+                                            throw new Exception("No records were updated in the database.");
+                                        }
+
+                                        await transaction.CommitAsync();
+
+                                        // Log successful update
+                                        System.Diagnostics.Debug.WriteLine($"Successfully updated HomeOwnerUser: {userId}");
+                                        System.Diagnostics.Debug.WriteLine($"Changed FullName from '{originalFullName}' to '{FullName}'");
+                                        System.Diagnostics.Debug.WriteLine($"Changed HouseNumber from '{originalHouseNumber}' to '{HouseNumber}'");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        await transaction.RollbackAsync();
+                                        throw new Exception($"Error saving HomeOwnerUser changes: {ex.Message}", ex);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Check for other user types
+                            var appUser = await freshDbContext.Set<HomeOwners.Models.Users.ApplicationUser>()
+                                .FirstOrDefaultAsync(a => a.Id == userId);
+
+                            if (appUser != null && appUser.FullName != FullName)
+                            {
+                                appUser.FullName = FullName;
+                                hasChanges = true;
+                                freshDbContext.Entry(appUser).State = EntityState.Modified;
+                                await freshDbContext.SaveChangesAsync();
+                            }
+                            else
+                            {
+                                // Similar code for AdminUser and StaffUser
+                                var adminUser = await freshDbContext.AdminUsers.FirstOrDefaultAsync(a => a.Id == userId);
+                                if (adminUser != null && adminUser.FullName != FullName)
+                                {
+                                    adminUser.FullName = FullName;
+                                    hasChanges = true;
+                                    freshDbContext.Entry(adminUser).State = EntityState.Modified;
+                                    await freshDbContext.SaveChangesAsync();
+                                }
+                                else
+                                {
+                                    var staffUser = await freshDbContext.StaffUsers.FirstOrDefaultAsync(s => s.Id == userId);
+                                    if (staffUser != null && staffUser.FullName != FullName)
+                                    {
+                                        staffUser.FullName = FullName;
+                                        hasChanges = true;
+                                        freshDbContext.Entry(staffUser).State = EntityState.Modified;
+                                        await freshDbContext.SaveChangesAsync();
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-            }
+                catch (Exception ex)
+                {
+                    TempData["StatusMessage"] = $"Error updating user profile: {ex.Message}";
+                    TempData["StatusType"] = "Error";
+                    await LoadUserDataAsync();
+                    return Page();
+                }
 
-            if (hasChanges)
-            {
-                await _signInManager.RefreshSignInAsync(user);
-                TempData["StatusMessage"] = "Your profile has been updated successfully.";
-                TempData["StatusType"] = "Success";
-            }
-            else
-            {
-                TempData["StatusMessage"] = "No changes detected.";
-                TempData["StatusType"] = "Info";
-            }
+                if (hasChanges)
+                {
+                    // Final step - refresh the sign-in cookie with updated user information
+                    await _signInManager.RefreshSignInAsync(await _userManager.GetUserAsync(User));
 
-            return RedirectToPage(new { activeTab = "personal" });
+                    TempData["StatusMessage"] = "Your profile has been updated successfully.";
+                    TempData["StatusType"] = "Success";
+
+                    // Add detailed logging
+                    System.Diagnostics.Debug.WriteLine($"Profile updated for user {userId}");
+                    if (originalUsername != Username)
+                        System.Diagnostics.Debug.WriteLine($"Changed username from '{originalUsername}' to '{Username}'");
+                    if (originalEmail != Email)
+                        System.Diagnostics.Debug.WriteLine($"Changed email from '{originalEmail}' to '{Email}'");
+                    if (originalPhone != PhoneNumber)
+                        System.Diagnostics.Debug.WriteLine($"Changed phone from '{originalPhone}' to '{PhoneNumber}'");
+                }
+                else
+                {
+                    TempData["StatusMessage"] = "No changes detected.";
+                    TempData["StatusType"] = "Info";
+                }
+
+                // Use PRG pattern to avoid duplicate form submission
+                return RedirectToPage(new { activeTab = "personal" });
+            }
+            catch (Exception ex)
+            {
+                // Global exception handler
+                TempData["StatusMessage"] = $"An error occurred: {ex.Message}";
+                TempData["StatusType"] = "Error";
+
+                // Log the error
+                System.Diagnostics.Debug.WriteLine($"ERROR in OnPostUpdatePersonalAsync: {ex.ToString()}");
+
+                await LoadUserDataAsync();
+                return Page();
+            }
         }
 
         public async Task<IActionResult> OnPostUpdatePasswordAsync()
@@ -364,14 +491,21 @@ namespace HomeOwners.Areas.Identity.Pages.Home
             var user = await _userManager.GetUserAsync(User);
             if (user != null)
             {
+                // Ensure we're getting fresh data from the database
                 Username = user.UserName;
                 Email = user.Email;
                 PhoneNumber = user.PhoneNumber;
 
                 var userId = user.Id;
 
-                // Try to get HomeOwnerUser
-                var homeOwner = await _context.HomeOwnerUsers.FirstOrDefaultAsync(h => h.Id == userId);
+                // Clear existing DbContext tracking to prevent stale data
+                _context.ChangeTracker.Clear();
+
+                // Try to get HomeOwnerUser with AsNoTracking to get fresh data
+                var homeOwner = await _context.HomeOwnerUsers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(h => h.Id == userId);
+
                 if (homeOwner != null)
                 {
                     FullName = homeOwner.FullName;
@@ -380,24 +514,31 @@ namespace HomeOwners.Areas.Identity.Pages.Home
                     return;
                 }
 
-                // Check for ApplicationUser using fully qualified name
-                var appUser = await _context.Set<HomeOwners.Models.Users.ApplicationUser>().FirstOrDefaultAsync(a => a.Id == userId);
+                // Check for other user types as before
+                var appUser = await _context.Set<HomeOwners.Models.Users.ApplicationUser>()
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.Id == userId);
+
                 if (appUser != null)
                 {
                     FullName = appUser.FullName;
                     return;
                 }
 
-                // Check for AdminUser
-                var adminUser = await _context.AdminUsers.FirstOrDefaultAsync(a => a.Id == userId);
+                var adminUser = await _context.AdminUsers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(a => a.Id == userId);
+
                 if (adminUser != null)
                 {
                     FullName = adminUser.FullName;
                     return;
                 }
 
-                // Check for StaffUser
-                var staffUser = await _context.StaffUsers.FirstOrDefaultAsync(s => s.Id == userId);
+                var staffUser = await _context.StaffUsers
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(s => s.Id == userId);
+
                 if (staffUser != null)
                 {
                     FullName = staffUser.FullName;

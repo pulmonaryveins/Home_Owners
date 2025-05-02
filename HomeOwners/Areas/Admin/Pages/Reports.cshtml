@@ -1,0 +1,909 @@
+﻿@page
+@model HomeOwners.Areas.Admin.Pages.ReportsModel
+@{
+    ViewData["Title"] = "Admin Reports";
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="~/css/nav.css" asp-append-version="true" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand" asp-area="Admin" asp-page="/Dashboard">
+            <span class="brand-text">ADMIN DASHBOARD</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav" aria-controls="navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-list text-white"></i>
+        </button>
+
+        <!-- Navigation Items -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Dashboard">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Admin" asp-page="/Users">
+                        Users
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Services">Manage Services</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ServiceRequests">Service Request</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ServicePersonnel">Service Personnel</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Facilities
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Facilities">Manage Facilities</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/BookingRequests">Booking Requests</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Announcements
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Announcement">Manage Announcement</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Calendar">Manage Events</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ManageForum">Manage Forum</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/ManagePolls">Manage Polls</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Billing
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Billing">All Invoices</a></li>
+                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Billing">Payment History</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" asp-area="Admin" asp-page="/Reports">
+                        Reports
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Profile Menu -->
+            <div class="nav-items-right">
+                <div class="nav-item dropdown profile-menu">
+                    <a class="profile-link dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="profile-avatar">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu profile-dropdown dropdown-menu-end">
+                        <li class="dropdown-header">
+                            <div class="user-info">
+                                <span class="user-name">@(User.Identity?.Name ?? "Admin")</span>
+                                <span class="user-role">Administrator</span>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" asp-area="Admin" asp-page="/Profile">
+                                <i class="bi bi-person-gear"></i> Profile Settings
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                                  asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item logout-item">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Dashboard container -->
+<div class="container dashboard-container">
+    <div class="dashboard-welcome mb-4">
+        <h1 class="welcome-title">
+            <i class="bi bi-graph-up me-2"></i>
+            Reports Dashboard
+        </h1>
+        <p class="welcome-subtitle">Generate and view system reports with detailed analytics</p>
+        <div class="export-actions mt-3">
+            <button id="printReportBtn" class="btn btn-outline-secondary">
+                <i class="bi bi-printer"></i> Print
+            </button>
+            <button id="downloadPdfBtn" class="btn btn-primary ms-2">
+                <i class="bi bi-file-earmark-pdf"></i> Export PDF
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        var statusType = TempData["StatusType"]?.ToString() == "Success" ? "success" : "danger";
+        <div class="alert alert-@statusType alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi @(statusType == "success" ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                <span>@TempData["StatusMessage"]</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Report Filter Controls -->
+    <div class="card dashboard-card mb-4">
+        <div class="card-header">
+            <h5><i class="bi bi-funnel me-2"></i>Report Filters</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" id="reportFilterForm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Report Type</label>
+                        <select asp-for="ReportType" class="form-select">
+                            <option value="Overview" selected>System Overview</option>
+                            <option value="Facilities">Facility Usage & Bookings</option>
+                            <option value="Services">Service Requests & Performance</option>
+                            <option value="Users">User Activity & Registration</option>
+                            <option value="Financial">Financial Summary</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Date Range</label>
+                        <select asp-for="DateRange" class="form-select" id="dateRangeSelect">
+                            <option value="7days">Last 7 Days</option>
+                            <option value="30days" selected>Last 30 Days</option>
+                            <option value="90days">Last 90 Days</option>
+                            <option value="year">Last 12 Months</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 custom-date-field">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" asp-for="StartDate" class="form-control" />
+                    </div>
+                    <div class="col-md-3 custom-date-field">
+                        <label class="form-label">End Date</label>
+                        <input type="date" asp-for="EndDate" class="form-control" />
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-funnel"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="reportContainer">
+        <!-- Report Header -->
+        <div class="report-header mb-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <h2 class="report-title">@Model.ReportTitle</h2>
+                    <p class="text-muted">@Model.ReportDescription</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="report-meta">
+                        <div><strong>Generated:</strong> @DateTime.Now.ToString("MMMM dd, yyyy hh:mm tt")</div>
+                        <div><strong>Period:</strong> @Model.ReportPeriod</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics Summary Cards -->
+        <div class="row stats-cards">
+            @foreach (var metric in Model.KeyMetrics)
+            {
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-card-content">
+                            <div class="stat-card-title">@metric.Name</div>
+                            <div class="stat-card-value">@metric.Value</div>
+                            @if (!string.IsNullOrEmpty(metric.Change))
+                            {
+                                <div class="stat-card-change @(metric.IsPositive ? "positive" : "negative")">
+                                    <i class="bi @(metric.IsPositive ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i>
+                                    @metric.Change
+                                </div>
+                            }
+                        </div>
+                        <div class="stat-card-icon @metric.IconClass">
+                            <i class="bi @metric.Icon"></i>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Primary Charts Row -->
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <div class="card dashboard-card chart-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>@Model.PrimaryChartTitle</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Last 30 Days
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
+                                <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
+                                <li><a class="dropdown-item" href="#">Last 90 Days</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body chart-container">
+                        <canvas id="primaryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card dashboard-card chart-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>@Model.SecondaryChartTitle</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Current Period
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">This Week</a></li>
+                                <li><a class="dropdown-item" href="#">This Month</a></li>
+                                <li><a class="dropdown-item" href="#">This Quarter</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body chart-container">
+                        <canvas id="secondaryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card dashboard-card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="bi bi-table me-2"></i>@Model.DataTableTitle</h5>
+                <button class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-download"></i> Export Data
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover report-table">
+                    <thead>
+                        <tr>
+                            @foreach (var header in Model.TableHeaders)
+                            {
+                                <th>@header</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.TableData)
+                        {
+                            <tr>
+                                @foreach (var cell in row)
+                                {
+                                    <td>@cell</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Additional Charts Row -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card dashboard-card chart-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="bi bi-bar-chart-line me-2"></i>@Model.AdditionalChart1Title</h5>
+                    </div>
+                    <div class="card-body chart-container">
+                        <canvas id="additionalChart1"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card dashboard-card chart-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="bi bi-pie-chart-fill me-2"></i>@Model.AdditionalChart2Title</h5>
+                    </div>
+                    <div class="card-body chart-container">
+                        <canvas id="additionalChart2"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistical Summaries -->
+        <div class="row mt-4">
+            @foreach (var stat in Model.Statistics)
+            {
+                <div class="col-md-4 mb-3">
+                    <div class="stat-item">
+                        <h6 class="stat-label">@stat.Label</h6>
+                        <p class="stat-value">@stat.Value</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Insights and Recommendations -->
+        <div class="card dashboard-card mt-4">
+            <div class="card-header">
+                <h5><i class="bi bi-lightbulb me-2"></i>Insights & Recommendations</h5>
+            </div>
+            <div class="card-body">
+                <div class="insights-content">
+                    @foreach (var insight in Model.Insights)
+                    {
+                        <div class="insight-item mb-3">
+                            <h6 class="insight-title">
+                                <i class="bi @insight.Icon me-2"></i>
+                                @insight.Title
+                            </h6>
+                            <p class="insight-text">@insight.Text</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #4e6e4d;
+        --primary-dark: #3d5a3c;
+        --primary-light: rgba(78, 110, 77, 0.1);
+        --primary-lighter: rgba(78, 110, 77, 0.05);
+        --text-light: #f8f9fa;
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --body-bg: #f9f9f9;
+    }
+
+    body {
+        background-color: var(--body-bg);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Navbar styling */
+    .navbar {
+        background-color: var(--primary-color) !important;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+    }
+
+    /* Dashboard container */
+    .dashboard-container {
+        margin-top: 5rem;
+        padding-bottom: 2rem;
+    }
+
+    .dashboard-welcome {
+        padding: 1.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .welcome-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .welcome-subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    /* Stats Cards */
+    .stats-cards {
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        padding: 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .stat-card-content {
+        z-index: 1;
+    }
+
+    .stat-card-title {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    .stat-card-value {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card-change {
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-card-change.positive {
+        color: var(--success-color);
+    }
+
+    .stat-card-change.negative {
+        color: var(--danger-color);
+    }
+
+    .stat-card-icon {
+        font-size: 2rem;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        color: white;
+    }
+
+    .user-icon, .bg-users {
+        background-color: #4299e1;
+    }
+
+    .service-icon, .bg-services {
+        background-color: #48bb78;
+    }
+
+    .approval-icon, .bg-bookings {
+        background-color: #ed8936;
+    }
+
+    .revenue-icon, .bg-revenue {
+        background-color: #805ad5;
+    }
+
+    /* Dashboard cards */
+    .dashboard-card {
+        height: 100%;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .dashboard-card .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1rem 1.25rem;
+    }
+
+    .dashboard-card .card-header h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+    }
+
+    /* Chart Cards */
+    .chart-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-card .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 1rem 1.25rem;
+    }
+
+    .chart-card .dropdown-toggle {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid rgba(0,0,0,0.1);
+        font-size: 0.85rem;
+    }
+
+    .chart-card .dropdown-toggle:hover {
+        background-color: var(--primary-lighter);
+        color: var(--primary-color);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 280px;
+        overflow: hidden;
+    }
+
+    /* Report header */
+    .report-header {
+        padding: 1.5rem;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .report-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .report-meta {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Data table */
+    .report-table thead th {
+        background-color: #f8f9fa;
+        color: #4a5568;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        padding: 0.85rem 1.25rem;
+    }
+
+    .report-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .report-table tbody tr:hover {
+        background-color: rgba(78, 110, 77, 0.03);
+    }
+
+    /* Statistics items */
+    .stat-item {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.25rem;
+        height: 100%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0;
+    }
+
+    /* Insights */
+    .insight-title {
+        font-weight: 600;
+        color: var (--primary-dark);
+        display: flex;
+        align-items: center;
+    }
+
+    .insight-text {
+        color: var(--text-muted);
+        margin-left: 2rem;
+    }
+
+    /* Button styling */
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-outline-secondary {
+        color: var(--text-muted);
+        border-color: #dee2e6;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f8f9fa;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    /* Export actions */
+    .export-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    /* Filter toggles */
+    .custom-date-field {
+        display: none;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set chart defaults to match theme
+        Chart.defaults.color = '#6c757d';
+        Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif";
+
+        // Initialize Chart.js configurations
+        const primaryChartData = @Html.Raw(Json.Serialize(Model.PrimaryChartData));
+        const secondaryChartData = @Html.Raw(Json.Serialize(Model.SecondaryChartData));
+        const additionalChart1Data = @Html.Raw(Json.Serialize(Model.AdditionalChart1Data));
+        const additionalChart2Data = @Html.Raw(Json.Serialize(Model.AdditionalChart2Data));
+
+        // Primary chart initialization
+        const primaryChartCtx = document.getElementById('primaryChart');
+        if (primaryChartCtx) {
+            new Chart(primaryChartCtx, {
+                type: primaryChartData.type,
+                data: primaryChartData.data,
+                options: {
+                    ...primaryChartData.options,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            align: 'end',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        ...primaryChartData.options?.scales,
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false,
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Secondary chart initialization
+        const secondaryChartCtx = document.getElementById('secondaryChart');
+        if (secondaryChartCtx) {
+            new Chart(secondaryChartCtx, {
+                type: secondaryChartData.type,
+                data: secondaryChartData.data,
+                options: {
+                    ...secondaryChartData.options,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Additional charts
+        const additionalChart1Ctx = document.getElementById('additionalChart1');
+        if (additionalChart1Ctx) {
+            new Chart(additionalChart1Ctx, {
+                type: additionalChart1Data.type,
+                data: additionalChart1Data.data,
+                options: {
+                    ...additionalChart1Data.options,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false,
+                                color: 'rgba(0,0,0,0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const additionalChart2Ctx = document.getElementById('additionalChart2');
+        if (additionalChart2Ctx) {
+            new Chart(additionalChart2Ctx, {
+                type: additionalChart2Data.type,
+                data: additionalChart2Data.data,
+                options: {
+                    ...additionalChart2Data.options,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Print functionality
+        document.getElementById('printReportBtn').addEventListener('click', function() {
+            window.print();
+        });
+
+        // PDF export functionality
+        document.getElementById('downloadPdfBtn').addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const report = document.getElementById('reportContainer');
+
+            // Create PDF instance
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const fileName = `${document.title}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+            // Use html2canvas to capture report content
+            html2canvas(report).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 295; // A4 height in mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                // Add image to PDF
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                // Add new pages if content overflows
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(fileName);
+            });
+        });
+
+        // Date range selection handling
+        document.getElementById('dateRangeSelect').addEventListener('change', function() {
+            const customDateFields = document.querySelectorAll('.custom-date-field');
+
+            if (this.value === 'custom') {
+                customDateFields.forEach(field => field.style.display = 'block');
+            } else {
+                customDateFields.forEach(field => field.style.display = 'none');
+            }
+        });
+
+        // Trigger the change event to set initial visibility
+        const dateRangeEvent = new Event('change');
+        document.getElementById('dateRangeSelect').dispatchEvent(dateRangeEvent);
+
+        // Hide custom date fields by default if not in custom mode
+        if (document.getElementById('dateRangeSelect').value !== 'custom') {
+            document.querySelectorAll('.custom-date-field').forEach(field => {
+                field.style.display = 'none';
+            });
+        }
+    });
+</script>

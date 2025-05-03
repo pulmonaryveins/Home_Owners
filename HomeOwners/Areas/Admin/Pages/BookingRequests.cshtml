@@ -542,7 +542,7 @@
                                         <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
                                         <td>
                                             <span class="time-badge">
-                                                @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") - 
+                                                @DateTime.Today.Add(booking.StartTime).ToString("hh:mm tt") -
                                                 @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
                                                 <small class="ms-1">(@booking.TotalHours.ToString("0.0") hrs)</small>
                                             </span>
@@ -600,6 +600,17 @@
                                                         </button>
                                                     </form>
                                                 </div>
+                                            }
+                                            <!-- Add View Rating button for completed bookings with ratings -->
+                                            @if (booking.Status == BookingStatus.Completed && Model.BookingRatings.ContainsKey(booking.Id))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-info view-rating-btn"
+                                                        data-bs-toggle="modal" data-bs-target="#viewRatingModal"
+                                                        data-booking-id="@booking.Id"
+                                                        data-facility-name="@booking.Facility?.Name"
+                                                        data-requester="@booking.FullName">
+                                                    <i class="bi bi-star me-1"></i> View Rating
+                                                </button>
                                             }
                                         </td>
                                     </tr>
@@ -701,6 +712,42 @@
                         </div>
                     </div>
                 }
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Rating Modal -->
+    <div class="modal fade" id="viewRatingModal" tabindex="-1" aria-labelledby="viewRatingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewRatingModalLabel">Booking Rating & Feedback</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <p>Rating for <strong id="facilityNameDisplay"></strong> by <strong id="requesterDisplay"></strong></p>
+                        <div class="rating-stars-display mb-3">
+                            <i class="bi bi-star-fill rating-star-display"></i>
+                            <i class="bi bi-star-fill rating-star-display"></i>
+                            <i class="bi bi-star-fill rating-star-display"></i>
+                            <i class="bi bi-star-fill rating-star-display"></i>
+                            <i class="bi bi-star-fill rating-star-display"></i>
+                        </div>
+                        <div id="ratingTextDisplay" class="text-center mb-3"></div>
+                        <small id="ratingDateDisplay" class="text-muted"></small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Feedback</label>
+                        <div id="feedbackDisplay" class="feedback-box p-3 bg-light rounded">
+                            <!-- Feedback text will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1179,7 +1226,7 @@
 </style>
 
 <script>
-    // Initialize tooltips
+    // Initialize tooltips and tabs
     document.addEventListener('DOMContentLoaded', function() {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -1196,6 +1243,70 @@
                 url.searchParams.set('tabFilter', tabId);
                 history.pushState({}, '', url);
             })
-        })
+        });
+
+        // Handle rating modal
+        const ratingModal = document.getElementById('viewRatingModal');
+        if (ratingModal) {
+            ratingModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const bookingId = button.getAttribute('data-booking-id');
+                const facilityName = button.getAttribute('data-facility-name');
+                const requester = button.getAttribute('data-requester');
+
+                // Set the facility name and requester in the modal
+                document.getElementById('facilityNameDisplay').textContent = facilityName;
+                document.getElementById('requesterDisplay').textContent = requester;
+
+                // Fetch rating data via AJAX
+                fetch(`?handler=BookingRating&id=${bookingId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch rating data');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Display rating stars
+                        const ratingStars = document.querySelectorAll('.rating-star-display');
+                        ratingStars.forEach((star, index) => {
+                            if (index < data.rating) {
+                                star.classList.add('active');
+                            } else {
+                                star.classList.remove('active');
+                            }
+                        });
+
+                        // Display rating text based on value
+                        const ratingTexts = [
+                            '',
+                            'Poor',
+                            'Fair',
+                            'Good',
+                            'Very Good',
+                            'Excellent'
+                        ];
+                        document.getElementById('ratingTextDisplay').textContent = ratingTexts[data.rating];
+
+                        // Display feedback
+                        document.getElementById('feedbackDisplay').textContent = data.feedback || 'No feedback provided';
+
+                        // Format and display the rating submission date
+                        const submittedDate = new Date(data.submittedDate);
+                        document.getElementById('ratingDateDisplay').textContent = `Submitted on ${submittedDate.toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}`;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching rating data:', error);
+                        document.getElementById('ratingTextDisplay').textContent = 'Error loading rating data';
+                        document.getElementById('feedbackDisplay').textContent = 'Unable to load feedback';
+                    });
+            });
+        }
     });
 </script>

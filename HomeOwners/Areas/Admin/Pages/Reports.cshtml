@@ -204,7 +204,7 @@
         </div>
     </div>
 
-    <div id="reportContainer">
+    <div id="reportContainer" class="report-container">
         <!-- Report Header -->
         <div class="report-header mb-4">
             <div class="row">
@@ -715,11 +715,136 @@
     }
 </style>
 
+<!-- Separate print stylesheet to avoid media query issues -->
+<style media="print">
+    body {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+    
+    .navbar, .dashboard-welcome button, .btn, form, .export-actions {
+        display: none !important;
+    }
+    
+    .dashboard-container {
+        margin-top: 0 !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    .card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid rgba(0,0,0,0.1) !important;
+        box-shadow: none !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .dashboard-card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .chart-container {
+        height: auto !important;
+        min-height: 250px;
+        page-break-inside: avoid;
+    }
+    
+    .col-md-3, .col-md-4, .col-md-6, .col-md-8 {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .row {
+        display: block !important;
+        margin-bottom: 20px !important;
+    }
+    
+    .report-header {
+        margin-top: 20px !important;
+    }
+    
+    .stat-card, .chart-card, .stat-item {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+    
+    .stats-section {
+        display: block;
+        page-break-before: auto;
+        page-break-after: always;
+    }
+    
+    .primary-charts-section {
+        display: block;
+        page-break-before: always;
+        page-break-after: always;
+    }
+    
+    .table-section {
+        display: block;
+        page-break-before: always;
+        page-break-after: always;
+    }
+    
+    .additional-charts-section {
+        display: block;
+        page-break-before: always;
+        page-break-after: always;
+    }
+    
+    .statistics-section {
+        display: block;
+        page-break-before: always;
+        page-break-after: always;
+    }
+    
+    .insights-section {
+        display: block;
+        page-break-before: always;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid !important;
+    }
+    
+    table {
+        page-break-inside: auto !important;
+    }
+    
+    tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+    
+    .welcome-subtitle {
+        margin-bottom: 0 !important;
+    }
+    
+    /* Hide elements not needed in print */
+    .dropdown, .dropdown-toggle, .btn-sm, .btn-outline-primary {
+        display: none !important;
+    }
+    
+    /* Ensure the charts print properly */
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Set chart defaults to match theme
         Chart.defaults.color = '#6c757d';
         Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif";
+        
+        // Store chart instances for later reference
+        const chartInstances = {};
 
         // Initialize Chart.js configurations
         const primaryChartData = @Html.Raw(Json.Serialize(Model.PrimaryChartData));
@@ -730,13 +855,19 @@
         // Primary chart initialization
         const primaryChartCtx = document.getElementById('primaryChart');
         if (primaryChartCtx) {
-            new Chart(primaryChartCtx, {
+            chartInstances.primaryChart = new Chart(primaryChartCtx, {
                 type: primaryChartData.type,
                 data: primaryChartData.data,
                 options: {
                     ...primaryChartData.options,
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        onComplete: function() {
+                            primaryChartCtx.setAttribute('data-rendered', 'true');
+                        }
+                    },
                     plugins: {
                         legend: {
                             position: 'top',
@@ -771,13 +902,19 @@
         // Secondary chart initialization
         const secondaryChartCtx = document.getElementById('secondaryChart');
         if (secondaryChartCtx) {
-            new Chart(secondaryChartCtx, {
+            chartInstances.secondaryChart = new Chart(secondaryChartCtx, {
                 type: secondaryChartData.type,
                 data: secondaryChartData.data,
                 options: {
                     ...secondaryChartData.options,
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        onComplete: function() {
+                            secondaryChartCtx.setAttribute('data-rendered', 'true');
+                        }
+                    },
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -796,13 +933,19 @@
         // Additional charts
         const additionalChart1Ctx = document.getElementById('additionalChart1');
         if (additionalChart1Ctx) {
-            new Chart(additionalChart1Ctx, {
+            chartInstances.additionalChart1 = new Chart(additionalChart1Ctx, {
                 type: additionalChart1Data.type,
                 data: additionalChart1Data.data,
                 options: {
                     ...additionalChart1Data.options,
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        onComplete: function() {
+                            additionalChart1Ctx.setAttribute('data-rendered', 'true');
+                        }
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -823,13 +966,19 @@
 
         const additionalChart2Ctx = document.getElementById('additionalChart2');
         if (additionalChart2Ctx) {
-            new Chart(additionalChart2Ctx, {
+            chartInstances.additionalChart2 = new Chart(additionalChart2Ctx, {
                 type: additionalChart2Data.type,
                 data: additionalChart2Data.data,
                 options: {
                     ...additionalChart2Data.options,
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        onComplete: function() {
+                            additionalChart2Ctx.setAttribute('data-rendered', 'true');
+                        }
+                    },
                     plugins: {
                         legend: {
                             position: 'right',
@@ -847,42 +996,258 @@
 
         // Print functionality
         document.getElementById('printReportBtn').addEventListener('click', function() {
-            window.print();
+            // Wait for charts to render and prepare for printing
+            waitForChartRendering().then(() => {
+                // Add section classes for better printing
+                addPrintSectionClasses();
+                
+                // Force redraw of charts for better print quality
+                Object.values(chartInstances).forEach(chart => {
+                    if (chart && typeof chart.render === 'function') {
+                        chart.render();
+                    }
+                });
+                
+                // Give charts time to redraw before printing
+                setTimeout(() => {
+                    window.print();
+                    // Remove classes after printing is done or canceled
+                    setTimeout(removePrintSectionClasses, 1000);
+                }, 500);
+            });
         });
 
         // PDF export functionality
         document.getElementById('downloadPdfBtn').addEventListener('click', function() {
-            const { jsPDF } = window.jspdf;
-            const report = document.getElementById('reportContainer');
-
-            // Create PDF instance
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const fileName = `${document.title}_${new Date().toISOString().split('T')[0]}.pdf`;
-
-            // Use html2canvas to capture report content
-            html2canvas(report).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const imgWidth = 210; // A4 width in mm
-                const pageHeight = 295; // A4 height in mm
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 0;
-
-                // Add image to PDF
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-
-                // Add new pages if content overflows
-                while (heightLeft > 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
-
-                pdf.save(fileName);
+            // Show loading indicator
+            showLoadingIndicator();
+            
+            // Wait for charts to render
+            waitForChartRendering().then(() => {
+                // Add section classes for PDF layout
+                addPrintSectionClasses();
+                
+                // Force redraw of charts for better quality
+                Object.values(chartInstances).forEach(chart => {
+                    if (chart && typeof chart.render === 'function') {
+                        chart.render();
+                    }
+                });
+                
+                // Give charts time to redraw
+                setTimeout(() => {
+                    generatePDF();
+                }, 500);
             });
         });
+
+        // Function to wait for all charts to render
+        function waitForChartRendering() {
+            return new Promise(resolve => {
+                // Check if charts are rendered
+                const checkIfRendered = () => {
+                    const charts = ['primaryChart', 'secondaryChart', 'additionalChart1', 'additionalChart2'];
+                    const allRendered = charts.every(chartId => {
+                        const canvas = document.getElementById(chartId);
+                        return canvas && canvas.getAttribute('data-rendered') === 'true';
+                    });
+                    
+                    if (allRendered) {
+                        resolve();
+                    } else {
+                        setTimeout(checkIfRendered, 100);
+                    }
+                };
+                
+                checkIfRendered();
+            });
+        }
+        
+        // Function to generate PDF
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const report = document.getElementById('reportContainer');
+            const reportTitle = document.querySelector('.report-title').textContent;
+            const fileName = `${reportTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.pdf`;
+            
+            // Add section classes for better PDF layout
+            addPrintSectionClasses();
+            
+            // Create PDF with larger dimensions to improve quality
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+            
+            // Add title to PDF
+            pdf.setFontSize(16);
+            pdf.setTextColor(78, 110, 77); // primary color
+            pdf.text(reportTitle, 105, 20, { align: 'center' });
+            
+            // Use html2canvas with higher scale for better quality
+            const options = {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                scrollX: 0,
+                scrollY: 0,
+                backgroundColor: '#ffffff'
+            };
+            
+            html2canvas(report, options).then(canvas => {
+                // Add report capture to PDF
+                addImageToPDF(pdf, canvas);
+                
+                // Save PDF
+                pdf.save(fileName);
+                
+                // Hide loading indicator
+                hideLoadingIndicator();
+                
+                // Remove section classes
+                removePrintSectionClasses();
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                hideLoadingIndicator();
+                alert('There was a problem generating the PDF. Please try again.');
+                removePrintSectionClasses();
+            });
+        }
+        
+        // Function to add image to PDF with paging
+        function addImageToPDF(pdf, canvas) {
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 210 - 20; // A4 width in mm - margins
+            const pageHeight = 297 - 20; // A4 height in mm - margins
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 10; // starting position
+            let pageCount = 0;
+            
+            // Add first page
+            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight - 30; // adjust for title space on first page
+            pageCount++;
+            
+            // Add new pages as needed
+            while (heightLeft > 0) {
+                pageCount++;
+                position = -(pageHeight * pageCount) + 10; // New position for next page
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+        }
+        
+        // Add section classes for better printing
+        function addPrintSectionClasses() {
+            try {
+                // Add class to main sections for page breaks
+                const statsCards = document.querySelector('.row.stats-cards');
+                if (statsCards) {
+                    const statsRow = statsCards.closest('.row');
+                    if (statsRow) statsRow.classList.add('stats-section');
+                }
+                
+                const primaryChart = document.querySelector('.col-md-8 .chart-card');
+                if (primaryChart) {
+                    const chartsRow = primaryChart.closest('.row');
+                    if (chartsRow) chartsRow.classList.add('primary-charts-section');
+                }
+                
+                const tableSection = document.querySelector('.table-responsive');
+                if (tableSection) {
+                    const tableCard = tableSection.closest('.card');
+                    if (tableCard) tableCard.classList.add('table-section');
+                }
+                
+                const additionalChart = document.querySelector('#additionalChart1');
+                if (additionalChart) {
+                    const addChartsRow = additionalChart.closest('.row');
+                    if (addChartsRow) addChartsRow.classList.add('additional-charts-section');
+                }
+                
+                const statItem = document.querySelector('.stat-item');
+                if (statItem) {
+                    const statsRow = statItem.closest('.row');
+                    if (statsRow) statsRow.classList.add('statistics-section');
+                }
+                
+                const insights = document.querySelector('.insights-content');
+                if (insights) {
+                    const insightsCard = insights.closest('.card');
+                    if (insightsCard) insightsCard.classList.add('insights-section');
+                }
+            } catch (error) {
+                console.error('Error adding print classes:', error);
+            }
+        }
+        
+        // Remove section classes
+        function removePrintSectionClasses() {
+            try {
+                const sections = document.querySelectorAll(
+                    '.stats-section, .primary-charts-section, .table-section, ' +
+                    '.additional-charts-section, .statistics-section, .insights-section'
+                );
+                sections.forEach(section => {
+                    section.classList.remove(
+                        'stats-section', 'primary-charts-section', 'table-section',
+                        'additional-charts-section', 'statistics-section', 'insights-section'
+                    );
+                });
+            } catch (error) {
+                console.error('Error removing print classes:', error);
+            }
+        }
+        
+        // Show loading indicator
+        function showLoadingIndicator() {
+            // Create loading overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+            overlay.style.display = 'flex';
+            overlay.style.justifyContent = 'center';
+            overlay.style.alignItems = 'center';
+            overlay.style.zIndex = '9999';
+            
+            const spinner = document.createElement('div');
+            spinner.classList.add('spinner-border', 'text-primary');
+            spinner.setAttribute('role', 'status');
+            spinner.style.width = '3rem';
+            spinner.style.height = '3rem';
+            
+            const message = document.createElement('div');
+            message.textContent = 'Generating PDF...';
+            message.style.marginLeft = '1rem';
+            message.style.fontWeight = '500';
+            message.style.color = '#4e6e4d';
+            
+            const content = document.createElement('div');
+            content.style.display = 'flex';
+            content.style.alignItems = 'center';
+            content.appendChild(spinner);
+            content.appendChild(message);
+            
+            overlay.appendChild(content);
+            document.body.appendChild(overlay);
+        }
+        
+        // Hide loading indicator
+        function hideLoadingIndicator() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                document.body.removeChild(overlay);
+            }
+        }
 
         // Date range selection handling
         document.getElementById('dateRangeSelect').addEventListener('change', function() {

@@ -254,6 +254,15 @@
                                                         </button>
                                                     </form>
                                                 }
+                                                @if (booking.Status == BookingStatus.Completed)
+                                                {
+                                                    <button type="button" class="btn btn-sm btn-outline-primary rate-booking-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#ratingModal"
+                                                            data-booking-id="@booking.Id"
+                                                            data-facility-name="@booking.Facility?.Name">
+                                                        <i class="bi bi-star"></i> Rate Experience
+                                                    </button>
+                                                }
                                             </td>
                                         </tr>
                                     }
@@ -336,6 +345,46 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ratingModalLabel">Rate Your Experience</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="ratingForm" asp-action="RateBooking" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" id="bookingId" name="bookingId" />
+
+                        <div class="mb-4 text-center">
+                            <p>How was your experience with <strong id="facilityName"></strong>?</p>
+                            <div class="rating-stars mb-3">
+                                <i class="bi bi-star-fill rating-star" data-value="1"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="2"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="3"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="4"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="5"></i>
+                            </div>
+                            <input type="hidden" id="rating" name="rating" value="0" required />
+                            <div id="ratingText" class="text-center mb-3">Click a star to rate</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="feedback" class="form-label">Share your feedback (optional)</label>
+                            <textarea class="form-control" id="feedback" name="feedback" rows="3"
+                                      placeholder="Tell us about your experience..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="submitRating" disabled>Submit Rating</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -726,6 +775,28 @@
         padding: 0.3rem 0.7rem;
         border-radius: 6px;
     }
+
+    /* Rating Stars */
+    .rating-stars {
+        font-size: 2rem;
+        color: #cbd5e0;
+        cursor: pointer;
+    }
+
+        .rating-stars .bi-star-fill {
+            margin: 0 0.15rem;
+            transition: all 0.2s ease;
+        }
+
+            .rating-stars .bi-star-fill:hover,
+            .rating-stars .bi-star-fill.selected {
+                color: #ffc107;
+                transform: scale(1.1);
+            }
+
+                .rating-stars .bi-star-fill.selected ~ .bi-star-fill.selected {
+                    color: #ffc107;
+                }
 </style>
 
 <script>
@@ -737,6 +808,63 @@
             triggerEl.addEventListener('click', function(event) {
                 event.preventDefault();
                 tabTrigger.show();
+            });
+        });
+    });
+
+        // Rating functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Rating modal functionality
+        const ratingModal = document.getElementById('ratingModal');
+        if (ratingModal) {
+            ratingModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const bookingId = button.getAttribute('data-booking-id');
+                const facilityName = button.getAttribute('data-facility-name');
+
+                document.getElementById('bookingId').value = bookingId;
+                document.getElementById('facilityName').textContent = facilityName;
+
+                // Reset rating
+                document.getElementById('rating').value = 0;
+                document.getElementById('ratingText').textContent = 'Click a star to rate';
+                document.querySelectorAll('.rating-star').forEach(star => {
+                    star.classList.remove('selected');
+                });
+                document.getElementById('submitRating').disabled = true;
+            });
+        }
+
+        // Star rating functionality
+        const ratingStars = document.querySelectorAll('.rating-star');
+        ratingStars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                document.getElementById('rating').value = value;
+
+                // Update visual state of stars
+                ratingStars.forEach(s => {
+                    const starValue = parseInt(s.getAttribute('data-value'));
+                    if (starValue <= value) {
+                        s.classList.add('selected');
+                    } else {
+                        s.classList.remove('selected');
+                    }
+                });
+
+                // Update rating text
+                const ratingTexts = [
+                    'Click a star to rate',
+                    'Poor',
+                    'Fair',
+                    'Good',
+                    'Very Good',
+                    'Excellent'
+                ];
+                document.getElementById('ratingText').textContent = ratingTexts[value];
+
+                // Enable submit button
+                document.getElementById('submitRating').disabled = false;
             });
         });
     });

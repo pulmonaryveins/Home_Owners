@@ -54,6 +54,56 @@ public class HomeController : Controller
         return View();
     }
 
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RateBooking(int bookingId, int rating, string feedback)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var booking = await _bookingService.GetBookingByIdAsync(bookingId);
+
+        if (booking == null || booking.UserId != userId)
+        {
+            TempData["StatusMessage"] = "Invalid booking or you're not authorized to rate this booking.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction("MyBookings");
+        }
+
+        // Check if this booking has already been rated
+        var existingRating = await _context.BookingRatings
+            .FirstOrDefaultAsync(r => r.BookingId == bookingId);
+
+        if (existingRating != null)
+        {
+            // Update existing rating
+            existingRating.Rating = rating;
+            existingRating.Feedback = feedback;
+            existingRating.SubmittedDate = DateTime.Now;
+            _context.BookingRatings.Update(existingRating);
+        }
+        else
+        {
+            // Create new rating
+            var bookingRating = new BookingRating
+            {
+                BookingId = bookingId,
+                UserId = userId,
+                Rating = rating,
+                Feedback = feedback,
+                SubmittedDate = DateTime.Now
+            };
+
+            _context.BookingRatings.Add(bookingRating);
+        }
+
+        await _context.SaveChangesAsync();
+
+        TempData["StatusMessage"] = "Thank you for rating your experience!";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction("MyBookings");
+    }
+
     [RequireAuthentication]
     public IActionResult Profile()
     {

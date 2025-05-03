@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using HomeOwners.Areas.Identity.Data;
 
 namespace HomeOwners.Areas.Admin.Pages
 {
@@ -16,14 +17,17 @@ namespace HomeOwners.Areas.Admin.Pages
     public class BookingRequestsModel : PageModel
     {
         private readonly BookingService _bookingService;
+        private readonly HomeDbContext _context;
 
-        public BookingRequestsModel(BookingService bookingService)
+        public BookingRequestsModel(BookingService bookingService, HomeDbContext context)
         {
             _bookingService = bookingService;
+            _context = context;
         }
 
         public List<Booking> PendingBookings { get; set; }
         public List<Booking> AllBookings { get; set; }
+        public Dictionary<int, BookingRating> BookingRatings { get; set; }
 
         // Common properties
         public int PageSize { get; set; } = 10;
@@ -165,6 +169,14 @@ namespace HomeOwners.Areas.Admin.Pages
                 .Skip((AllPageIndex - 1) * PageSize)
                 .Take(PageSize)
                 .ToList();
+
+            // Load booking ratings for all bookings in the current page
+            var bookingIds = AllBookings.Select(b => b.Id).ToList();
+            var ratings = await _context.BookingRatings
+                .Where(r => bookingIds.Contains(r.BookingId))
+                .ToDictionaryAsync(r => r.BookingId);
+
+            BookingRatings = ratings;
         }
 
         private List<Booking> ApplySorting(List<Booking> bookings, string field, string direction)
@@ -249,6 +261,20 @@ namespace HomeOwners.Areas.Admin.Pages
 
             // Redirect back to the BookingRequests page
             return RedirectToPage();
+        }
+
+        // Get booking rating by ID for the rating modal
+        public async Task<IActionResult> OnGetBookingRatingAsync(int id)
+        {
+            var rating = await _context.BookingRatings
+                .FirstOrDefaultAsync(r => r.BookingId == id);
+
+            if (rating == null)
+            {
+                return NotFound();
+            }
+
+            return new JsonResult(rating);
         }
     }
 }

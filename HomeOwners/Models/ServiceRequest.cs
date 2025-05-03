@@ -1,6 +1,7 @@
 ﻿// HomeOwners/Models/ServiceRequest.cs
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HomeOwners.Models
 {
@@ -58,5 +59,8 @@ namespace HomeOwners.Models
         [Required]
         [Display(Name = "Status")]
         public ServiceRequestStatus Status { get; set; } = ServiceRequestStatus.Pending;
+
+        [NotMapped]
+        public bool HasRating { get; set; }
     }
 }

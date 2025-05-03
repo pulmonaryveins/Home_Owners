@@ -18,6 +18,18 @@ namespace HomeOwners.Services
             _context = context;
         }
 
+        public async Task<ServiceRating> GetServiceRatingByServiceRequestIdAsync(int serviceRequestId)
+        {
+            return await _context.ServiceRatings
+                .FirstOrDefaultAsync(r => r.ServiceRequestId == serviceRequestId);
+        }
+
+        public async Task<List<ServiceRating>> GetServiceRatingsAsync()
+        {
+            return await _context.ServiceRatings
+                .Where(r => r.ServiceRequestId > 0)
+                .ToListAsync();
+        }
         public async Task DeleteAllServiceRequestsAsync()
         {
             var allRequests = await _context.ServiceRequests.ToListAsync();

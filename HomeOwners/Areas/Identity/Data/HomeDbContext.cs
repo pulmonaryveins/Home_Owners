@@ -39,6 +39,7 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<ForumPost> ForumPosts { get; set; }
         public DbSet<ForumComment> ForumComments { get; set; }
         public DbSet<BookingRating> BookingRatings { get; set; }
+        public DbSet<ServiceRating> ServiceRatings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

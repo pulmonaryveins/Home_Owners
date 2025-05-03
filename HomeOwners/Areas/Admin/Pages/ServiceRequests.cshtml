@@ -544,7 +544,6 @@
                                 <tr>
                                     <th>Service</th>
                                     <th>Requester</th>
-                                    <th>Contact</th>
                                     <th>Date & Time</th>
                                     <th>Assigned Team</th>
                                     <th>Status</th>
@@ -568,11 +567,6 @@
                                                 <div class="requester-info">
                                                     <strong>@request.FullName</strong>
                                                     <div class="house-number">House #@request.HouseNumber</div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="contact-info">
-                                                    <i class="bi bi-telephone me-1"></i> @request.ContactNumber
                                                 </div>
                                             </td>
                                             <td>
@@ -622,12 +616,107 @@
                                                 }
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-sm btn-outline-primary"
-                                                        data-bs-toggle="modal" data-bs-target="#detailsModalAll@(request.Id)">
-                                                    <i class="bi bi-eye"></i> Details
-                                                </button>
+                                                <div class="d-flex flex-column gap-2">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                            data-bs-toggle="modal" data-bs-target="#detailsModalAll@(request.Id)">
+                                                        <i class="bi bi-eye"></i> Details
+                                                    </button>
 
-                                                <!-- Modal for Details -->
+                                                    @if (request.Status == ServiceRequestStatus.Done && request.HasRating)
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-outline-info w-100"
+                                                                data-bs-toggle="modal" data-bs-target="#viewExperienceModal@(request.Id)"
+                                                                data-request-id="@request.Id"
+                                                                data-service-name="@request.Service?.Name"
+                                                                data-requester="@request.FullName">
+                                                            <i class="bi bi-star me-1"></i> View Experience
+                                                        </button>
+                                                    }
+                                                </div>
+
+                                                @if (request.Status == ServiceRequestStatus.Done && request.HasRating)
+                                                {
+                                                    <!-- View Experience Modal -->
+                                                    <div class="modal fade" id="viewExperienceModal@(request.Id)" tabindex="-1" aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">
+                                                                        <i class="bi bi-star-fill text-warning me-2"></i>
+                                                                        Service Experience Feedback
+                                                                    </h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="service-rating-card">
+                                                                        <div class="rating-header text-center">
+                                                                            <h6 class="service-name mb-2">@request.Service?.Name</h6>
+                                                                            <div class="rating-user mb-3">
+                                                                                <i class="bi bi-person-circle me-1"></i>
+                                                                                <span>@request.FullName</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div class="rating-score-container">
+                                                                            <div class="rating-score">@(Model.ServiceRatings.ContainsKey(request.Id) ? Model.ServiceRatings[request.Id].Rating.ToString("0.0") : "N/A")</div>                                                                            <div class="rating-stars-display mb-2">
+                                                                                @for (int i = 1; i <= 5; i++)
+                                                                                {
+                                                                                    <i class="bi bi-star-fill rating-star-display @(Model.ServiceRatings.ContainsKey(request.Id) && i <= Model.ServiceRatings[request.Id].Rating ? "active" : "")"></i>
+                                                                                }
+                                                                            </div>
+                                                                            <div class="rating-text">
+                                                                                @{
+                                                                                    var ratingText = Model.ServiceRatings.ContainsKey(request.Id) ? Model.ServiceRatings[request.Id].Rating switch
+                                                                                    {
+                                                                                        1 => "Poor",
+                                                                                        2 => "Fair",
+                                                                                        3 => "Good",
+                                                                                        4 => "Very Good",
+                                                                                        5 => "Excellent",
+                                                                                        _ => "No rating"
+                                                                                    } : "No rating";
+                                                                                }
+                                                                                @ratingText
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div class="rating-meta">
+                                                                            <small class="text-muted">
+                                                                                <i class="bi bi-calendar-event me-1"></i>
+                                                                                Submitted on @(Model.ServiceRatings.ContainsKey(request.Id) ? Model.ServiceRatings[request.Id].SubmittedDate.ToString("MMMM dd, yyyy h:mm tt") : "Not available")
+                                                                            </small>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="feedback-container mt-4">
+                                                                        <h6 class="feedback-heading">
+                                                                            <i class="bi bi-chat-left-text me-1"></i>
+                                                                            User Feedback
+                                                                        </h6>
+                                                                        @if (Model.ServiceRatings.ContainsKey(request.Id) && !string.IsNullOrEmpty(Model.ServiceRatings[request.Id].Feedback))
+                                                                        {
+                                                                            <div class="feedback-box p-3 bg-light rounded">
+                                                                                @Model.ServiceRatings[request.Id].Feedback
+                                                                            </div>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <div class="text-center text-muted py-3">
+                                                                                <i class="bi bi-chat-square me-1"></i>
+                                                                                No feedback provided by the user
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+
+                                                <!-- Existing Modal for Details -->
                                                 <div class="modal fade" id="detailsModalAll@(request.Id)" tabindex="-1" aria-hidden="true">
                                                     <div class="modal-dialog modal-dialog-centered">
                                                         <div class="modal-content">
@@ -1289,6 +1378,109 @@
         color: var(--text-muted);
         background-color: transparent;
         border-color: var(--primary-lighter);
+    }
+
+    /* Service Rating Modal Styling */
+    .service-rating-card {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+        position: relative;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .service-rating-card .service-name {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .rating-user {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+    
+    .rating-score-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 1rem 0;
+    }
+    
+    .rating-score {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #ffc107;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+    
+    .rating-stars-display {
+        font-size: 1.8rem;
+        color: #cbd5e0;
+        margin-bottom: 0.5rem;
+        display: flex;
+        gap: 0.25rem;
+    }
+    
+    .rating-stars-display .rating-star-display.active {
+        color: #ffc107;
+    }
+    
+    .rating-text {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--text-dark);
+    }
+    
+    .rating-meta {
+        text-align: center;
+        color: var(--text-muted);
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .feedback-heading {
+        margin-bottom: 0.75rem;
+        color: var(--primary-color);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    
+    .feedback-box {
+        background-color: #f9f9f9;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 8px;
+        padding: 1rem !important;
+        color: var(--text-dark);
+        min-height: 100px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    /* Button Styling */
+    .btn-outline-info {
+        color: #17a2b8;
+        border-color: #17a2b8;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-info:hover {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(23, 162, 184, 0.2);
+    }
+    
+    /* Improve button spacing in action column */
+    .request-table td .btn {
+        margin: 0.2rem 0;
     }
 </style>
 

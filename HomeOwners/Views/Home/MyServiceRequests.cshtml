@@ -271,6 +271,24 @@
                                                         </button>
                                                     </form>
                                                 }
+                                                else if (request.Status == ServiceRequestStatus.Done)
+                                                {
+                                                    @if (request.HasRating)
+                                                    {
+                                                        <span class="status-badge feedback-submitted">
+                                                            <i class="bi bi-star-fill me-1"></i> Experience Submitted
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-outline-primary rate-service-btn"
+                                                                data-bs-toggle="modal" data-bs-target="#ratingModal"
+                                                                data-service-request-id="@request.Id"
+                                                                data-service-name="@request.Service?.Name">
+                                                            <i class="bi bi-star"></i> Rate Experience
+                                                        </button>
+                                                    }
+                                                }
                                             </td>
                                         </tr>
                                     }
@@ -377,6 +395,62 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Rating Modal -->
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ratingModalLabel">Rate Your Experience</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="ratingForm" asp-controller="Home" asp-action="RateServiceRequest" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="serviceRequestId" name="serviceRequestId" />
+
+                    <div class="mb-4 text-center">
+                        <p class="service-rating-label">How was your experience with <strong id="serviceName"></strong>?</p>
+
+                        <div class="rating-stars-container mb-4">
+                            <div class="rating-stars">
+                                <i class="bi bi-star-fill rating-star" data-value="1"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="2"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="3"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="4"></i>
+                                <i class="bi bi-star-fill rating-star" data-value="5"></i>
+                            </div>
+                            <div id="ratingText" class="rating-text">Click a star to rate</div>
+                        </div>
+                        <input type="hidden" id="rating" name="rating" value="0" required />
+
+                        <div class="rating-level-indicators">
+                            <span class="rating-level">Poor</span>
+                            <span class="rating-level">Fair</span>
+                            <span class="rating-level">Good</span>
+                            <span class="rating-level">Very Good</span>
+                            <span class="rating-level">Excellent</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="feedback" class="form-label">Share your feedback (optional)</label>
+                        <textarea class="form-control feedback-textarea" id="feedback" name="feedback" rows="4"
+                                  placeholder="Tell us about your experience..."></textarea>
+                        <div class="feedback-helper text-muted mt-2">
+                            <i class="bi bi-lightbulb me-1"></i>
+                            Your feedback helps us improve our services
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitRating" disabled>Submit Rating</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -951,6 +1025,128 @@
         .logout-item i {
             color: #dc3545 !important;
         }
+
+    /* Rating Stars */
+    .rating-stars {
+        font-size: 2rem;
+        color: #cbd5e0;
+        cursor: pointer;
+    }
+
+        .rating-stars .bi-star-fill {
+            margin: 0 0.15rem;
+            transition: all 0.2s ease;
+        }
+
+            .rating-stars .bi-star-fill:hover,
+            .rating-stars .bi-star-fill.selected {
+                color: #ffc107;
+                transform: scale(1.1);
+            }
+
+                .rating-stars .bi-star-fill.selected ~ .bi-star-fill.selected {
+                    color: #ffc107;
+                }
+
+    /* Enhanced Rating Stars */
+    .service-rating-label {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-dark);
+    }
+
+    .rating-stars-container {
+        position: relative;
+        padding: 0.5rem 0;
+    }
+
+    .rating-stars {
+        font-size: 2.5rem;
+        color: #cbd5e0;
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+        .rating-stars .rating-star {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+            .rating-stars .rating-star:hover,
+            .rating-stars .rating-star.selected {
+                color: #ffc107;
+                transform: scale(1.2);
+            }
+
+                .rating-stars .rating-star.selected ~ .rating-star {
+                    color: #cbd5e0;
+                }
+
+                /* Apply star coloring in reverse order */
+                .rating-stars .rating-star:hover ~ .rating-star {
+                    color: #cbd5e0;
+                }
+
+    .rating-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--primary-color);
+        margin-top: 1rem;
+        min-height: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .rating-level-indicators {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 0.5rem;
+        margin-top: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    .feedback-textarea {
+        border-color: rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+        .feedback-textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.25);
+        }
+
+    .feedback-helper {
+        font-size: 0.85rem;
+    }
+
+    /* Rating modal styling */
+    #ratingModal .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    #ratingModal .modal-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        background-color: var(--primary-lighter);
+    }
+
+    #ratingModal .modal-title {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    #ratingModal .modal-footer {
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .status-badge.feedback-submitted {
+        background-color: rgba(144, 104, 190, 0.15);
+        color: #8a5eba;
+    }
 </style>
 
 <script>
@@ -962,6 +1158,111 @@
             triggerEl.addEventListener('click', function(event) {
                 event.preventDefault();
                 tabTrigger.show();
+            });
+        });
+    });
+
+        // Add to the existing script section at the bottom of MyServiceRequests.cshtml
+    document.addEventListener('DOMContentLoaded', function() {
+        // Rating modal functionality
+        const ratingModal = document.getElementById('ratingModal');
+        if (ratingModal) {
+            ratingModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const serviceRequestId = button.getAttribute('data-service-request-id');
+                const serviceName = button.getAttribute('data-service-name');
+
+                document.getElementById('serviceRequestId').value = serviceRequestId;
+                document.getElementById('serviceName').textContent = serviceName;
+
+                // Reset rating
+                document.getElementById('rating').value = 0;
+                document.getElementById('ratingText').textContent = 'Click a star to rate';
+                document.querySelectorAll('.rating-star').forEach(star => {
+                    star.classList.remove('selected');
+                });
+                document.getElementById('submitRating').disabled = true;
+            });
+        }
+
+        // Star rating functionality with improved UX
+        const ratingStars = document.querySelectorAll('.rating-star');
+
+        // Helper function to update stars based on value
+        function updateStars(value) {
+            ratingStars.forEach(s => {
+                const starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= value) {
+                    s.classList.add('selected');
+                } else {
+                    s.classList.remove('selected');
+                }
+            });
+        }
+
+        // Handle hovering over stars
+        ratingStars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                updateStars(value);
+
+                // Update rating text on hover
+                const ratingTexts = [
+                    'Click a star to rate',
+                    'Poor',
+                    'Fair',
+                    'Good',
+                    'Very Good',
+                    'Excellent'
+                ];
+                document.getElementById('ratingText').textContent = ratingTexts[value];
+            });
+        });
+
+        // Handle mouse leaving the rating area
+        const ratingContainer = document.querySelector('.rating-stars');
+        if (ratingContainer) {
+            ratingContainer.addEventListener('mouseleave', function() {
+                const currentRating = parseInt(document.getElementById('rating').value);
+                updateStars(currentRating);
+
+                // Reset text if no rating selected, otherwise keep selected rating text
+                if (currentRating === 0) {
+                    document.getElementById('ratingText').textContent = 'Click a star to rate';
+                } else {
+                    const ratingTexts = [
+                        'Click a star to rate',
+                        'Poor',
+                        'Fair',
+                        'Good',
+                        'Very Good',
+                        'Excellent'
+                    ];
+                    document.getElementById('ratingText').textContent = ratingTexts[currentRating];
+                }
+            });
+        }
+
+        // Handle clicking on stars
+        ratingStars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                document.getElementById('rating').value = value;
+                updateStars(value);
+
+                // Update rating text
+                const ratingTexts = [
+                    'Click a star to rate',
+                    'Poor',
+                    'Fair',
+                    'Good',
+                    'Very Good',
+                    'Excellent'
+                ];
+                document.getElementById('ratingText').textContent = ratingTexts[value];
+
+                // Enable submit button
+                document.getElementById('submitRating').disabled = false;
             });
         });
     });

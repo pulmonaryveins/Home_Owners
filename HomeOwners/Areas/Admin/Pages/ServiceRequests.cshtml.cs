@@ -26,6 +26,7 @@ namespace HomeOwners.Areas.Admin.Pages
         public List<ServiceRequest> PendingRequests { get; set; } = new List<ServiceRequest>();
         public List<ServiceRequest> AllRequests { get; set; } = new List<ServiceRequest>();
         public Dictionary<int, List<ServicePersonnel>> AvailableTeams { get; set; } = new Dictionary<int, List<ServicePersonnel>>();
+        public Dictionary<int, ServiceRatingViewModel> ServiceRatings { get; set; } = new Dictionary<int, ServiceRatingViewModel>();
 
         public async Task OnGetAsync()
         {
@@ -38,6 +39,43 @@ namespace HomeOwners.Areas.Admin.Pages
                 var teams = await _servicePersonnelService.GetServicePersonnelByServiceIdAsync(request.ServiceId);
                 AvailableTeams[request.Id] = teams.Where(t => t.IsActive).ToList();
             }
+
+            // Populate ServiceRatings dictionary 
+            ServiceRatings = new Dictionary<int, ServiceRatingViewModel>();
+
+            // Use the service to get ratings instead of directly accessing _context
+            var serviceRatings = await _serviceRequestService.GetServiceRatingsAsync();
+
+            foreach (var rating in serviceRatings)
+            {
+                if (rating.ServiceRequestId > 0)
+                {
+                    ServiceRatings[rating.ServiceRequestId] = new ServiceRatingViewModel
+                    {
+                        Rating = rating.Rating,
+                        Feedback = rating.Feedback,
+                        SubmittedDate = rating.SubmittedDate  
+                    };
+
+                    // Mark the service request as having a rating
+                    var request = AllRequests.FirstOrDefault(r => r.Id == rating.ServiceRequestId);
+                    if (request != null)
+                    {
+                        request.HasRating = true;
+                    }
+                }
+            }
+        }
+
+        public async Task<IActionResult> OnGetServiceRatingAsync(int id)
+        {
+            var rating = await _serviceRequestService.GetServiceRatingByServiceRequestIdAsync(id);
+            if (rating == null)
+            {
+                return NotFound();
+            }
+
+            return new JsonResult(rating);
         }
 
         public async Task<IActionResult> OnPostAssignTeamAsync(int requestId, int teamId)
@@ -98,5 +136,12 @@ namespace HomeOwners.Areas.Admin.Pages
             TempData["StatusType"] = "Success";
             return RedirectToPage();
         }
+    }
+
+    public class ServiceRatingViewModel
+    {
+        public int Rating { get; set; }
+        public string Feedback { get; set; }
+        public DateTime SubmittedDate { get; set; }
     }
 }

@@ -57,6 +57,56 @@ public class HomeController : Controller
     [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RateServiceRequest(int serviceRequestId, int rating, string feedback)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var serviceRequest = await _serviceRequestService.GetServiceRequestByIdAsync(serviceRequestId);
+
+        if (serviceRequest == null || serviceRequest.UserId != userId)
+        {
+            TempData["StatusMessage"] = "Invalid service request or you're not authorized to rate this request.";
+            TempData["StatusType"] = "Error";
+            return RedirectToAction("MyServiceRequests");
+        }
+
+        // Check if this service request has already been rated
+        var existingRating = await _context.ServiceRatings
+            .FirstOrDefaultAsync(r => r.ServiceRequestId == serviceRequestId);
+
+        if (existingRating != null)
+        {
+            // Update existing rating
+            existingRating.Rating = rating;
+            existingRating.Feedback = feedback;
+            existingRating.SubmittedDate = DateTime.Now;
+            _context.ServiceRatings.Update(existingRating);
+        }
+        else
+        {
+            // Create new rating
+            var serviceRating = new ServiceRating
+            {
+                ServiceRequestId = serviceRequestId,
+                UserId = userId,
+                Rating = rating,
+                Feedback = feedback,
+                SubmittedDate = DateTime.Now
+            };
+
+            _context.ServiceRatings.Add(serviceRating);
+        }
+
+        await _context.SaveChangesAsync();
+
+        TempData["StatusMessage"] = "Thank you for rating your service experience!";
+        TempData["StatusType"] = "Success";
+
+        return RedirectToAction("MyServiceRequests");
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RateBooking(int bookingId, int rating, string feedback)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -502,6 +552,20 @@ public class HomeController : Controller
         var allServiceRequests = (await _serviceRequestService.GetAllServiceRequestsAsync())
             .Where(r => r.Status != ServiceRequestStatus.Done)
             .ToList();
+
+        // Get the service request IDs
+        var requestIds = serviceRequests.Select(r => r.Id).ToList();
+
+        // Query service ratings for these requests
+        var serviceRatings = await _context.ServiceRatings
+            .Where(r => requestIds.Contains(r.ServiceRequestId))
+            .ToListAsync();
+
+        // Set HasRating property for each request that has a rating
+        foreach (var request in serviceRequests)
+        {
+            request.HasRating = serviceRatings.Any(r => r.ServiceRequestId == request.Id);
+        }
 
         ViewBag.AllServiceRequests = allServiceRequests;
         return View(serviceRequests);

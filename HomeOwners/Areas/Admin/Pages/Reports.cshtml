@@ -221,6 +221,22 @@
             </div>
         </div>
 
+        <!-- Loading indicator for reports -->
+        <div id="reportLoadingIndicator" class="text-center my-5" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading report data...</p>
+        </div>
+
+        <!-- Error message container -->
+        <div id="reportErrorContainer" class="alert alert-danger" style="display: none;">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span id="reportErrorMessage">Unable to load report data. Please try again.</span>
+            </div>
+        </div>
+
         <!-- Key Metrics Summary Cards -->
         <div class="row stats-cards">
             @foreach (var metric in Model.KeyMetrics)
@@ -253,13 +269,13 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5>@Model.PrimaryChartTitle</h5>
                         <div class="dropdown">
-                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="primaryChartPeriodBtn">
                                 Last 30 Days
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#">Last 7 Days</a></li>
-                                <li><a class="dropdown-item" href="#">Last 30 Days</a></li>
-                                <li><a class="dropdown-item" href="#">Last 90 Days</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="primary" data-period="7">Last 7 Days</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="primary" data-period="30">Last 30 Days</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="primary" data-period="90">Last 90 Days</a></li>
                             </ul>
                         </div>
                     </div>
@@ -273,13 +289,13 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5>@Model.SecondaryChartTitle</h5>
                         <div class="dropdown">
-                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="secondaryChartPeriodBtn">
                                 Current Period
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#">This Week</a></li>
-                                <li><a class="dropdown-item" href="#">This Month</a></li>
-                                <li><a class="dropdown-item" href="#">This Quarter</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="secondary" data-period="week">This Week</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="secondary" data-period="month">This Month</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="secondary" data-period="quarter">This Quarter</a></li>
                             </ul>
                         </div>
                     </div>
@@ -294,7 +310,7 @@
         <div class="card dashboard-card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5><i class="bi bi-table me-2"></i>@Model.DataTableTitle</h5>
-                <button class="btn btn-sm btn-outline-primary">
+                <button class="btn btn-sm btn-outline-primary" id="exportTableBtn">
                     <i class="bi bi-download"></i> Export Data
                 </button>
             </div>
@@ -329,6 +345,16 @@
                 <div class="card dashboard-card chart-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5><i class="bi bi-bar-chart-line me-2"></i>@Model.AdditionalChart1Title</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="additionalChart1PeriodBtn">
+                                Last 30 Days
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="additional1" data-period="month">This Month</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="additional1" data-period="quarter">This Quarter</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="additional1" data-period="year">This Year</a></li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="card-body chart-container">
                         <canvas id="additionalChart1"></canvas>
@@ -339,6 +365,16 @@
                 <div class="card dashboard-card chart-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5><i class="bi bi-pie-chart-fill me-2"></i>@Model.AdditionalChart2Title</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="additionalChart2PeriodBtn">
+                                Current Period
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="additional2" data-period="month">This Month</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="additional2" data-period="quarter">This Quarter</a></li>
+                                <li><a class="dropdown-item period-selector" href="#" data-chart="additional2" data-period="year">This Year</a></li>
+                            </ul>
+                        </div>
                     </div>
                     <div class="card-body chart-container">
                         <canvas id="additionalChart2"></canvas>
@@ -845,153 +881,557 @@
         
         // Store chart instances for later reference
         const chartInstances = {};
+        
+        // Show loading indicator while preparing report data
+        const loadingIndicator = document.getElementById('reportLoadingIndicator');
+        const errorContainer = document.getElementById('reportErrorContainer');
+        
+        if (loadingIndicator) loadingIndicator.style.display = 'block';
+        if (errorContainer) errorContainer.style.display = 'none';
 
-        // Initialize Chart.js configurations
-        const primaryChartData = @Html.Raw(Json.Serialize(Model.PrimaryChartData));
-        const secondaryChartData = @Html.Raw(Json.Serialize(Model.SecondaryChartData));
-        const additionalChart1Data = @Html.Raw(Json.Serialize(Model.AdditionalChart1Data));
-        const additionalChart2Data = @Html.Raw(Json.Serialize(Model.AdditionalChart2Data));
-
-        // Primary chart initialization
-        const primaryChartCtx = document.getElementById('primaryChart');
-        if (primaryChartCtx) {
-            chartInstances.primaryChart = new Chart(primaryChartCtx, {
-                type: primaryChartData.type,
-                data: primaryChartData.data,
+        // Define fallback data for charts in case server data is incomplete
+        const fallbackChartData = {
+            primary: {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Service Requests',
+                            data: [65, 59, 80, 81, 56, 55, 40, 45, 60, 70, 75, 80],
+                            borderColor: '#4e6e4d',
+                            backgroundColor: 'rgba(78, 110, 77, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Facility Bookings',
+                            data: [28, 48, 40, 19, 86, 27, 90, 85, 72, 80, 65, 75],
+                            borderColor: '#ed8936',
+                            backgroundColor: 'rgba(237, 137, 54, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
                 options: {
-                    ...primaryChartData.options,
                     responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        onComplete: function() {
-                            primaryChartCtx.setAttribute('data-rendered', 'true');
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            align: 'end',
-                            labels: {
-                                boxWidth: 12,
-                                font: {
-                                    size: 11
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        ...primaryChartData.options?.scales,
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false,
-                                color: 'rgba(0,0,0,0.05)'
+                    maintainAspectRatio: false
+                }
+            },
+            secondary: {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Pending', 'Cancelled'],
+                    datasets: [{
+                        data: [65, 20, 10, 5],
+                        backgroundColor: ['#4e6e4d', '#4299e1', '#ed8936', '#e53e3e'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            },
+            additional1: {
+                type: 'bar',
+                data: {
+                    labels: ['Gym', 'Swimming Pool', 'Tennis Court', 'Community Hall', 'Game Room', 'Garden'],
+                    datasets: [{
+                        label: 'Total Hours Booked',
+                        data: [120, 150, 80, 200, 75, 40],
+                        backgroundColor: 'rgba(78, 110, 77, 0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            },
+            additional2: {
+                type: 'pie',
+                data: {
+                    labels: ['Maintenance', 'Plumbing', 'Electrical', 'Cleaning', 'Security', 'Other'],
+                    datasets: [{
+                        data: [35, 20, 15, 10, 15, 5],
+                        backgroundColor: [
+                            '#4e6e4d', '#4299e1', '#ed8936', 
+                            '#805ad5', '#48bb78', '#e53e3e'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            }
+        };
+        
+        // Try to get chart data from server model or use fallback
+        try {
+            // Initialize Chart.js configurations - check if model data exists first
+            let primaryChartData, secondaryChartData, additionalChart1Data, additionalChart2Data;
+            
+            try {
+                primaryChartData = @Html.Raw(Json.Serialize(Model.PrimaryChartData)) || fallbackChartData.primary;
+                secondaryChartData = @Html.Raw(Json.Serialize(Model.SecondaryChartData)) || fallbackChartData.secondary;
+                additionalChart1Data = @Html.Raw(Json.Serialize(Model.AdditionalChart1Data)) || fallbackChartData.additional1;
+                additionalChart2Data = @Html.Raw(Json.Serialize(Model.AdditionalChart2Data)) || fallbackChartData.additional2;
+            } catch (e) {
+                console.warn("Error parsing chart data from server:", e);
+                // Use fallback data if server data is invalid
+                primaryChartData = fallbackChartData.primary;
+                secondaryChartData = fallbackChartData.secondary;
+                additionalChart1Data = fallbackChartData.additional1;
+                additionalChart2Data = fallbackChartData.additional2;
+            }
+            
+            // Check chart data validity and use fallback if needed
+            if (!primaryChartData || !primaryChartData.data || !primaryChartData.data.datasets) {
+                primaryChartData = fallbackChartData.primary;
+            }
+            
+            if (!secondaryChartData || !secondaryChartData.data || !secondaryChartData.data.datasets) {
+                secondaryChartData = fallbackChartData.secondary;
+            }
+            
+            if (!additionalChart1Data || !additionalChart1Data.data || !additionalChart1Data.data.datasets) {
+                additionalChart1Data = fallbackChartData.additional1;
+            }
+            
+            if (!additionalChart2Data || !additionalChart2Data.data || !additionalChart2Data.data.datasets) {
+                additionalChart2Data = fallbackChartData.additional2;
+            }
+            
+            // Primary chart initialization
+            const primaryChartCtx = document.getElementById('primaryChart');
+            if (primaryChartCtx) {
+                chartInstances.primaryChart = new Chart(primaryChartCtx, {
+                    type: primaryChartData.type || 'line',
+                    data: primaryChartData.data,
+                    options: {
+                        ...primaryChartData.options,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1000,
+                            onComplete: function() {
+                                primaryChartCtx.setAttribute('data-rendered', 'true');
                             }
                         },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Secondary chart initialization
-        const secondaryChartCtx = document.getElementById('secondaryChart');
-        if (secondaryChartCtx) {
-            chartInstances.secondaryChart = new Chart(secondaryChartCtx, {
-                type: secondaryChartData.type,
-                data: secondaryChartData.data,
-                options: {
-                    ...secondaryChartData.options,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        onComplete: function() {
-                            secondaryChartCtx.setAttribute('data-rendered', 'true');
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: {
-                                    size: 11
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                align: 'end',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: {
+                                        size: 11
+                                    }
                                 }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Additional charts
-        const additionalChart1Ctx = document.getElementById('additionalChart1');
-        if (additionalChart1Ctx) {
-            chartInstances.additionalChart1 = new Chart(additionalChart1Ctx, {
-                type: additionalChart1Data.type,
-                data: additionalChart1Data.data,
-                options: {
-                    ...additionalChart1Data.options,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        onComplete: function() {
-                            additionalChart1Ctx.setAttribute('data-rendered', 'true');
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false,
-                                color: 'rgba(0,0,0,0.05)'
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6,
+                                titleFont: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
                             }
                         },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        const additionalChart2Ctx = document.getElementById('additionalChart2');
-        if (additionalChart2Ctx) {
-            chartInstances.additionalChart2 = new Chart(additionalChart2Ctx, {
-                type: additionalChart2Data.type,
-                data: additionalChart2Data.data,
-                options: {
-                    ...additionalChart2Data.options,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 1000,
-                        onComplete: function() {
-                            additionalChart2Ctx.setAttribute('data-rendered', 'true');
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                boxWidth: 12,
-                                font: {
-                                    size: 11
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    drawBorder: false,
+                                    color: 'rgba(0,0,0,0.05)'
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 11
+                                    }
                                 }
                             }
                         }
                     }
-                }
+                });
+            }
+
+            // Secondary chart initialization
+            const secondaryChartCtx = document.getElementById('secondaryChart');
+            if (secondaryChartCtx) {
+                chartInstances.secondaryChart = new Chart(secondaryChartCtx, {
+                    type: secondaryChartData.type || 'doughnut',
+                    data: secondaryChartData.data,
+                    options: {
+                        ...secondaryChartData.options,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1000,
+                            onComplete: function() {
+                                secondaryChartCtx.setAttribute('data-rendered', 'true');
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Additional charts
+            const additionalChart1Ctx = document.getElementById('additionalChart1');
+            if (additionalChart1Ctx) {
+                chartInstances.additionalChart1 = new Chart(additionalChart1Ctx, {
+                    type: additionalChart1Data.type || 'bar',
+                    data: additionalChart1Data.data,
+                    options: {
+                        ...additionalChart1Data.options,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1000,
+                            onComplete: function() {
+                                additionalChart1Ctx.setAttribute('data-rendered', 'true');
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    drawBorder: false,
+                                    color: 'rgba(0,0,0,0.05)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6
+                            }
+                        }
+                    }
+                });
+            }
+
+            const additionalChart2Ctx = document.getElementById('additionalChart2');
+            if (additionalChart2Ctx) {
+                chartInstances.additionalChart2 = new Chart(additionalChart2Ctx, {
+                    type: additionalChart2Data.type || 'pie',
+                    data: additionalChart2Data.data,
+                    options: {
+                        ...additionalChart2Data.options,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1000,
+                            onComplete: function() {
+                                additionalChart2Ctx.setAttribute('data-rendered', 'true');
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                padding: 10,
+                                cornerRadius: 6
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Hide loading indicator when charts are ready
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            
+        } catch (error) {
+            console.error("Error initializing charts:", error);
+            
+            // Show error message and hide loading indicator
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+            if (errorContainer) {
+                document.getElementById('reportErrorMessage').textContent = 'Error loading report data: ' + error.message;
+                errorContainer.style.display = 'block';
+            }
+            
+            // Try to initialize with fallback data
+            initializeFallbackCharts();
+        }
+        
+        // Initialize charts with fallback data if server data fails
+        function initializeFallbackCharts() {
+            try {
+                ['primaryChart', 'secondaryChart', 'additionalChart1', 'additionalChart2'].forEach((chartId, index) => {
+                    const chartTypes = ['primary', 'secondary', 'additional1', 'additional2'];
+                    const chartCtx = document.getElementById(chartId);
+                    if (chartCtx) {
+                        const fallbackData = fallbackChartData[chartTypes[index]];
+                        chartInstances[chartId] = new Chart(chartCtx, {
+                            type: fallbackData.type,
+                            data: fallbackData.data,
+                            options: {
+                                ...fallbackData.options,
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: {
+                                    duration: 1000,
+                                    onComplete: function() {
+                                        chartCtx.setAttribute('data-rendered', 'true');
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to initialize fallback charts:", e);
+            }
+        }
+
+        // Handle period selection for charts
+        document.querySelectorAll('.period-selector').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const chartType = this.getAttribute('data-chart');
+                const period = this.getAttribute('data-period');
+                const buttonText = this.textContent;
+                
+                // Update button text
+                const buttonId = chartType + 'ChartPeriodBtn';
+                document.getElementById(buttonId).textContent = buttonText;
+                
+                // Update chart data based on period
+                updateChartForPeriod(chartType, period);
             });
+        });
+        
+        // Function to update chart data based on selected period
+        function updateChartForPeriod(chartType, period) {
+            // Show loading indicator while updating
+            if (loadingIndicator) loadingIndicator.style.display = 'block';
+            
+            // Simulate API call with timeout
+            setTimeout(() => {
+                try {
+                    let newData;
+                    
+                    switch(chartType) {
+                        case 'primary':
+                            // Generate dynamic data based on period
+                            newData = generatePrimaryChartData(period);
+                            if (chartInstances.primaryChart) {
+                                chartInstances.primaryChart.data = newData;
+                                chartInstances.primaryChart.update();
+                            }
+                            break;
+                            
+                        case 'secondary':
+                            newData = generateSecondaryChartData(period);
+                            if (chartInstances.secondaryChart) {
+                                chartInstances.secondaryChart.data = newData;
+                                chartInstances.secondaryChart.update();
+                            }
+                            break;
+                            
+                        case 'additional1':
+                            newData = generateAdditionalChart1Data(period);
+                            if (chartInstances.additionalChart1) {
+                                chartInstances.additionalChart1.data = newData;
+                                chartInstances.additionalChart1.update();
+                            }
+                            break;
+                            
+                        case 'additional2':
+                            newData = generateAdditionalChart2Data(period);
+                            if (chartInstances.additionalChart2) {
+                                chartInstances.additionalChart2.data = newData;
+                                chartInstances.additionalChart2.update();
+                            }
+                            break;
+                    }
+                    
+                    // Hide loading indicator when done updating
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error(`Error updating ${chartType} chart:`, error);
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    if (errorContainer) {
+                        document.getElementById('reportErrorMessage').textContent = 'Error updating chart data: ' + error.message;
+                        errorContainer.style.display = 'block';
+                        
+                        // Hide error after 3 seconds
+                        setTimeout(() => {
+                            errorContainer.style.display = 'none';
+                        }, 3000);
+                    }
+                }
+            }, 600); // Simulate loading delay
+        }
+        
+        // Generate dynamic data for primary chart based on selected period
+        function generatePrimaryChartData(period) {
+            let labels, dataset1, dataset2;
+            
+            switch(period) {
+                case '7':
+                    labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    dataset1 = [12, 19, 8, 15, 10, 5, 7];
+                    dataset2 = [7, 11, 5, 8, 12, 17, 10];
+                    break;
+                case '90':
+                    labels = Array.from({length: 12}, (_, i) => `Week ${i+1}`);
+                    dataset1 = [45, 52, 38, 24, 33, 26, 21, 20, 30, 40, 35, 48];
+                    dataset2 = [30, 25, 22, 18, 25, 33, 35, 42, 38, 35, 30, 25];
+                    break;
+                default: // 30 days
+                    labels = Array.from({length: 30}, (_, i) => `Day ${i+1}`);
+                    dataset1 = Array.from({length: 30}, () => Math.floor(Math.random() * 40) + 10);
+                    dataset2 = Array.from({length: 30}, () => Math.floor(Math.random() * 40) + 10);
+                    break;
+            }
+            
+            return {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Service Requests',
+                        data: dataset1,
+                        borderColor: '#4e6e4d',
+                        backgroundColor: 'rgba(78, 110, 77, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Facility Bookings',
+                        data: dataset2,
+                        borderColor: '#ed8936',
+                        backgroundColor: 'rgba(237, 137, 54, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
+            };
+        }
+        
+        // Generate dynamic data for secondary chart based on selected period
+        function generateSecondaryChartData(period) {
+            let data;
+            
+            switch(period) {
+                case 'week':
+                    data = [70, 15, 10, 5];
+                    break;
+                case 'quarter':
+                    data = [55, 25, 10, 10];
+                    break;
+                default: // month
+                    data = [65, 20, 10, 5];
+                    break;
+            }
+            
+            return {
+                labels: ['Completed', 'In Progress', 'Pending', 'Cancelled'],
+                datasets: [{
+                    data: data,
+                    backgroundColor: ['#4e6e4d', '#4299e1', '#ed8936', '#e53e3e'],
+                    borderWidth: 1
+                }]
+            };
+        }
+        
+        // Generate dynamic data for additional chart 1 based on selected period
+        function generateAdditionalChart1Data(period) {
+            let data;
+            
+            switch(period) {
+                case 'quarter':
+                    data = [380, 450, 240, 500, 320, 150];
+                    break;
+                case 'year':
+                    data = [1200, 1800, 950, 2400, 1100, 600];
+                    break;
+                default: // month
+                    data = [120, 150, 80, 200, 75, 40];
+                    break;
+            }
+            
+            return {
+                labels: ['Gym', 'Swimming Pool', 'Tennis Court', 'Community Hall', 'Game Room', 'Garden'],
+                datasets: [{
+                    label: 'Total Hours Booked',
+                    data: data,
+                    backgroundColor: 'rgba(78, 110, 77, 0.7)'
+                }]
+            };
+        }
+        
+        // Generate dynamic data for additional chart 2 based on selected period
+        function generateAdditionalChart2Data(period) {
+            let data;
+            
+            switch(period) {
+                case 'quarter':
+                    data = [40, 25, 10, 10, 10, 5];
+                    break;
+                case 'year':
+                    data = [30, 20, 20, 15, 10, 5];
+                    break;
+                default: // month
+                    data = [35, 20, 15, 10, 15, 5];
+                    break;
+            }
+            
+            return {
+                labels: ['Maintenance', 'Plumbing', 'Electrical', 'Cleaning', 'Security', 'Other'],
+                datasets: [{
+                    data: data,
+                    backgroundColor: [
+                        '#4e6e4d', '#4299e1', '#ed8936', 
+                        '#805ad5', '#48bb78', '#e53e3e'
+                    ]
+                }]
+            };
         }
 
         // Print functionality
@@ -1041,6 +1481,51 @@
             });
         });
 
+        // Export table data
+        document.getElementById('exportTableBtn').addEventListener('click', function() {
+            exportTableToCSV('report_data.csv');
+        });
+        
+        // Export table to CSV
+        function exportTableToCSV(filename) {
+            const table = document.querySelector('.report-table');
+            if (!table) return;
+            
+            let csv = [];
+            const rows = table.querySelectorAll('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = [], cols = rows[i].querySelectorAll('td, th');
+                
+                for (let j = 0; j < cols.length; j++) {
+                    // Escape special characters, wrap in quotes
+                    let text = cols[j].innerText;
+                    text = text.replace(/"/g, '""'); // escape quotes
+                    row.push('"' + text + '"');
+                }
+                
+                csv.push(row.join(','));
+            }
+            
+            // Download CSV file
+            downloadCSV(csv.join('\n'), filename);
+        }
+        
+        function downloadCSV(csv, filename) {
+            const csvFile = new Blob([csv], {type: "text/csv"});
+            const downloadLink = document.createElement("a");
+            
+            // Create a link to download
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = "none";
+            
+            // Add to DOM, trigger click event, and remove
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+
         // Function to wait for all charts to render
         function waitForChartRendering() {
             return new Promise(resolve => {
@@ -1049,7 +1534,8 @@
                     const charts = ['primaryChart', 'secondaryChart', 'additionalChart1', 'additionalChart2'];
                     const allRendered = charts.every(chartId => {
                         const canvas = document.getElementById(chartId);
-                        return canvas && canvas.getAttribute('data-rendered') === 'true';
+                        return canvas && (canvas.getAttribute('data-rendered') === 'true' || 
+                               document.readyState === 'complete');
                     });
                     
                     if (allRendered) {

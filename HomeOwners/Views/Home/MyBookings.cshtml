@@ -188,8 +188,9 @@
                                     <th>Facility</th>
                                     <th>Booking Date</th>
                                     <th>Duration</th>
-                                    <th>Status</th>
                                     <th>Ammount Due</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -212,6 +213,10 @@
                                                     @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
                                                     <small class="ms-1">(@booking.TotalHours.ToString("0.0") hrs)</small>
                                                 </span>
+                                            </td>
+
+                                            <td>
+                                                <span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span>
                                             </td>
 
                                             <td>
@@ -242,10 +247,6 @@
                                             </td>
 
                                             <td>
-                                                <span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span>
-                                            </td>
-
-                                            <td>
                                                 @if (booking.BookingDate > DateTime.Today && booking.Status == BookingStatus.Pending)
                                                 {
                                                     <form asp-action="CancelBooking" asp-route-id="@booking.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
@@ -256,12 +257,21 @@
                                                 }
                                                 @if (booking.Status == BookingStatus.Completed)
                                                 {
-                                                    <button type="button" class="btn btn-sm btn-outline-primary rate-booking-btn"
-                                                            data-bs-toggle="modal" data-bs-target="#ratingModal"
-                                                            data-booking-id="@booking.Id"
-                                                            data-facility-name="@booking.Facility?.Name">
-                                                        <i class="bi bi-star"></i> Rate Experience
-                                                    </button>
+                                                    @if (booking.HasRating)
+                                                    {
+                                                        <span class="status-badge feedback-submitted">
+                                                            <i class="bi bi-star-fill me-1"></i> Experience Submitted
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="button" class="btn btn-sm btn-outline-primary rate-booking-btn"
+                                                                data-bs-toggle="modal" data-bs-target="#ratingModal"
+                                                                data-booking-id="@booking.Id"
+                                                                data-facility-name="@booking.Facility?.Name">
+                                                            <i class="bi bi-star"></i> Rate Experience
+                                                        </button>
+                                                    }
                                                 }
                                             </td>
                                         </tr>
@@ -362,26 +372,41 @@
                         <input type="hidden" id="bookingId" name="bookingId" />
 
                         <div class="mb-4 text-center">
-                            <p>How was your experience with <strong id="facilityName"></strong>?</p>
-                            <div class="rating-stars mb-3">
-                                <i class="bi bi-star-fill rating-star" data-value="1"></i>
-                                <i class="bi bi-star-fill rating-star" data-value="2"></i>
-                                <i class="bi bi-star-fill rating-star" data-value="3"></i>
-                                <i class="bi bi-star-fill rating-star" data-value="4"></i>
-                                <i class="bi bi-star-fill rating-star" data-value="5"></i>
+                            <p class="facility-rating-label">How was your experience with <strong id="facilityName"></strong>?</p>
+                            
+                            <div class="rating-stars-container mb-4">
+                                <div class="rating-stars">
+                                    <i class="bi bi-star-fill rating-star" data-value="1"></i>
+                                    <i class="bi bi-star-fill rating-star" data-value="2"></i>
+                                    <i class="bi bi-star-fill rating-star" data-value="3"></i>
+                                    <i class="bi bi-star-fill rating-star" data-value="4"></i>
+                                    <i class="bi bi-star-fill rating-star" data-value="5"></i>
+                                </div>
+                                <div id="ratingText" class="rating-text">Click a star to rate</div>
                             </div>
                             <input type="hidden" id="rating" name="rating" value="0" required />
-                            <div id="ratingText" class="text-center mb-3">Click a star to rate</div>
+                            
+                            <div class="rating-level-indicators">
+                                <span class="rating-level">Poor</span>
+                                <span class="rating-level">Fair</span>
+                                <span class="rating-level">Good</span>
+                                <span class="rating-level">Very Good</span>
+                                <span class="rating-level">Excellent</span>
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="feedback" class="form-label">Share your feedback (optional)</label>
-                            <textarea class="form-control" id="feedback" name="feedback" rows="3"
+                            <textarea class="form-control feedback-textarea" id="feedback" name="feedback" rows="4"
                                       placeholder="Tell us about your experience..."></textarea>
+                            <div class="feedback-helper text-muted mt-2">
+                                <i class="bi bi-lightbulb me-1"></i>
+                                Your feedback helps us improve our facilities and services
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="submitRating" disabled>Submit Rating</button>
                     </div>
                 </form>
@@ -708,27 +733,9 @@
         color: #e53e3e;
     }
     
-    /* Empty State */
-    .empty-state {
-        padding: 3rem 2rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .empty-state i {
-        color: #cbd5e0;
-        margin-bottom: 1rem;
-    }
-    
-    .empty-state h5 {
-        color: #4a5568;
-        font-weight: 600;
-    }
-    
-    .empty-state p {
-        max-width: 300px;
+    .status-badge.feedback-submitted {
+        background-color: rgba(144, 104, 190, 0.15);
+        color: #8a5eba;
     }
     
     /* Button Styling */
@@ -745,6 +752,20 @@
         box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
     }
     
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.2);
+    }
+    
     .btn-outline-secondary {
         color: var(--text-muted);
         border-color: #dee2e6;
@@ -757,6 +778,20 @@
         border-color: var(--primary-color);
     }
     
+    .btn-outline-info {
+        color: #17a2b8;
+        border-color: #17a2b8;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-info:hover {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(23, 162, 184, 0.2);
+    }
+    
     .btn-outline-danger {
         transition: all 0.3s ease;
     }
@@ -766,6 +801,32 @@
         box-shadow: 0 4px 10px rgba(220, 53, 69, 0.2);
     }
 
+    .btn-success {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+    }
+    
     .price-badge {
         display: inline-block;
         font-weight: 700;
@@ -797,6 +858,101 @@
                 .rating-stars .bi-star-fill.selected ~ .bi-star-fill.selected {
                     color: #ffc107;
                 }
+
+    /* Enhanced Rating Stars */
+    .facility-rating-label {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-dark);
+    }
+    
+    .rating-stars-container {
+        position: relative;
+        padding: 0.5rem 0;
+    }
+    
+    .rating-stars {
+        font-size: 2.5rem;
+        color: #cbd5e0;
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .rating-stars .rating-star {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .rating-stars .rating-star:hover,
+    .rating-stars .rating-star.selected {
+        color: #ffc107;
+        transform: scale(1.2);
+    }
+    
+    .rating-stars .rating-star.selected ~ .rating-star {
+        color: #cbd5e0;
+    }
+    
+    /* Apply star coloring in reverse order */
+    .rating-stars .rating-star:hover ~ .rating-star {
+        color: #cbd5e0;
+    }
+    
+    .rating-text {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--primary-color);
+        margin-top: 1rem;
+        min-height: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .rating-level-indicators {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 0.5rem;
+        margin-top: 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+    
+    .feedback-textarea {
+        border-color: rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+    
+    .feedback-textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(78, 110, 77, 0.25);
+    }
+    
+    .feedback-helper {
+        font-size: 0.85rem;
+    }
+    
+    /* Rating modal styling */
+    #ratingModal .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    #ratingModal .modal-header {
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        background-color: var(--primary-lighter);
+    }
+    
+    #ratingModal .modal-title {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+    
+    #ratingModal .modal-footer {
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
 </style>
 
 <script>
@@ -812,7 +968,7 @@
         });
     });
 
-        // Rating functionality
+    // Enhanced Rating functionality
     document.addEventListener('DOMContentLoaded', function() {
         // Rating modal functionality
         const ratingModal = document.getElementById('ratingModal');
@@ -835,23 +991,69 @@
             });
         }
 
-        // Star rating functionality
+        // Star rating functionality with improved UX
         const ratingStars = document.querySelectorAll('.rating-star');
+        
+        // Helper function to update stars based on value
+        function updateStars(value) {
+            ratingStars.forEach(s => {
+                const starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= value) {
+                    s.classList.add('selected');
+                } else {
+                    s.classList.remove('selected');
+                }
+            });
+        }
+        
+        // Handle hovering over stars
+        ratingStars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                updateStars(value);
+                
+                // Update rating text on hover
+                const ratingTexts = [
+                    'Click a star to rate',
+                    'Poor',
+                    'Fair',
+                    'Good',
+                    'Very Good',
+                    'Excellent'
+                ];
+                document.getElementById('ratingText').textContent = ratingTexts[value];
+            });
+        });
+        
+        // Handle mouse leaving the rating area
+        const ratingContainer = document.querySelector('.rating-stars');
+        ratingContainer.addEventListener('mouseleave', function() {
+            const currentRating = parseInt(document.getElementById('rating').value);
+            updateStars(currentRating);
+            
+            // Reset text if no rating selected, otherwise keep selected rating text
+            if (currentRating === 0) {
+                document.getElementById('ratingText').textContent = 'Click a star to rate';
+            } else {
+                const ratingTexts = [
+                    'Click a star to rate',
+                    'Poor',
+                    'Fair',
+                    'Good',
+                    'Very Good',
+                    'Excellent'
+                ];
+                document.getElementById('ratingText').textContent = ratingTexts[currentRating];
+            }
+        });
+        
+        // Handle clicking on stars
         ratingStars.forEach(star => {
             star.addEventListener('click', function() {
                 const value = parseInt(this.getAttribute('data-value'));
                 document.getElementById('rating').value = value;
-
-                // Update visual state of stars
-                ratingStars.forEach(s => {
-                    const starValue = parseInt(s.getAttribute('data-value'));
-                    if (starValue <= value) {
-                        s.classList.add('selected');
-                    } else {
-                        s.classList.remove('selected');
-                    }
-                });
-
+                updateStars(value);
+                
                 // Update rating text
                 const ratingTexts = [
                     'Click a star to rate',

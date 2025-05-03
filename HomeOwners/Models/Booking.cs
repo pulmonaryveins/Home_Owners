@@ -60,6 +60,31 @@ namespace HomeOwners.Models
         [Required]
         [Display(Name = "Status")]
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
+
+        // Add this property to your Booking model if it doesn't already exist
+        public bool HasRating { get; set; }
+
+        // Alternatively, if you have a Rating entity with a relationship to Booking,
+        // you could implement it as a calculated property:
+
+        /*
+        public bool HasRating
+        {
+            get
+            {
+                return Rating != null;
+            }
+        }
+
+        // Or if you have a collection of ratings:
+        public bool HasRating
+        {
+            get
+            {
+                return Ratings != null && Ratings.Any();
+            }
+        }
+        */
     }
 
     public enum PaymentStatus

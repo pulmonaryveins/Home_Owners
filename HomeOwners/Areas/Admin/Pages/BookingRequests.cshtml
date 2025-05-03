@@ -508,11 +508,10 @@
                             <tr>
                                 <th>Facility</th>
                                 <th>Requester</th>
-                                <th>Contact</th>
                                 <th>Booking Date</th>
                                 <th>Duration</th>
-                                <th>Status</th>
                                 <th>Amount Due</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -533,12 +532,6 @@
                                             <span class="fw-medium">@booking.FullName</span>
                                             <small class="d-block text-muted">House #@booking.HouseNumber</small>
                                         </td>
-                                        <td>
-                                            <span class="contact-info">
-                                                <i class="bi bi-telephone me-1"></i>
-                                                @booking.ContactNumber
-                                            </span>
-                                        </td>
                                         <td>@booking.BookingDate.ToString("MMM dd, yyyy")</td>
                                         <td>
                                             <span class="time-badge">
@@ -546,6 +539,9 @@
                                                 @DateTime.Today.Add(booking.EndTime).ToString("hh:mm tt")
                                                 <small class="ms-1">(@booking.TotalHours.ToString("0.0") hrs)</small>
                                             </span>
+                                        </td>
+                                        <td>
+                                            <span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span>
                                         </td>
                                         <td>
                                             @if (booking.Status == BookingStatus.Pending)
@@ -572,9 +568,6 @@
                                                     <i class="bi bi-x-circle"></i> Rejected
                                                 </span>
                                             }
-                                        </td>
-                                        <td>
-                                            <span class="price-badge">₱@booking.TotalPrice.ToString("N2")</span>
                                         </td>
                                         <td>
                                             @if (booking.Status == BookingStatus.Approved)
@@ -716,32 +709,58 @@
         </div>
     </div>
 
-    <!-- Add Rating Modal -->
+    <!-- Enhanced Rating Modal -->
     <div class="modal fade" id="viewRatingModal" tabindex="-1" aria-labelledby="viewRatingModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="viewRatingModalLabel">Booking Rating & Feedback</h5>
+                    <h5 class="modal-title" id="viewRatingModalLabel">
+                        <i class="bi bi-star-fill text-warning me-2"></i>
+                        Booking Rating & Feedback
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <p>Rating for <strong id="facilityNameDisplay"></strong> by <strong id="requesterDisplay"></strong></p>
-                        <div class="rating-stars-display mb-3">
-                            <i class="bi bi-star-fill rating-star-display"></i>
-                            <i class="bi bi-star-fill rating-star-display"></i>
-                            <i class="bi bi-star-fill rating-star-display"></i>
-                            <i class="bi bi-star-fill rating-star-display"></i>
-                            <i class="bi bi-star-fill rating-star-display"></i>
+                    <div class="booking-rating-card">
+                        <div class="rating-header text-center">
+                            <h6 class="facility-name mb-2" id="facilityNameDisplay"></h6>
+                            <div class="rating-user mb-3">
+                                <i class="bi bi-person-circle me-1"></i>
+                                <span id="requesterDisplay"></span>
+                            </div>
                         </div>
-                        <div id="ratingTextDisplay" class="text-center mb-3"></div>
-                        <small id="ratingDateDisplay" class="text-muted"></small>
+                        
+                        <div class="rating-score-container">
+                            <div class="rating-score" id="ratingScoreDisplay">0.0</div>
+                            <div class="rating-stars-display mb-2">
+                                <i class="bi bi-star-fill rating-star-display"></i>
+                                <i class="bi bi-star-fill rating-star-display"></i>
+                                <i class="bi bi-star-fill rating-star-display"></i>
+                                <i class="bi bi-star-fill rating-star-display"></i>
+                                <i class="bi bi-star-fill rating-star-display"></i>
+                            </div>
+                            <div id="ratingTextDisplay" class="rating-text"></div>
+                        </div>
+                        
+                        <div class="rating-meta">
+                            <small id="ratingDateDisplay" class="text-muted">
+                                <i class="bi bi-calendar-event me-1"></i>
+                                Submitted on: Loading...
+                            </small>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Feedback</label>
+                    <div class="feedback-container mt-4">
+                        <h6 class="feedback-heading">
+                            <i class="bi bi-chat-left-text me-1"></i>
+                            User Feedback
+                        </h6>
                         <div id="feedbackDisplay" class="feedback-box p-3 bg-light rounded">
                             <!-- Feedback text will be displayed here -->
+                        </div>
+                        <div id="noFeedbackMessage" class="text-center text-muted py-3 d-none">
+                            <i class="bi bi-chat-square me-1"></i>
+                            No feedback provided by the user
                         </div>
                     </div>
                 </div>
@@ -1013,14 +1032,28 @@
 
     /* Button styling */
     .btn-success {
-        background-color: #4e6e4d;
-        border-color: #4e6e4d;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
         transition: all 0.3s ease;
     }
 
     .btn-success:hover {
-        background-color: #3d5a3c;
-        border-color: #3d5a3c;
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark) !important;
+        border-color: var(--primary-dark) !important;
         transform: translateY(-2px);
         box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
     }
@@ -1034,6 +1067,33 @@
         box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
     }
 
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.2);
+    }
+
     .btn-outline-secondary {
         color: #6c757d;
         border-color: #dee2e6;
@@ -1042,8 +1102,22 @@
 
     .btn-outline-secondary:hover {
         background-color: #f8f9fa;
-        color: #4e6e4d;
-        border-color: #4e6e4d;
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .btn-outline-info {
+        color: #17a2b8;
+        border-color: #17a2b8;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-outline-info:hover {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(23, 162, 184, 0.2);
     }
 
     /* Added search form styles matching Users page */
@@ -1223,6 +1297,112 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.08);
         transition: transform 0.3s ease;
     }
+
+    /* Enhanced View Rating Modal Styling */
+    #viewRatingModal .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    #viewRatingModal .modal-header {
+        background-color: rgba(78, 110, 77, 0.05);
+        border-bottom: 1px solid rgba(78, 110, 77, 0.1);
+    }
+    
+    #viewRatingModal .modal-title {
+        color: var(--text-dark);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    
+    .booking-rating-card {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+        position: relative;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .facility-name {
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .rating-user {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+    
+    .rating-score-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 1rem 0;
+    }
+    
+    .rating-score {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #ffc107;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+    
+    .rating-stars-display {
+        font-size: 1.8rem;
+        color: #cbd5e0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .rating-stars-display .rating-star-display.active {
+        color: #ffc107;
+    }
+    
+    .rating-text {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--text-dark);
+    }
+    
+    .rating-meta {
+        text-align: center;
+        color: var(--text-muted);
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .feedback-heading {
+        margin-bottom: 0.75rem;
+        color: var(--primary-color);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    
+    .feedback-box {
+        background-color: #f9f9f9;
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 8px;
+        padding: 1rem !important;
+        color: var(--text-dark);
+        min-height: 100px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    
+    #noFeedbackMessage {
+        font-style: italic;
+        background-color: rgba(0,0,0,0.02);
+        border-radius: 8px;
+        padding: 1rem;
+    }
 </style>
 
 <script>
@@ -1258,6 +1438,20 @@
                 document.getElementById('facilityNameDisplay').textContent = facilityName;
                 document.getElementById('requesterDisplay').textContent = requester;
 
+                // Reset the display before fetching new data
+                document.getElementById('ratingScoreDisplay').textContent = "...";
+                document.getElementById('ratingTextDisplay').textContent = "Loading...";
+                document.getElementById('feedbackDisplay').textContent = "Loading...";
+                document.getElementById('ratingDateDisplay').textContent = "Submitted on: Loading...";
+                document.getElementById('feedbackDisplay').classList.remove('d-none');
+                document.getElementById('noFeedbackMessage').classList.add('d-none');
+                
+                // Reset star display
+                const ratingStars = document.querySelectorAll('.rating-star-display');
+                ratingStars.forEach((star) => {
+                    star.classList.remove('active');
+                });
+
                 // Fetch rating data via AJAX
                 fetch(`?handler=BookingRating&id=${bookingId}`)
                     .then(response => {
@@ -1267,6 +1461,9 @@
                         return response.json();
                     })
                     .then(data => {
+                        // Display rating score
+                        document.getElementById('ratingScoreDisplay').textContent = data.rating.toFixed(1);
+                        
                         // Display rating stars
                         const ratingStars = document.querySelectorAll('.rating-star-display');
                         ratingStars.forEach((star, index) => {
@@ -1286,25 +1483,36 @@
                             'Very Good',
                             'Excellent'
                         ];
-                        document.getElementById('ratingTextDisplay').textContent = ratingTexts[data.rating];
+                        document.getElementById('ratingTextDisplay').textContent = ratingTexts[data.rating] || '';
 
                         // Display feedback
-                        document.getElementById('feedbackDisplay').textContent = data.feedback || 'No feedback provided';
+                        if (data.feedback && data.feedback.trim() !== '') {
+                            document.getElementById('feedbackDisplay').textContent = data.feedback;
+                            document.getElementById('feedbackDisplay').classList.remove('d-none');
+                            document.getElementById('noFeedbackMessage').classList.add('d-none');
+                        } else {
+                            document.getElementById('feedbackDisplay').classList.add('d-none');
+                            document.getElementById('noFeedbackMessage').classList.remove('d-none');
+                        }
 
                         // Format and display the rating submission date
                         const submittedDate = new Date(data.submittedDate);
-                        document.getElementById('ratingDateDisplay').textContent = `Submitted on ${submittedDate.toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}`;
+                        document.getElementById('ratingDateDisplay').innerHTML = `
+                            <i class="bi bi-calendar-event me-1"></i>
+                            Submitted on ${submittedDate.toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
+                        `;
                     })
                     .catch(error => {
                         console.error('Error fetching rating data:', error);
                         document.getElementById('ratingTextDisplay').textContent = 'Error loading rating data';
                         document.getElementById('feedbackDisplay').textContent = 'Unable to load feedback';
+                        document.getElementById('ratingScoreDisplay').textContent = "N/A";
                     });
             });
         }

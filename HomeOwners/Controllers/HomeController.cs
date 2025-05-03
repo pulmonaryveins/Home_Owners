@@ -351,6 +351,20 @@ public class HomeController : Controller
         var bookings = await _bookingService.GetBookingsByUserIdAsync(userId);
         var allBookings = await _bookingService.GetAllBookingsAsync();
 
+        // Get the booking IDs
+        var bookingIds = bookings.Select(b => b.Id).ToList();
+
+        // Query booking ratings for these bookings
+        var bookingRatings = await _context.BookingRatings
+            .Where(r => bookingIds.Contains(r.BookingId))
+            .ToListAsync();
+
+        // Set HasRating property for each booking that has a rating
+        foreach (var booking in bookings)
+        {
+            booking.HasRating = bookingRatings.Any(r => r.BookingId == booking.Id);
+        }
+
         ViewBag.AllBookings = allBookings;
         return View(bookings);
     }

@@ -1,722 +1,613 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using HomeOwners.Areas.Identity.Data;
-using HomeOwners.Models;
-using HomeOwners.Models.Users;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HomeOwners.Areas.Identity.Data;
+using HomeOwners.Models;
+using HomeOwners.Services;
 using Microsoft.AspNetCore.Authorization;
-using System.Text.Json;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomeOwners.Areas.Admin.Pages
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "RequireAdminRole")]
     public class ReportsModel : PageModel
     {
         private readonly HomeDbContext _context;
+        private readonly PaymentService _paymentService;
+        private readonly ServiceService _serviceService;
 
-        public ReportsModel(HomeDbContext context)
+        public ReportsModel(HomeDbContext context, PaymentService paymentService, ServiceService serviceService)
         {
             _context = context;
+            _paymentService = paymentService;
+            _serviceService = serviceService;
         }
 
+        // Filter properties
         [BindProperty(SupportsGet = true)]
-        public string ReportType { get; set; } = "Overview";
+        public string TimeRange { get; set; } = "month"; // week, month, quarter, year
 
-        [BindProperty(SupportsGet = true)]
-        public string DateRange { get; set; } = "30days";
+        // Revenue Report Data
+        public RevenueData Revenue { get; set; }
 
-        [BindProperty(SupportsGet = true)]
-        public DateTime? StartDate { get; set; }
+        // User Statistics
+        public UserStatistics UserStats { get; set; }
 
-        [BindProperty(SupportsGet = true)]
-        public DateTime? EndDate { get; set; }
+        // Service Request Statistics
+        public ServiceRequestStats ServiceStats { get; set; }
 
-        public string ReportTitle { get; set; }
-        public string ReportDescription { get; set; }
-        public string ReportPeriod { get; set; }
-        public List<MetricViewModel> KeyMetrics { get; set; }
-        public string PrimaryChartTitle { get; set; }
-        public string SecondaryChartTitle { get; set; }
-        public string DataTableTitle { get; set; }
-        public List<string> TableHeaders { get; set; }
-        public List<List<string>> TableData { get; set; }
-        public string AdditionalChart1Title { get; set; }
-        public string AdditionalChart2Title { get; set; }
-        public List<StatisticViewModel> Statistics { get; set; }
-        public List<InsightViewModel> Insights { get; set; }
+        // Property Statistics
+        public FacilityStats FacilityStatistics { get; set; }
 
-        // Chart data properties
-        public dynamic PrimaryChartData { get; set; }
-        public dynamic SecondaryChartData { get; set; }
-        public dynamic AdditionalChart1Data { get; set; }
-        public dynamic AdditionalChart2Data { get; set; }
+        // Forum Activity
+        public ForumActivityData ForumActivity { get; set; }
 
-        public async Task<IActionResult> OnGetAsync()
+        public async Task OnGetAsync()
         {
-            // Set date range based on selection
-            SetDateRange();
+            // Set date ranges based on selected time range
+            DateTime startDate, endDate = DateTime.Now;
 
-            // Generate the appropriate report based on type
-            switch (ReportType)
+            switch (TimeRange)
             {
-                case "Facilities":
-                    await GenerateFacilitiesReportAsync();
+                case "week":
+                    startDate = DateTime.Now.AddDays(-7);
                     break;
-                case "Services":
-                    await GenerateServicesReportAsync();
+                case "month":
+                    startDate = DateTime.Now.AddMonths(-1);
                     break;
-                case "Users":
-                    await GenerateUsersReportAsync();
-                    break;
-                case "Financial":
-                    await GenerateFinancialReportAsync();
-                    break;
-                default:
-                    await GenerateOverviewReportAsync();
-                    break;
-            }
-
-            return Page();
-        }
-
-        private void SetDateRange()
-        {
-            DateTime now = DateTime.Now;
-
-            switch (DateRange)
-            {
-                case "7days":
-                    StartDate = now.AddDays(-7);
-                    EndDate = now;
-                    ReportPeriod = $"{StartDate:MMM dd, yyyy} - {EndDate:MMM dd, yyyy}";
-                    break;
-                case "30days":
-                    StartDate = now.AddDays(-30);
-                    EndDate = now;
-                    ReportPeriod = $"{StartDate:MMM dd, yyyy} - {EndDate:MMM dd, yyyy}";
-                    break;
-                case "90days":
-                    StartDate = now.AddDays(-90);
-                    EndDate = now;
-                    ReportPeriod = $"{StartDate:MMM dd, yyyy} - {EndDate:MMM dd, yyyy}";
+                case "quarter":
+                    startDate = DateTime.Now.AddMonths(-3);
                     break;
                 case "year":
-                    StartDate = now.AddYears(-1);
-                    EndDate = now;
-                    ReportPeriod = $"{StartDate:MMM dd, yyyy} - {EndDate:MMM dd, yyyy}";
-                    break;
-                case "custom":
-                    if (StartDate.HasValue && EndDate.HasValue)
-                    {
-                        ReportPeriod = $"{StartDate:MMM dd, yyyy} - {EndDate:MMM dd, yyyy}";
-                    }
-                    else
-                    {
-                        StartDate = now.AddDays(-30);
-                        EndDate = now;
-                        ReportPeriod = $"{StartDate:MMM dd, yyyy} - {EndDate:MMM dd, yyyy}";
-                    }
+                default:
+                    startDate = DateTime.Now.AddYears(-1);
                     break;
             }
+
+            // Initialize data models
+            Revenue = new RevenueData();
+            UserStats = new UserStatistics();
+            ServiceStats = new ServiceRequestStats();
+            FacilityStatistics = new FacilityStats();
+            ForumActivity = new ForumActivityData();
+
+            // Generate Revenue Report Data
+            await GenerateRevenueReportAsync(startDate, endDate);
+
+            // Generate User Statistics
+            await GenerateUserStatsAsync(startDate, endDate);
+
+            // Generate Service Request Statistics
+            await GenerateServiceStatsAsync(startDate, endDate);
+
+            // Generate Facility Statistics
+            await GenerateFacilityStatsAsync(startDate, endDate);
+
+            // Generate Forum Activity Data
+            await GenerateForumActivityDataAsync(startDate, endDate);
         }
 
-        private async Task GenerateOverviewReportAsync()
+        private async Task GenerateRevenueReportAsync(DateTime startDate, DateTime endDate)
         {
-            ReportTitle = "System Overview Report";
-            ReportDescription = "Comprehensive overview of system performance, user activity, and key metrics";
+            // Get all payments within the date range
+            var payments = await _context.Payments
+                .Where(p => p.PaymentDate >= startDate && p.PaymentDate <= endDate)
+                .ToListAsync();
 
-            try
+            // Generate labels (x-axis) and data points based on the selected time range
+            Revenue.Labels = new List<string>();
+            Revenue.Data = new List<decimal>();
+
+            if (TimeRange == "week")
             {
-                // Count entities
-                int userCount = await _context.Users.CountAsync();
-                int bookingsCount = await _context.Bookings
-                    .Where(b => b.BookingDate >= StartDate && b.BookingDate <= EndDate)
-                    .CountAsync();
-                int serviceRequestsCount = await _context.ServiceRequests
-                    .Where(s => s.RequestDate >= StartDate && s.RequestDate <= EndDate)
-                    .CountAsync();
-                int facilityCount = await _context.Facilities.CountAsync();
-
-                // Calculate revenue
-                decimal totalRevenue = await _context.Payments
-                    .Where(p => p.PaymentDate >= StartDate && p.PaymentDate <= EndDate)
-                    .SumAsync(p => p.AmountPaid);
-
-                // Previous period metrics for comparison
-                DateTime previousStart = StartDate.Value.AddDays(-(EndDate.Value - StartDate.Value).Days);
-                DateTime previousEnd = StartDate.Value.AddDays(-1);
-
-                int previousBookings = await _context.Bookings
-                    .Where(b => b.BookingDate >= previousStart && b.BookingDate <= previousEnd)
-                    .CountAsync();
-
-                decimal previousRevenue = await _context.Payments
-                    .Where(p => p.PaymentDate >= previousStart && p.PaymentDate <= previousEnd)
-                    .SumAsync(p => p.AmountPaid);
-
-                // Calculate percent changes
-                string bookingsChange = bookingsCount > 0 && previousBookings > 0
-                    ? $"{Math.Round(((double)bookingsCount / previousBookings - 1) * 100)}% from previous period"
-                    : "";
-
-                string revenueChange = totalRevenue > 0 && previousRevenue > 0
-                    ? $"{Math.Round(((double)totalRevenue / (double)previousRevenue - 1) * 100)}% from previous period"
-                    : "";
-
-                // Set key metrics
-                KeyMetrics = new List<MetricViewModel>
+                // For weekly report, show daily revenue
+                for (int i = 6; i >= 0; i--)
                 {
-                    new MetricViewModel
-                    {
-                        Name = "Total Users",
-                        Value = userCount.ToString(),
-                        Icon = "bi-people-fill",
-                        IconClass = "bg-users"
-                    },
-                    new MetricViewModel
-                    {
-                        Name = "Bookings",
-                        Value = bookingsCount.ToString(),
-                        Icon = "bi-calendar-check-fill",
-                        IconClass = "bg-bookings",
-                        Change = bookingsChange,
-                        IsPositive = bookingsCount >= previousBookings
-                    },
-                    new MetricViewModel
-                    {
-                        Name = "Service Requests",
-                        Value = serviceRequestsCount.ToString(),
-                        Icon = "bi-tools",
-                        IconClass = "bg-services"
-                    },
-                    new MetricViewModel
-                    {
-                        Name = "Total Revenue",
-                        Value = $"₱{totalRevenue:N2}",
-                        Icon = "bi-cash-stack",
-                        IconClass = "bg-revenue",
-                        Change = revenueChange,
-                        IsPositive = totalRevenue >= previousRevenue
-                    }
-                };
+                    var date = DateTime.Now.AddDays(-i);
+                    Revenue.Labels.Add(date.ToString("ddd"));
 
-                // Prepare monthly data for primary chart (user registrations and bookings)
-                var monthlyData = new Dictionary<string, (int Users, int Bookings)>();
+                    var dailyPayments = payments
+                        .Where(p => p.PaymentDate.Date == date.Date)
+                        .Sum(p => p.AmountPaid);
 
-                // Get last 6 months
-                for (int i = 5; i >= 0; i--)
-                {
-                    var month = DateTime.Now.AddMonths(-i);
-                    var monthName = month.ToString("MMM yyyy");
-                    monthlyData[monthName] = (0, 0);
-                }
-
-                // Get users by registration date - Fixed: Use CreatedDate instead of CreationTime
-                var usersByMonth = await _context.HomeOwnerUsers
-                    .Where(u => u.CreatedDate >= DateTime.Now.AddMonths(-6))
-                    .GroupBy(u => new { Month = u.CreatedDate.Month, Year = u.CreatedDate.Year })
-                    .Select(g => new {
-                        Month = g.Key.Month,
-                        Year = g.Key.Year,
-                        Count = g.Count()
-                    })
-                    .ToListAsync();
-
-                // Get bookings by month
-                var bookingsByMonth = await _context.Bookings
-                    .Where(b => b.BookingDate >= DateTime.Now.AddMonths(-6))
-                    .GroupBy(b => new { Month = b.BookingDate.Month, Year = b.BookingDate.Year })
-                    .Select(g => new {
-                        Month = g.Key.Month,
-                        Year = g.Key.Year,
-                        Count = g.Count()
-                    })
-                    .ToListAsync();
-
-                // Populate monthly data
-                foreach (var user in usersByMonth)
-                {
-                    var month = new DateTime(user.Year, user.Month, 1);
-                    var monthName = month.ToString("MMM yyyy");
-                    if (monthlyData.ContainsKey(monthName))
-                    {
-                        monthlyData[monthName] = (user.Count, monthlyData[monthName].Bookings);
-                    }
-                }
-
-                foreach (var booking in bookingsByMonth)
-                {
-                    var month = new DateTime(booking.Year, booking.Month, 1);
-                    var monthName = month.ToString("MMM yyyy");
-                    if (monthlyData.ContainsKey(monthName))
-                    {
-                        monthlyData[monthName] = (monthlyData[monthName].Users, booking.Count);
-                    }
-                }
-
-                // Setup primary chart data
-                PrimaryChartTitle = "User Registrations & Bookings (Last 6 Months)";
-                PrimaryChartData = new
-                {
-                    type = "bar",
-                    data = new
-                    {
-                        labels = monthlyData.Keys.ToArray(),
-                        datasets = new[]
-                        {
-                            new
-                            {
-                                label = "New Users",
-                                data = monthlyData.Values.Select(v => v.Users).ToArray(),
-                                backgroundColor = "rgba(66, 153, 225, 0.7)",
-                                borderColor = "rgba(66, 153, 225, 1)",
-                                borderWidth = 1
-                            },
-                            new
-                            {
-                                label = "Bookings",
-                                data = monthlyData.Values.Select(v => v.Bookings).ToArray(),
-                                backgroundColor = "rgba(237, 137, 54, 0.7)",
-                                borderColor = "rgba(237, 137, 54, 1)",
-                                borderWidth = 1
-                            }
-                        }
-                    },
-                    options = new
-                    {
-                        responsive = true,
-                        scales = new
-                        {
-                            y = new
-                            {
-                                beginAtZero = true,
-                                title = new
-                                {
-                                    display = true,
-                                    text = "Count"
-                                }
-                            },
-                            x = new
-                            {
-                                title = new
-                                {
-                                    display = true,
-                                    text = "Month"
-                                }
-                            }
-                        }
-                    }
-                };
-
-                // Secondary chart: Service Distribution
-                SecondaryChartTitle = "Service Request Distribution";
-
-                // Get service request counts by service type
-                var serviceRequests = await _context.ServiceRequests
-                    .Where(sr => sr.RequestDate >= StartDate && sr.RequestDate <= EndDate)
-                    .Include(sr => sr.Service)
-                    .GroupBy(sr => sr.Service.Name)
-                    .Select(g => new { ServiceName = g.Key, Count = g.Count() })
-                    .ToListAsync();
-
-                SecondaryChartData = new
-                {
-                    type = "pie",
-                    data = new
-                    {
-                        labels = serviceRequests.Select(sr => sr.ServiceName).ToArray(),
-                        datasets = new[]
-                        {
-                            new
-                            {
-                                data = serviceRequests.Select(sr => sr.Count).ToArray(),
-                                backgroundColor = new[]
-                                {
-                                    "rgba(72, 187, 120, 0.7)",
-                                    "rgba(66, 153, 225, 0.7)",
-                                    "rgba(237, 137, 54, 0.7)",
-                                    "rgba(128, 90, 213, 0.7)",
-                                    "rgba(226, 74, 117, 0.7)",
-                                    "rgba(109, 120, 133, 0.7)"
-                                }
-                            }
-                        }
-                    },
-                    options = new
-                    {
-                        responsive = true
-                    }
-                };
-
-                // Table data: Recent bookings
-                DataTableTitle = "Recent Facility Bookings";
-                TableHeaders = new List<string> { "Facility", "Homeowner", "Booking Date", "Status", "Amount" };
-
-                var recentBookings = await _context.Bookings
-                    .Include(b => b.Facility)
-                    .OrderByDescending(b => b.BookingDate)
-                    .Take(10)
-                    .Select(b => new List<string>
-                    {
-                        b.Facility.Name,
-                        b.FullName,
-                        b.BookingDate.ToString("MMM dd, yyyy"),
-                        b.Status.ToString(),
-                        $"₱{b.TotalPrice:N2}"
-                    })
-                    .ToListAsync();
-
-                TableData = recentBookings;
-
-                // Additional Charts
-                AdditionalChart1Title = "Booking Status Distribution";
-                var bookingStatusCounts = await _context.Bookings
-                    .Where(b => b.BookingDate >= StartDate && b.BookingDate <= EndDate)
-                    .GroupBy(b => b.Status)
-                    .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
-                    .ToListAsync();
-
-                AdditionalChart1Data = new
-                {
-                    type = "doughnut",
-                    data = new
-                    {
-                        labels = bookingStatusCounts.Select(b => b.Status).ToArray(),
-                        datasets = new[]
-                        {
-                            new
-                            {
-                                data = bookingStatusCounts.Select(b => b.Count).ToArray(),
-                                backgroundColor = new[]
-                                {
-                                    "rgba(72, 187, 120, 0.7)",
-                                    "rgba(237, 137, 54, 0.7)",
-                                    "rgba(226, 74, 117, 0.7)",
-                                    "rgba(66, 153, 225, 0.7)"
-                                }
-                            }
-                        }
-                    },
-                    options = new
-                    {
-                        responsive = true
-                    }
-                };
-
-                AdditionalChart2Title = "Revenue by Month";
-                var revenueByMonth = await _context.Payments
-                    .Where(p => p.PaymentDate >= DateTime.Now.AddMonths(-6))
-                    .GroupBy(p => new { Month = p.PaymentDate.Month, Year = p.PaymentDate.Year })
-                    .Select(g => new {
-                        Month = g.Key.Month,
-                        Year = g.Key.Year,
-                        TotalRevenue = g.Sum(p => p.AmountPaid)
-                    })
-                    .ToListAsync();
-
-                var monthLabels = new List<string>();
-                var monthlyRevenues = new List<decimal>();
-
-                for (int i = 5; i >= 0; i--)
-                {
-                    var month = DateTime.Now.AddMonths(-i);
-                    var monthName = month.ToString("MMM yyyy");
-                    monthLabels.Add(monthName);
-
-                    var revenue = revenueByMonth
-                        .FirstOrDefault(r => r.Month == month.Month && r.Year == month.Year);
-
-                    monthlyRevenues.Add(revenue?.TotalRevenue ?? 0);
-                }
-
-                AdditionalChart2Data = new
-                {
-                    type = "line",
-                    data = new
-                    {
-                        labels = monthLabels,
-                        datasets = new[]
-                        {
-                            new
-                            {
-                                label = "Revenue",
-                                data = monthlyRevenues,
-                                borderColor = "rgba(128, 90, 213, 1)",
-                                backgroundColor = "rgba(128, 90, 213, 0.1)",
-                                tension = 0.4,
-                                fill = true
-                            }
-                        }
-                    },
-                    options = new
-                    {
-                        responsive = true,
-                        scales = new
-                        {
-                            y = new
-                            {
-                                beginAtZero = true,
-                                title = new
-                                {
-                                    display = true,
-                                    text = "Revenue (₱)"
-                                }
-                            }
-                        }
-                    }
-                };
-
-                // Statistical Summaries
-                Statistics = new List<StatisticViewModel>();
-
-                // Average bookings per day
-                double daysInRange = (EndDate.Value - StartDate.Value).TotalDays;
-                double avgBookingsPerDay = daysInRange > 0 ? bookingsCount / daysInRange : 0;
-                Statistics.Add(new StatisticViewModel
-                {
-                    Label = "Average Bookings Per Day",
-                    Value = avgBookingsPerDay.ToString("F1")
-                });
-
-                // Average revenue per booking
-                decimal avgRevenuePerBooking = bookingsCount > 0 ? totalRevenue / bookingsCount : 0;
-                Statistics.Add(new StatisticViewModel
-                {
-                    Label = "Average Revenue Per Booking",
-                    Value = $"₱{avgRevenuePerBooking:N2}"
-                });
-
-                // Most popular facility
-                var mostPopularFacility = await _context.Bookings
-                    .Where(b => b.BookingDate >= StartDate && b.BookingDate <= EndDate)
-                    .Include(b => b.Facility)
-                    .GroupBy(b => b.Facility.Name)
-                    .Select(g => new { FacilityName = g.Key, Count = g.Count() })
-                    .OrderByDescending(x => x.Count)
-                    .FirstOrDefaultAsync();
-
-                if (mostPopularFacility != null)
-                {
-                    Statistics.Add(new StatisticViewModel
-                    {
-                        Label = "Most Popular Facility",
-                        Value = $"{mostPopularFacility.FacilityName} ({mostPopularFacility.Count} bookings)"
-                    });
-                }
-
-                // Most requested service
-                var mostRequestedService = await _context.ServiceRequests
-                    .Where(sr => sr.RequestDate >= StartDate && sr.RequestDate <= EndDate)
-                    .Include(sr => sr.Service)
-                    .GroupBy(sr => sr.Service.Name)
-                    .Select(g => new { ServiceName = g.Key, Count = g.Count() })
-                    .OrderByDescending(x => x.Count)
-                    .FirstOrDefaultAsync();
-
-                if (mostRequestedService != null)
-                {
-                    Statistics.Add(new StatisticViewModel
-                    {
-                        Label = "Most Requested Service",
-                        Value = $"{mostRequestedService.ServiceName} ({mostRequestedService.Count} requests)"
-                    });
-                }
-
-                // Active home owners
-                int activeHomeOwners = await _context.HomeOwnerUsers.CountAsync(h => h.AccountStatus == "Active");
-                Statistics.Add(new StatisticViewModel
-                {
-                    Label = "Active Home Owners",
-                    Value = activeHomeOwners.ToString()
-                });
-
-                // Active staff members - Fixed: StaffUser doesn't have IsActive property
-                // Count all staff members instead
-                int staffCount = await _context.StaffUsers.CountAsync();
-                Statistics.Add(new StatisticViewModel
-                {
-                    Label = "Staff Members",
-                    Value = staffCount.ToString()
-                });
-
-                // Generate Insights
-                Insights = new List<InsightViewModel>();
-
-                // Booking trend insight
-                bool bookingsIncreasing = bookingsCount > previousBookings;
-                Insights.Add(new InsightViewModel
-                {
-                    Title = "Booking Trend Analysis",
-                    Icon = bookingsIncreasing ? "bi-graph-up-arrow" : "bi-graph-down-arrow",
-                    Text = bookingsIncreasing
-                        ? "Facility bookings are showing an upward trend compared to the previous period, indicating increasing community engagement."
-                        : "Facility bookings have decreased compared to the previous period. Consider promotional activities to increase usage."
-                });
-
-                // Revenue insight
-                bool revenueIncreasing = totalRevenue > previousRevenue;
-                Insights.Add(new InsightViewModel
-                {
-                    Title = "Revenue Performance",
-                    Icon = revenueIncreasing ? "bi-currency-dollar" : "bi-exclamation-triangle",
-                    Text = revenueIncreasing
-                        ? "Revenue has increased compared to the previous period, showing healthy financial growth."
-                        : "Revenue has decreased compared to the previous period. Consider reviewing pricing strategies."
-                });
-
-                // Facility utilization insight
-                if (mostPopularFacility != null)
-                {
-                    Insights.Add(new InsightViewModel
-                    {
-                        Title = "Facility Utilization",
-                        Icon = "bi-building",
-                        Text = $"The {mostPopularFacility.FacilityName} is your most booked facility. Consider similar amenities in future development plans."
-                    });
-                }
-
-                // Service popularity insight
-                if (mostRequestedService != null)
-                {
-                    Insights.Add(new InsightViewModel
-                    {
-                        Title = "Service Demand",
-                        Icon = "bi-tools",
-                        Text = $"The {mostRequestedService.ServiceName} service is in high demand. Consider expanding capacity for this service."
-                    });
+                    Revenue.Data.Add(dailyPayments);
                 }
             }
-            catch (Exception ex)
+            else if (TimeRange == "month")
             {
-                // Log the error and set default data
-                Console.Error.WriteLine($"Error generating overview report: {ex.Message}");
-                TempData["StatusMessage"] = "An error occurred while generating the report.";
-                TempData["StatusType"] = "Error";
+                // For monthly report, show weekly revenue
+                for (int i = 3; i >= 0; i--)
+                {
+                    var weekStart = DateTime.Now.AddDays(-i * 7 - 6);
+                    var weekEnd = DateTime.Now.AddDays(-i * 7);
+                    Revenue.Labels.Add($"{weekStart:MMM dd} - {weekEnd:MMM dd}");
 
-                // Set empty collections to prevent null reference exceptions
-                KeyMetrics = new List<MetricViewModel>();
-                TableHeaders = new List<string>();
-                TableData = new List<List<string>>();
-                Statistics = new List<StatisticViewModel>();
-                Insights = new List<InsightViewModel>();
+                    var weeklyPayments = payments
+                        .Where(p => p.PaymentDate >= weekStart && p.PaymentDate <= weekEnd)
+                        .Sum(p => p.AmountPaid);
+
+                    Revenue.Data.Add(weeklyPayments);
+                }
+            }
+            else if (TimeRange == "quarter")
+            {
+                // For quarterly report, show monthly revenue
+                for (int i = 2; i >= 0; i--)
+                {
+                    var month = DateTime.Now.AddMonths(-i);
+                    Revenue.Labels.Add(month.ToString("MMMM"));
+
+                    var monthlyPayments = payments
+                        .Where(p => p.PaymentDate.Month == month.Month && p.PaymentDate.Year == month.Year)
+                        .Sum(p => p.AmountPaid);
+
+                    Revenue.Data.Add(monthlyPayments);
+                }
+            }
+            else // year
+            {
+                // For yearly report, show quarterly revenue
+                for (int i = 3; i >= 0; i--)
+                {
+                    var quarterStart = DateTime.Now.AddMonths(-i * 3);
+                    Revenue.Labels.Add($"Q{(quarterStart.Month / 3) + 1}");
+
+                    var quarterlyPayments = payments
+                        .Where(p => p.PaymentDate.Month >= quarterStart.Month &&
+                                   p.PaymentDate.Month < quarterStart.Month + 3 &&
+                                   p.PaymentDate.Year == quarterStart.Year)
+                        .Sum(p => p.AmountPaid);
+
+                    Revenue.Data.Add(quarterlyPayments);
+                }
+            }
+
+            // Set the total revenue for the period
+            Revenue.TotalRevenue = payments.Sum(p => p.AmountPaid);
+
+            // Get payment methods breakdown
+            var paymentMethods = payments
+                .GroupBy(p => p.PaymentMethod)
+                .Select(g => new PaymentMethodData
+                {
+                    Method = g.Key.ToString(), // Convert enum to string
+                    Amount = g.Sum(p => p.AmountPaid),
+                    Percentage = (decimal)g.Count() / payments.Count * 100
+                })
+                .ToList();
+
+            Revenue.PaymentMethods = paymentMethods;
+
+            // Compare with previous period
+            var previousStartDate = startDate.AddDays(-(endDate - startDate).Days);
+            var previousEndDate = startDate.AddDays(-1);
+
+            var previousPayments = await _context.Payments
+                .Where(p => p.PaymentDate >= previousStartDate && p.PaymentDate <= previousEndDate)
+                .ToListAsync();
+
+            var previousTotal = previousPayments.Sum(p => p.AmountPaid);
+
+            if (previousTotal > 0)
+            {
+                Revenue.ChangePercentage = (Revenue.TotalRevenue - previousTotal) / previousTotal * 100;
+            }
+            else
+            {
+                Revenue.ChangePercentage = 100; // If there were no payments in the previous period
             }
         }
 
-        private async Task GenerateFacilitiesReportAsync()
+        private async Task GenerateUserStatsAsync(DateTime startDate, DateTime endDate)
         {
-            ReportTitle = "Facilities Usage Report";
-            ReportDescription = "Detailed analysis of facility bookings, usage patterns, and revenue generation";
+            // Total users
+            UserStats.TotalUsers = await _context.HomeOwnerUsers.CountAsync();
 
-            // Implementation similar to overview but focused on facilities
-            // ...
+            // New users in the selected period
+            UserStats.NewUsers = await _context.HomeOwnerUsers
+                .Where(u => u.CreatedDate >= startDate && u.CreatedDate <= endDate)
+                .CountAsync();
 
-            // Example placeholder implementation
-            KeyMetrics = new List<MetricViewModel>();
-            TableHeaders = new List<string>();
-            TableData = new List<List<string>>();
-            Statistics = new List<StatisticViewModel>();
-            Insights = new List<InsightViewModel>();
+            // Active users (with activity in the last period)
+            var activeUserIds = await _context.ServiceRequests
+                .Where(s => s.CreatedDate >= startDate)
+                .Select(s => s.UserId)
+                .Distinct()
+                .ToListAsync();
 
-            // Initialize chart data with empty placeholder values
-            PrimaryChartData = new { type = "bar", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
-            SecondaryChartData = new { type = "pie", data = new { labels = new string[0], datasets = new[] { new { data = new int[0] } } } };
-            AdditionalChart1Data = new { type = "bar", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
-            AdditionalChart2Data = new { type = "line", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
+            var activeBookingUserIds = await _context.Bookings
+                .Where(b => b.CreatedDate >= startDate)
+                .Select(b => b.UserId)
+                .Distinct()
+                .ToListAsync();
+
+            activeUserIds.AddRange(activeBookingUserIds);
+            UserStats.ActiveUsers = activeUserIds.Distinct().Count();
+
+            // Calculate active percentage
+            UserStats.ActivePercentage = (double)UserStats.ActiveUsers / UserStats.TotalUsers * 100;
+
+            // User growth trend
+            UserStats.GrowthLabels = new List<string>();
+            UserStats.GrowthData = new List<int>();
+
+            // Generate growth data based on time range
+            if (TimeRange == "week" || TimeRange == "month")
+            {
+                // Weekly growth over days
+                int days = TimeRange == "week" ? 7 : 30;
+                for (int i = days - 1; i >= 0; i--)
+                {
+                    var date = DateTime.Now.AddDays(-i);
+                    UserStats.GrowthLabels.Add(date.ToString("MMM dd"));
+
+                    var newUsersCount = await _context.HomeOwnerUsers
+                        .Where(u => u.CreatedDate.Date == date.Date)
+                        .CountAsync();
+
+                    UserStats.GrowthData.Add(newUsersCount);
+                }
+            }
+            else // quarter or year
+            {
+                // Monthly growth
+                int months = TimeRange == "quarter" ? 3 : 12;
+                for (int i = months - 1; i >= 0; i--)
+                {
+                    var month = DateTime.Now.AddMonths(-i);
+                    UserStats.GrowthLabels.Add(month.ToString("MMM yy"));
+
+                    var newUsersCount = await _context.HomeOwnerUsers
+                        .Where(u => u.CreatedDate.Month == month.Month && u.CreatedDate.Year == month.Year)
+                        .CountAsync();
+
+                    UserStats.GrowthData.Add(newUsersCount);
+                }
+            }
         }
 
-        private async Task GenerateServicesReportAsync()
+        private async Task GenerateServiceStatsAsync(DateTime startDate, DateTime endDate)
         {
-            ReportTitle = "Services Performance Report";
-            ReportDescription = "Analysis of service requests, response times, and customer satisfaction";
+            // Get service requests in the period
+            var serviceRequests = await _context.ServiceRequests
+                .Where(s => s.CreatedDate >= startDate && s.CreatedDate <= endDate)
+                .ToListAsync();
 
-            // Implementation similar to overview but focused on services
-            // ...
+            ServiceStats.TotalRequests = serviceRequests.Count;
 
-            // Example placeholder implementation
-            KeyMetrics = new List<MetricViewModel>();
-            TableHeaders = new List<string>();
-            TableData = new List<List<string>>();
-            Statistics = new List<StatisticViewModel>();
-            Insights = new List<InsightViewModel>();
+            // Status breakdown
+            var pendingCount = serviceRequests.Count(s => s.Status == ServiceRequestStatus.Pending);
+            var approvedCount = serviceRequests.Count(s => s.Status == ServiceRequestStatus.Approved);
+            var doneCount = serviceRequests.Count(s => s.Status == ServiceRequestStatus.Done);
+            var rejectedCount = serviceRequests.Count(s => s.Status == ServiceRequestStatus.Rejected);
 
-            // Initialize chart data with empty placeholder values
-            PrimaryChartData = new { type = "bar", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
-            SecondaryChartData = new { type = "pie", data = new { labels = new string[0], datasets = new[] { new { data = new int[0] } } } };
-            AdditionalChart1Data = new { type = "bar", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
-            AdditionalChart2Data = new { type = "line", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
+            ServiceStats.StatusLabels = new List<string> { "Pending", "Approved", "Completed", "Rejected" };
+            ServiceStats.StatusData = new List<int> { pendingCount, approvedCount, doneCount, rejectedCount };
+
+            // Service type breakdown
+            var serviceTypes = await _context.ServiceRequests
+                .Where(s => s.CreatedDate >= startDate && s.CreatedDate <= endDate)
+                .GroupBy(s => s.ServiceId)
+                .Select(g => new { ServiceId = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            ServiceStats.ServiceTypeLabels = new List<string>();
+            ServiceStats.ServiceTypeData = new List<int>();
+
+            foreach (var serviceType in serviceTypes.OrderByDescending(s => s.Count).Take(5))
+            {
+                var service = await _context.Services.FindAsync(serviceType.ServiceId);
+                ServiceStats.ServiceTypeLabels.Add(service?.Name ?? "Unknown");
+                ServiceStats.ServiceTypeData.Add(serviceType.Count);
+            }
+
+            // Average resolution time
+            var completedRequests = await _context.ServiceRequests
+                .Where(s => s.Status == ServiceRequestStatus.Done &&
+                         s.CreatedDate >= startDate)
+                .ToListAsync();
+
+            if (completedRequests.Any())
+            {
+                // Since CompletedDate is missing, estimate based on request creation date
+                // You may want to adjust this logic based on your actual data structure
+                ServiceStats.AvgResolutionTime = TimeSpan.FromDays(3); // Default placeholder value
+
+                // Alternatively, if you have a field that records completion:
+                // ServiceStats.AvgResolutionTime = TimeSpan.FromMinutes(
+                //    completedRequests.Average(s => (s.LastUpdatedDate - s.CreatedDate).TotalMinutes)
+                // );
+            }
+            else
+            {
+                ServiceStats.AvgResolutionTime = TimeSpan.Zero;
+            }
+
+            // Request volume over time
+            ServiceStats.VolumeLabels = new List<string>();
+            ServiceStats.VolumeData = new List<int>();
+
+            if (TimeRange == "week")
+            {
+                // Daily volume for week
+                for (int i = 6; i >= 0; i--)
+                {
+                    var date = DateTime.Now.AddDays(-i);
+                    ServiceStats.VolumeLabels.Add(date.ToString("ddd"));
+
+                    var count = serviceRequests.Count(s => s.CreatedDate.Date == date.Date);
+                    ServiceStats.VolumeData.Add(count);
+                }
+            }
+            else if (TimeRange == "month")
+            {
+                // Weekly volume for month
+                for (int i = 3; i >= 0; i--)
+                {
+                    var weekStart = DateTime.Now.AddDays(-i * 7 - 6);
+                    var weekEnd = DateTime.Now.AddDays(-i * 7);
+                    ServiceStats.VolumeLabels.Add($"Week {4 - i}");
+
+                    var count = serviceRequests.Count(s =>
+                        s.CreatedDate >= weekStart && s.CreatedDate <= weekEnd);
+                    ServiceStats.VolumeData.Add(count);
+                }
+            }
+            else // quarter or year
+            {
+                // Monthly volume
+                int months = TimeRange == "quarter" ? 3 : 12;
+                for (int i = months - 1; i >= 0; i--)
+                {
+                    var month = DateTime.Now.AddMonths(-i);
+                    ServiceStats.VolumeLabels.Add(month.ToString("MMM"));
+
+                    var count = serviceRequests.Count(s =>
+                        s.CreatedDate.Month == month.Month && s.CreatedDate.Year == month.Year);
+                    ServiceStats.VolumeData.Add(count);
+                }
+            }
         }
 
-        private async Task GenerateUsersReportAsync()
+        private async Task GenerateFacilityStatsAsync(DateTime startDate, DateTime endDate)
         {
-            ReportTitle = "User Activity Report";
-            ReportDescription = "Analysis of user registrations, engagement patterns, and account status";
+            // Get facility bookings in the period
+            var bookings = await _context.Bookings
+                .Include(b => b.Facility)
+                .Where(b => b.CreatedDate >= startDate && b.CreatedDate <= endDate)
+                .ToListAsync();
 
-            // Implementation similar to overview but focused on users
-            // ...
+            FacilityStatistics.TotalBookings = bookings.Count;
 
-            // Example placeholder implementation
-            KeyMetrics = new List<MetricViewModel>();
-            TableHeaders = new List<string>();
-            TableData = new List<List<string>>();
-            Statistics = new List<StatisticViewModel>();
-            Insights = new List<InsightViewModel>();
+            // Most popular facilities
+            var facilityUsage = bookings
+                .GroupBy(b => b.FacilityId)
+                .Select(g => new { FacilityId = g.Key, Name = g.First().Facility?.Name, Count = g.Count() })
+                .OrderByDescending(f => f.Count)
+                .Take(5)
+                .ToList();
 
-            // Initialize chart data with empty placeholder values
-            PrimaryChartData = new { type = "bar", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
-            SecondaryChartData = new { type = "pie", data = new { labels = new string[0], datasets = new[] { new { data = new int[0] } } } };
-            AdditionalChart1Data = new { type = "bar", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
-            AdditionalChart2Data = new { type = "line", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
+            FacilityStatistics.PopularFacilityLabels = facilityUsage.Select(f => f.Name ?? "Unknown").ToList();
+            FacilityStatistics.PopularFacilityData = facilityUsage.Select(f => f.Count).ToList();
+
+            // Occupancy rate
+            var facilities = await _context.Facilities.ToListAsync();
+            FacilityStatistics.TotalFacilities = facilities.Count;
+
+            int totalBookingHours = 0;
+            int totalAvailableHours = 0;
+
+            foreach (var facility in facilities)
+            {
+                var facilityBookings = bookings.Where(b => b.FacilityId == facility.Id).ToList();
+
+                // Calculate total hours booked
+                foreach (var booking in facilityBookings)
+                {
+                    totalBookingHours += (int)(booking.EndTime - booking.StartTime).TotalHours;
+                }
+
+                // Calculate total available hours (assuming 12h/day)
+                int daysInPeriod = (int)(endDate - startDate).TotalDays + 1;
+                totalAvailableHours += 12 * daysInPeriod;
+            }
+
+            // Calculate occupancy rate
+            if (totalAvailableHours > 0)
+            {
+                FacilityStatistics.OccupancyRate = (double)totalBookingHours / totalAvailableHours * 100;
+            }
+
+            // Revenue by facility
+            FacilityStatistics.RevenueFacilityLabels = new List<string>();
+            FacilityStatistics.RevenueFacilityData = new List<decimal>();
+
+            var facilityRevenue = await _context.Payments
+                .Include(p => p.Booking)
+                .Include(p => p.Booking.Facility)
+                .Where(p => p.PaymentDate >= startDate && p.PaymentDate <= endDate)
+                .GroupBy(p => p.Booking.FacilityId)
+                .Select(g => new {
+                    FacilityId = g.Key,
+                    Name = g.First().Booking.Facility.Name,
+                    Revenue = g.Sum(p => p.AmountPaid)
+                })
+                .OrderByDescending(f => f.Revenue)
+                .Take(5)
+                .ToListAsync();
+
+            FacilityStatistics.RevenueFacilityLabels = facilityRevenue.Select(f => f.Name).ToList();
+            FacilityStatistics.RevenueFacilityData = facilityRevenue.Select(f => f.Revenue).ToList();
         }
 
-        private async Task GenerateFinancialReportAsync()
+        private async Task GenerateForumActivityDataAsync(DateTime startDate, DateTime endDate)
         {
-            ReportTitle = "Financial Performance Report";
-            ReportDescription = "Comprehensive overview of revenue streams, payment history, and financial trends";
+            // Total posts and comments in the period
+            ForumActivity.TotalPosts = await _context.ForumPosts
+                .Where(p => p.PostedDate >= startDate && p.PostedDate <= endDate)
+                .CountAsync();
 
-            // Implementation similar to overview but focused on financial data
-            // ...
+            ForumActivity.TotalComments = await _context.ForumComments
+                .Where(c => c.PostedDate >= startDate && c.PostedDate <= endDate)
+                .CountAsync();
 
-            // Example placeholder implementation
-            KeyMetrics = new List<MetricViewModel>();
-            TableHeaders = new List<string>();
-            TableData = new List<List<string>>();
-            Statistics = new List<StatisticViewModel>();
-            Insights = new List<InsightViewModel>();
+            // Popular categories
+            var categoryActivity = await _context.ForumPosts
+                .Where(p => p.PostedDate >= startDate && p.PostedDate <= endDate)
+                .GroupBy(p => p.Category)
+                .Select(g => new { Category = g.Key, Count = g.Count() })
+                .OrderByDescending(c => c.Count)
+                .Take(5)
+                .ToListAsync();
 
-            // Initialize chart data with empty placeholder values
-            PrimaryChartData = new { type = "bar", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
-            SecondaryChartData = new { type = "pie", data = new { labels = new string[0], datasets = new[] { new { data = new int[0] } } } };
-            AdditionalChart1Data = new { type = "bar", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
-            AdditionalChart2Data = new { type = "line", data = new { labels = new string[0], datasets = new[] { new { label = "", data = new int[0] } } } };
+            ForumActivity.CategoryLabels = categoryActivity.Select(c => c.Category).ToList();
+            ForumActivity.CategoryData = categoryActivity.Select(c => c.Count).ToList();
+
+            // Top contributors
+            var topContributors = await _context.ForumPosts
+                .Where(p => p.PostedDate >= startDate && p.PostedDate <= endDate)
+                .GroupBy(p => p.UserId)
+                .Select(g => new { UserId = g.Key, UserName = g.First().UserName, Count = g.Count() })
+                .OrderByDescending(c => c.Count)
+                .Take(5)
+                .ToListAsync();
+
+            ForumActivity.ContributorLabels = topContributors.Select(c => c.UserName).ToList();
+            ForumActivity.ContributorData = topContributors.Select(c => c.Count).ToList();
+
+            // Activity trend over time
+            ForumActivity.ActivityLabels = new List<string>();
+            ForumActivity.PostsData = new List<int>();
+            ForumActivity.CommentsData = new List<int>();
+
+            if (TimeRange == "week")
+            {
+                // Daily activity for week
+                for (int i = 6; i >= 0; i--)
+                {
+                    var date = DateTime.Now.AddDays(-i);
+                    ForumActivity.ActivityLabels.Add(date.ToString("ddd"));
+
+                    var postsCount = await _context.ForumPosts
+                        .Where(p => p.PostedDate.Date == date.Date)
+                        .CountAsync();
+
+                    var commentsCount = await _context.ForumComments
+                        .Where(c => c.PostedDate.Date == date.Date)
+                        .CountAsync();
+
+                    ForumActivity.PostsData.Add(postsCount);
+                    ForumActivity.CommentsData.Add(commentsCount);
+                }
+            }
+            else if (TimeRange == "month")
+            {
+                // Weekly activity for month
+                for (int i = 3; i >= 0; i--)
+                {
+                    var weekStart = DateTime.Now.AddDays(-i * 7 - 6);
+                    var weekEnd = DateTime.Now.AddDays(-i * 7);
+                    ForumActivity.ActivityLabels.Add($"Week {4 - i}");
+
+                    var postsCount = await _context.ForumPosts
+                        .Where(p => p.PostedDate >= weekStart && p.PostedDate <= weekEnd)
+                        .CountAsync();
+
+                    var commentsCount = await _context.ForumComments
+                        .Where(c => c.PostedDate >= weekStart && c.PostedDate <= weekEnd)
+                        .CountAsync();
+
+                    ForumActivity.PostsData.Add(postsCount);
+                    ForumActivity.CommentsData.Add(commentsCount);
+                }
+            }
+            else // quarter or year
+            {
+                // Monthly activity
+                int months = TimeRange == "quarter" ? 3 : 12;
+                for (int i = months - 1; i >= 0; i--)
+                {
+                    var month = DateTime.Now.AddMonths(-i);
+                    ForumActivity.ActivityLabels.Add(month.ToString("MMM"));
+
+                    var postsCount = await _context.ForumPosts
+                        .Where(p => p.PostedDate.Month == month.Month && p.PostedDate.Year == month.Year)
+                        .CountAsync();
+
+                    var commentsCount = await _context.ForumComments
+                        .Where(c => c.PostedDate.Month == month.Month && c.PostedDate.Year == month.Year)
+                        .CountAsync();
+
+                    ForumActivity.PostsData.Add(postsCount);
+                    ForumActivity.CommentsData.Add(commentsCount);
+                }
+            }
         }
     }
 
-    // Helper view models
-    public class MetricViewModel
+    // Supporting model classes
+    public class RevenueData
     {
-        public string Name { get; set; }
-        public string Value { get; set; }
-        public string Icon { get; set; }
-        public string IconClass { get; set; }
-        public string Change { get; set; } = "";
-        public bool IsPositive { get; set; } = true;
+        public List<string> Labels { get; set; } = new List<string>();
+        public List<decimal> Data { get; set; } = new List<decimal>();
+        public decimal TotalRevenue { get; set; }
+        public decimal ChangePercentage { get; set; }
+        public List<PaymentMethodData> PaymentMethods { get; set; } = new List<PaymentMethodData>();
     }
 
-    public class StatisticViewModel
+    public class PaymentMethodData
     {
-        public string Label { get; set; }
-        public string Value { get; set; }
+        public string Method { get; set; }
+        public decimal Amount { get; set; }
+        public decimal Percentage { get; set; }
     }
 
-    public class InsightViewModel
+    public class UserStatistics
     {
-        public string Title { get; set; }
-        public string Icon { get; set; }
-        public string Text { get; set; }
+        public int TotalUsers { get; set; }
+        public int NewUsers { get; set; }
+        public int ActiveUsers { get; set; }
+        public double ActivePercentage { get; set; }
+        public List<string> GrowthLabels { get; set; } = new List<string>();
+        public List<int> GrowthData { get; set; } = new List<int>();
+    }
+
+    public class ServiceRequestStats
+    {
+        public int TotalRequests { get; set; }
+        public List<string> StatusLabels { get; set; } = new List<string>();
+        public List<int> StatusData { get; set; } = new List<int>();
+        public List<string> ServiceTypeLabels { get; set; } = new List<string>();
+        public List<int> ServiceTypeData { get; set; } = new List<int>();
+        public TimeSpan AvgResolutionTime { get; set; }
+        public List<string> VolumeLabels { get; set; } = new List<string>();
+        public List<int> VolumeData { get; set; } = new List<int>();
+    }
+
+    public class FacilityStats
+    {
+        public int TotalFacilities { get; set; }
+        public int TotalBookings { get; set; }
+        public List<string> PopularFacilityLabels { get; set; } = new List<string>();
+        public List<int> PopularFacilityData { get; set; } = new List<int>();
+        public double OccupancyRate { get; set; }
+        public List<string> RevenueFacilityLabels { get; set; } = new List<string>();
+        public List<decimal> RevenueFacilityData { get; set; } = new List<decimal>();
+    }
+
+    public class ForumActivityData
+    {
+        public int TotalPosts { get; set; }
+        public int TotalComments { get; set; }
+        public List<string> CategoryLabels { get; set; } = new List<string>();
+        public List<int> CategoryData { get; set; } = new List<int>();
+        public List<string> ContributorLabels { get; set; } = new List<string>();
+        public List<int> ContributorData { get; set; } = new List<int>();
+        public List<string> ActivityLabels { get; set; } = new List<string>();
+        public List<int> PostsData { get; set; } = new List<int>();
+        public List<int> CommentsData { get; set; } = new List<int>();
     }
 }

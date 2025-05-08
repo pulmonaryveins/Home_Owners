@@ -136,104 +136,189 @@
         var statusClass = Model.StatusType == "Success" ? "success" : "danger";
         var statusIcon = Model.StatusType == "Success" ? "check-circle" : "exclamation-triangle";
         <div class="alert alert-@statusClass alert-dismissible fade show" role="alert">
-            <i class="bi bi-@statusIcon me-2"></i> @Model.StatusMessage
+            <div class="d-flex align-items-center">
+                <i class="bi bi-@statusIcon me-2"></i> @Model.StatusMessage
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <!-- Tasks Filter Tabs -->
-    <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-            <a class="nav-link @(Request.Query["filter"] != "completed" && Request.Query["filter"] != "active" ? "active" : "")"
-               asp-page="./Tasks">All Tasks</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Request.Query["filter"] == "active" ? "active" : "")"
-               asp-page="./Tasks" asp-route-filter="active">Active Tasks</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link @(Request.Query["filter"] == "completed" ? "active" : "")"
-               asp-page="./Tasks" asp-route-filter="completed">Completed Tasks</a>
-        </li>
-    </ul>
+    <!-- Task Progress Bar -->
+    @{
+        int totalTasks = Model.Tasks.Count + Model.CompletedTasks.Count;
+        int completedTasks = Model.CompletedTasks.Count;
+        double completionPercentage = totalTasks > 0 ? (double)completedTasks / totalTasks * 100 : 0;
+    }
+    <div class="task-progress-container mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="task-stats">
+                <span class="fw-medium">Task Progress</span>
+                <span class="text-muted ms-2">(@completedTasks of @totalTasks tasks completed)</span>
+            </div>
+            <div class="completion-percentage">
+                <span class="badge rounded-pill">@completionPercentage.ToString("0")%</span>
+            </div>
+        </div>
+        <div class="progress" style="height: 8px;">
+            <div class="progress-bar" role="progressbar" 
+                 style="width: @completionPercentage%;" 
+                 aria-valuenow="@completionPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+    </div>
 
+    <!-- Tasks Filter Tabs -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <ul class="nav nav-pills card-header-pills" id="taskTabs">
+                <li class="nav-item">
+                    <a class="nav-link @(Request.Query["filter"] != "completed" && Request.Query["filter"] != "active" ? "active" : "")"
+                       asp-page="./Tasks">
+                       <i class="bi bi-grid-3x3-gap me-2"></i>All Tasks
+                       <span class="badge ms-1">@totalTasks</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Request.Query["filter"] == "active" ? "active" : "")"
+                       asp-page="./Tasks" asp-route-filter="active">
+                       <i class="bi bi-hourglass-split me-2"></i>Active Tasks
+                       <span class="badge ms-1">@Model.Tasks.Count(t => !t.IsComplete)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(Request.Query["filter"] == "completed" ? "active" : "")"
+                       asp-page="./Tasks" asp-route-filter="completed">
+                       <i class="bi bi-check2-all me-2"></i>Completed Tasks
+                       <span class="badge ms-1">@completedTasks</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Priority Filter -->
+        <div class="card-body border-bottom">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-sm btn-outline-secondary filter-btn active" data-priority="all">
+                    All Priorities
+                </button>
+                <button class="btn btn-sm btn-outline-success filter-btn" data-priority="low">
+                    <i class="bi bi-flag me-1"></i>Low
+                </button>
+                <button class="btn btn-sm btn-outline-info filter-btn" data-priority="medium">
+                    <i class="bi bi-flag-fill me-1"></i>Medium
+                </button>
+                <button class="btn btn-sm btn-outline-warning filter-btn" data-priority="high">
+                    <i class="bi bi-flag-fill me-1"></i>High
+                </button>
+                <button class="btn btn-sm btn-outline-danger filter-btn" data-priority="urgent">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Urgent
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Active Tasks -->
-    <div class="card mb-4">
-        <div class="card-header bg-white">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
                 <i class="bi bi-hourglass-split me-2"></i>Active Tasks
             </h5>
+            <span class="badge bg-primary rounded-pill">@Model.Tasks.Count(t => !t.IsComplete)</span>
         </div>
         <div class="card-body">
             @if (Model.Tasks.Any(t => !t.IsComplete))
             {
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 5%;" class="text-center">Status</th>
-                                <th style="width: 40%;">Task</th>
-                                <th style="width: 15%;">Priority</th>
-                                <th style="width: 15%;">Due Date</th>
-                                <th style="width: 25%;" class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var task in Model.Tasks.Where(t => !t.IsComplete).OrderByDescending(t => t.Priority).ThenBy(t => t.DueDate))
+                <div class="task-list-container">
+                    @{
+                        var groupedTasks = Model.Tasks.Where(t => !t.IsComplete)
+                            .OrderByDescending(t => t.Priority)
+                            .ThenBy(t => t.DueDate)
+                            .GroupBy(t => {
+                                var dueDate = t.DueDate.Date;
+                                var today = DateTime.Now.Date;
+                                var daysDiff = (dueDate - today).TotalDays;
+                                
+                                if (daysDiff < 0) return "Overdue";
+                                if (daysDiff == 0) return "Today";
+                                if (daysDiff == 1) return "Tomorrow";
+                                if (daysDiff < 7) return "This Week";
+                                return "Later";
+                            });
+                    }
+                    
+                    @foreach (var group in groupedTasks)
+                    {
+                        <div class="task-group mb-3">
+                            <div class="task-group-title">
+                                @{
+                                    string iconClass = group.Key switch {
+                                        "Overdue" => "bi-exclamation-octagon text-danger",
+                                        "Today" => "bi-calendar-event text-warning",
+                                        "Tomorrow" => "bi-calendar-day text-primary",
+                                        "This Week" => "bi-calendar-week text-info",
+                                        _ => "bi-calendar text-muted"
+                                    };
+                                }
+                                <i class="bi @iconClass me-2"></i>@group.Key
+                                <span class="badge bg-secondary rounded-pill ms-2">@group.Count()</span>
+                            </div>
+                            
+                            @foreach (var task in group)
                             {
-                                <tr>
-                                    <td class="text-center">
-                                        <form method="post" asp-page-handler="ToggleCompletion" asp-route-id="@task.Id">
-                                            <div class="form-check d-flex justify-content-center">
-                                                <input class="form-check-input task-checkbox"
-                                                       type="checkbox"
-                                                       id="task-@task.Id"
-                                                @(task.IsComplete ? "checked" : "")
-                                                       onchange="this.form.submit()">
+                                string priorityClass = task.Priority switch {
+                                    TaskPriority.Low => "task-priority-low",
+                                    TaskPriority.Medium => "task-priority-medium",
+                                    TaskPriority.High => "task-priority-high",
+                                    TaskPriority.Urgent => "task-priority-urgent",
+                                    _ => "task-priority-default"
+                                };
+                                
+                                string priorityIcon = task.Priority switch {
+                                    TaskPriority.Low => "bi-flag",
+                                    TaskPriority.Medium => "bi-flag-fill",
+                                    TaskPriority.High => "bi-flag-fill",
+                                    TaskPriority.Urgent => "bi-exclamation-triangle-fill",
+                                    _ => "bi-dash-circle"
+                                };
+
+                                string priorityBadgeClass = task.Priority switch {
+                                    TaskPriority.Low => "success",
+                                    TaskPriority.Medium => "info",
+                                    TaskPriority.High => "warning",
+                                    TaskPriority.Urgent => "danger",
+                                    _ => "secondary"
+                                };
+                                
+                                <div class="task-item @priorityClass" data-priority="@task.Priority.ToString().ToLower()">
+                                    <div class="task-status">
+                                        <form method="post" asp-page-handler="ToggleCompletion" asp-route-id="@task.Id" class="task-checkbox-form">
+                                            <div class="form-check">
+                                                <input class="form-check-input task-checkbox" 
+                                                       type="checkbox" 
+                                                       id="task-@task.Id" 
+                                                       @(task.IsComplete ? "checked" : "")>
+                                                <label class="form-check-label" for="task-@task.Id"></label>
                                             </div>
                                         </form>
-                                    </td>
-                                    <td>
-                                        <span class="fw-medium">@task.Title</span>
+                                    </div>
+                                    <div class="task-content">
+                                        <div class="task-title">@task.Title</div>
                                         @if (!string.IsNullOrEmpty(task.Description))
                                         {
-                                            <p class="text-muted small mb-0 text-truncate">@task.Description</p>
+                                            <div class="task-description">@task.Description</div>
                                         }
-                                    </td>
-                                    <td>
-                                        @{
-                                            string badgeClass = task.Priority switch
-                                            {
-                                                TaskPriority.Low => "bg-success",
-                                                TaskPriority.Medium => "bg-info",
-                                                TaskPriority.High => "bg-warning",
-                                                TaskPriority.Urgent => "bg-danger",
-                                                _ => "bg-secondary"
-                                            };
-                                        }
-                                        <span class="badge @badgeClass">@task.Priority</span>
-                                    </td>
-                                    <td>
-                                        @{
-                                            var dueDate = task.DueDate.Date;
-                                            var today = DateTime.Now.Date;
-                                            var daysDiff = (dueDate - today).TotalDays;
-                                            string dateClass = daysDiff < 0 ? "text-danger" :
-                                            daysDiff == 0 ? "text-warning" :
-                                            daysDiff <= 2 ? "text-info" : "";
-                                        }
-                                        <span class="@dateClass">@task.DueDate.ToString("MMM d, yyyy")</span>
-                                        @if (daysDiff < 0)
-                                        {
-                                            <span class="badge bg-danger ms-1">Overdue</span>
-                                        }
-                                        else if (daysDiff == 0)
-                                        {
-                                            <span class="badge bg-warning ms-1">Today</span>
-                                        }
-                                    </td>
-                                    <td class="text-end">
-                                        <button type="button" class="btn btn-sm btn-outline-primary me-1 edit-task-btn"
+                                        <div class="task-meta">
+                                            <span class="task-priority">
+                                                <span class="status-badge @priorityBadgeClass">
+                                                    <i class="bi @priorityIcon"></i> @task.Priority
+                                                </span>
+                                            </span>
+                                            <span class="task-due-date">
+                                                <i class="bi bi-calendar3"></i> @task.DueDate.ToString("MMM d, yyyy")
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="task-actions">
+                                        <button type="button" class="btn btn-sm btn-light edit-task-btn"
                                                 data-id="@task.Id"
                                                 data-title="@task.Title"
                                                 data-description="@task.Description"
@@ -243,26 +328,28 @@
                                             <i class="bi bi-pencil"></i>
                                         </button>
                                         <form method="post" asp-page-handler="Delete" asp-route-id="@task.Id" class="d-inline">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            <button type="submit" class="btn btn-sm btn-light delete-task-btn"
                                                     onclick="return confirm('Are you sure you want to delete this task?')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
-                                    </td>
-                                </tr>
+                                    </div>
+                                </div>
                             }
-                        </tbody>
-                    </table>
+                        </div>
+                    }
                 </div>
             }
             else
             {
-                <div class="text-center py-5">
-                    <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
-                    <h4 class="mt-3">No active tasks</h4>
-                    <p class="text-muted">All caught up! Create a new task to get started.</p>
-                    <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#createTaskModal">
-                        <i class="bi bi-plus-circle me-2"></i>Create Task
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <h4>All caught up!</h4>
+                    <p class="text-muted">You have no active tasks at the moment.</p>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+                        <i class="bi bi-plus-circle me-2"></i>Create a new task
                     </button>
                 </div>
             }
@@ -272,12 +359,13 @@
     <!-- Completed Tasks -->
     @if (Model.CompletedTasks.Any() && Request.Query["filter"] != "active")
     {
-        <div class="card">
+        <div class="card shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">
                     <i class="bi bi-check2-all me-2"></i>Completed Tasks
+                    <span class="badge bg-success rounded-pill ms-2">@Model.CompletedTasks.Count</span>
                 </h5>
-                <button class="btn btn-sm btn-link" type="button"
+                <button class="btn btn-sm btn-link collapse-btn" type="button"
                         data-bs-toggle="collapse" data-bs-target="#completedTasksCollapse"
                         aria-expanded="false" aria-controls="completedTasksCollapse">
                     <i class="bi bi-chevron-down"></i>
@@ -285,68 +373,61 @@
             </div>
             <div class="collapse" id="completedTasksCollapse">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 5%;" class="text-center">Status</th>
-                                    <th style="width: 40%;">Task</th>
-                                    <th style="width: 15%;">Priority</th>
-                                    <th style="width: 15%;">Completed On</th>
-                                    <th style="width: 25%;" class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var task in Model.CompletedTasks)
-                                {
-                                    <tr class="table-light">
-                                        <td class="text-center">
-                                            <form method="post" asp-page-handler="ToggleCompletion" asp-route-id="@task.Id">
-                                                <div class="form-check d-flex justify-content-center">
-                                                    <input class="form-check-input task-checkbox"
-                                                           type="checkbox"
-                                                           id="task-@task.Id"
-                                                    @(task.IsComplete ? "checked" : "")
-                                                           onchange="this.form.submit()">
-                                                </div>
-                                            </form>
-                                        </td>
-                                        <td>
-                                            <span class="fw-medium text-decoration-line-through text-muted">@task.Title</span>
-                                            @if (!string.IsNullOrEmpty(task.Description))
-                                            {
-                                                <p class="text-muted small mb-0 text-truncate">@task.Description</p>
-                                            }
-                                        </td>
-                                        <td>
-                                            @{
-                                                string badgeClass = task.Priority switch
-                                                {
-                                                    TaskPriority.Low => "bg-success",
-                                                    TaskPriority.Medium => "bg-info",
-                                                    TaskPriority.High => "bg-warning",
-                                                    TaskPriority.Urgent => "bg-danger",
-                                                    _ => "bg-secondary"
-                                                };
-                                            }
-                                            <span class="badge @badgeClass bg-opacity-50">@task.Priority</span>
-                                        </td>
-                                        <td>
-                                            @(task.CompletedDate?.ToString("MMM d, yyyy") ?? "N/A")
-                                        </td>
-                                        <td class="text-end">
-                                            <form method="post" asp-page-handler="Delete" asp-route-id="@task.Id" class="d-inline">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                        onclick="return confirm('Are you sure you want to delete this task?')">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                    <div class="task-list-container">
+                        @foreach (var task in Model.CompletedTasks)
+                        {
+                            <div class="task-item task-completed" data-priority="@task.Priority.ToString().ToLower()">
+                                <div class="task-status">
+                                    <form method="post" asp-page-handler="ToggleCompletion" asp-route-id="@task.Id" class="task-checkbox-form">
+                                        <div class="form-check">
+                                            <input class="form-check-input task-checkbox" 
+                                                   type="checkbox" 
+                                                   id="task-completed-@task.Id" 
+                                                   checked>
+                                            <label class="form-check-label" for="task-completed-@task.Id"></label>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="task-content">
+                                    <div class="task-title">@task.Title</div>
+                                    @if (!string.IsNullOrEmpty(task.Description))
+                                    {
+                                        <div class="task-description">@task.Description</div>
+                                    }
+                                    <div class="task-meta">
+                                        <span class="task-completion-date">
+                                            <i class="bi bi-check-circle"></i> Completed on @(task.CompletedDate?.ToString("MMM d, yyyy") ?? "N/A")
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@task.Id" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-light delete-task-btn"
+                                                onclick="return confirm('Are you sure you want to delete this task?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
                     </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (Request.Query["filter"] == "completed")
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-clipboard-x"></i>
+                    </div>
+                    <h4>No completed tasks</h4>
+                    <p class="text-muted">You haven't completed any tasks yet.</p>
+                    <a asp-page="./Tasks" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to all tasks
+                    </a>
                 </div>
             </div>
         </div>
@@ -459,6 +540,11 @@
         --danger-color: #dc3545;
         --info-color: #17a2b8;
         --body-bg: #f9f9f9;
+        
+        --priority-low: #28a745;
+        --priority-medium: #17a2b8;
+        --priority-high: #ffc107;
+        --priority-urgent: #dc3545;
     }
 
     body {
@@ -478,14 +564,17 @@
         font-weight: 600;
         color: var(--primary-color);
         margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
     }
 
     /* Card customization */
     .card {
         border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
         margin-bottom: 1.5rem;
+        overflow: hidden;
     }
 
     .card-header {
@@ -498,41 +587,41 @@
         font-weight: 600;
         color: var(--primary-color);
         margin: 0;
+        display: flex;
+        align-items: center;
     }
 
-    /* Nav tabs customization */
-    .nav-tabs {
-        border-bottom: 1px solid rgba(0,0,0,0.1);
-    }
-
-    .nav-tabs .nav-link {
-        border: none;
-        color: var(--text-muted);
-        padding: 0.75rem 1rem;
+    /* Nav pills customization */
+    .nav-pills .nav-link {
+        border-radius: 8px;
+        padding: 0.6rem 1.2rem;
         font-weight: 500;
+        color: #6c757d;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
     }
 
-    .nav-tabs .nav-link:hover {
-        border: none;
-        color: var(--primary-color);
+    .nav-pills .nav-link:hover {
+        background-color: rgba(78, 110, 77, 0.05);
     }
 
-    .nav-tabs .nav-link.active {
-        border: none;
-        border-bottom: 2px solid var(--primary-color);
-        color: var(--primary-color);
-        font-weight: 600;
+    .nav-pills .nav-link.active {
+        background-color: #4e6e4d;
+        color: white;
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
     }
 
-    /* Table customization */
-    .table-hover tbody tr:hover {
-        background-color: var(--primary-lighter);
+    .nav-pills .badge {
+        font-weight: 500;
+        font-size: 0.7rem;
     }
 
+    /* Task checkbox */
     .task-checkbox {
         cursor: pointer;
-        width: 1.2em;
-        height: 1.2em;
+        width: 20px;
+        height: 20px;
     }
 
     /* Badges */
@@ -541,76 +630,307 @@
         font-weight: 500;
     }
 
+    .completion-percentage .badge {
+        background-color: var(--success-color);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
     /* Profile menu */
     .profile-menu {
         position: relative;
-    }
-
-    .profile-link {
-        color: white;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-    }
-
-    .profile-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        color: white;
-        margin-right: 0.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .profile-dropdown {
-        padding: 0.5rem 0;
-        min-width: 240px;
-    }
-
-    .user-info {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .user-name {
-        font-weight: 600;
-        color: var(--text-dark);
-    }
-
-    .user-role {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-    }
-
-    .logout-item {
-        color: #dc3545;
     }
 
     /* Buttons */
     .btn-primary {
         background-color: var(--primary-color);
         border-color: var(--primary-color);
+        transition: all 0.3s ease;
     }
 
     .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
         background-color: var(--primary-dark) !important;
         border-color: var(--primary-dark) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(78, 110, 77, 0.3);
     }
 
     .btn-outline-primary {
         color: var(--primary-color);
         border-color: var(--primary-color);
+        transition: all 0.3s ease;
     }
 
     .btn-outline-primary:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+
+    /* New Task List Design */
+    .task-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .task-group-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        background-color: rgba(0,0,0,0.02);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+    }
+
+    .task-item {
+        display: flex;
+        align-items: flex-start;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        padding: 1rem;
+        transition: all 0.2s ease;
+        position: relative;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .task-item:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .task-priority-low {
+        
+    }
+
+    .task-priority-medium {
+   
+    }
+
+    .task-priority-high {
+        
+    }
+
+    .task-priority-urgent {
+        
+    }
+
+    .task-status {
+        margin-right: 0.75rem;
+    }
+
+    .task-checkbox-form .form-check {
+        margin: 0;
+        padding: 0;
+    }
+
+    .task-content {
+        flex: 1;
+        min-width: 0; /* Helps with text ellipsis */
+    }
+
+    .task-title {
+        font-weight: 500;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .task-description {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .task-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        align-items: center;
+    }
+
+    .task-due-date {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .task-completion-date {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: var(--success-color);
+    }
+
+    .task-actions {
+        display: flex;
+        gap: 0.25rem;
+        margin-left: 0.75rem;
+    }
+
+    .delete-task-btn:hover {
+        color: var(--danger-color);
+    }
+
+    .edit-task-btn:hover {
+        color: var(--primary-color);
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .status-badge.success {
+        background-color: rgba(40, 167, 69, 0.15);
+        color: #28a745;
+    }
+
+    .status-badge.info {
+        background-color: rgba(23, 162, 184, 0.15);
+        color: #17a2b8;
+    }
+
+    .status-badge.warning {
+        background-color: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+    }
+
+    .status-badge.danger {
+        background-color: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
+    }
+    
+    .status-badge.secondary {
+        background-color: rgba(108, 117, 125, 0.15);
+        color: #6c757d;
+    }
+
+    /* Completed task style */
+    .task-completed {
+        background-color: rgba(248, 249, 250, 0.5);
+        
+    }
+
+    .task-completed .task-title {
+        color: var(--text-muted);
+        text-decoration: line-through;
+    }
+
+    .task-completed .task-description {
+        color: var (--text-muted);
+        opacity: 0.7;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        opacity: 0.5;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state h4 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        max-width: 300px;
+        margin: 0 auto 1.5rem;
+    }
+
+    /* Collapse button */
+    .collapse-btn {
+        color: var(--text-muted);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .collapse-btn:hover {
+        color: var(--primary-color);
+        background-color: var(--primary-lighter);
+    }
+
+    /* Priority filter */
+    .filter-btn {
+        border-radius: 50px;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+
+    .filter-btn.active {
         background-color: var(--primary-color);
-        border-color: var(--primary-color);
         color: white;
+        border-color: var(--primary-color);
+    }
+
+    .filter-btn:hover:not(.active) {
+        transform: translateY(-1px);
+    }
+
+    /* Task progress bar */
+    .task-progress-container {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .task-stats {
+        font-size: 0.9rem;
+    }
+
+    .completion-percentage .badge {
+        font-size: 0.85rem;
+    }
+
+    .progress {
+        border-radius: 10px;
+        background-color: rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        background-color: var(--success-color);
+    }
+    
+    /* Custom checkbox styling */
+    .task-checkbox {
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .task-checkbox:checked {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
     }
 </style>
 
@@ -669,5 +989,57 @@
                 completedCollapse.classList.add('show');
             }
         }
+
+        // Task checkbox handling with animation
+        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const taskItem = this.closest('.task-item');
+                
+                if (this.checked) {
+                    taskItem.style.opacity = '0.6';
+                    taskItem.style.transform = 'translateX(10px)';
+                    
+                    setTimeout(() => {
+                        this.form.submit();
+                    }, 300);
+                } else {
+                    this.form.submit();
+                }
+            });
+        });
+
+        // Priority filter functionality
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active button state
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                const priority = this.getAttribute('data-priority');
+                
+                // Filter tasks
+                document.querySelectorAll('.task-item').forEach(task => {
+                    if (priority === 'all' || task.getAttribute('data-priority') === priority) {
+                        task.style.display = 'flex';
+                    } else {
+                        task.style.display = 'none';
+                    }
+                });
+                
+                // Update task group visibility
+                document.querySelectorAll('.task-group').forEach(group => {
+                    const visibleTasks = Array.from(group.querySelectorAll('.task-item'))
+                        .filter(task => task.style.display !== 'none');
+                    
+                    if (visibleTasks.length === 0) {
+                        group.style.display = 'none';
+                    } else {
+                        group.style.display = 'block';
+                    }
+                });
+            });
+        });
     });
 </script>

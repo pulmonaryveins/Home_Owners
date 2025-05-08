@@ -33,8 +33,8 @@ namespace HomeOwners.Areas.Staff.Pages
         {
             if (filter == "completed")
             {
-                Tasks = await _taskService.GetCompletedTasksAsync();
-                CompletedTasks = new List<StaffTask>();
+                Tasks = new List<StaffTask>(); // No active tasks when viewing completed only
+                CompletedTasks = await _taskService.GetCompletedTasksAsync();
             }
             else if (filter == "active")
             {
@@ -88,7 +88,57 @@ namespace HomeOwners.Areas.Staff.Pages
             return RedirectToPage();
         }
 
-        
+        [BindProperty]
+        public StaffTask Task { get; set; }
+
+        public async Task<IActionResult> OnPostEditTaskAsync(int id)
+        {
+            if (Task == null)
+            {
+                TempData["StatusMessage"] = "Error: Task details are missing.";
+                TempData["StatusType"] = "Error";
+                return RedirectToPage();
+            }
+
+            // Handle validation manually
+            if (string.IsNullOrEmpty(Task.Title) || Task.DueDate == default)
+            {
+                TempData["StatusMessage"] = "Error: Please check your input. Title and due date are required.";
+                TempData["StatusType"] = "Error";
+                return RedirectToPage();
+            }
+
+            try
+            {
+                // Get the existing task
+                var existingTask = await _taskService.GetTaskByIdAsync(id);
+                if (existingTask == null)
+                {
+                    TempData["StatusMessage"] = "Error: Task not found.";
+                    TempData["StatusType"] = "Error";
+                    return RedirectToPage();
+                }
+
+                // Update only the editable fields
+                existingTask.Title = Task.Title;
+                existingTask.Description = Task.Description;
+                existingTask.Priority = Task.Priority;
+                existingTask.DueDate = Task.DueDate;
+
+                await _taskService.UpdateTaskAsync(existingTask);
+                TempData["StatusMessage"] = "Task updated successfully.";
+                TempData["StatusType"] = "Success";
+            }
+            catch (Exception ex)
+            {
+                TempData["StatusMessage"] = $"Error updating task: {ex.Message}";
+                TempData["StatusType"] = "Error";
+            }
+
+            return RedirectToPage();
+        }
+
+
 
 
         public async Task<IActionResult> OnPostToggleCompletionAsync(int id)

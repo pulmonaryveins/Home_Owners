@@ -52,7 +52,7 @@ namespace HomeOwners.Areas.Staff.Pages
         }
 
         public async Task<IActionResult> OnPostCreateTask()
-        {
+{
             if (NewTask == null)
             {
                 TempData["StatusMessage"] = "Error: Task details are missing.";
@@ -60,21 +60,35 @@ namespace HomeOwners.Areas.Staff.Pages
                 return RedirectToPage();
             }
 
-            if (!ModelState.IsValid)
+            // Handle validation manually since we need to set some properties
+            if (string.IsNullOrEmpty(NewTask.Title) || NewTask.DueDate == default)
             {
-                TempData["StatusMessage"] = "Error: Please check your input.";
+                TempData["StatusMessage"] = "Error: Please check your input. Title and due date are required.";
                 TempData["StatusType"] = "Error";
                 return RedirectToPage();
             }
 
+            // Set required properties
             NewTask.CreatedDate = DateTime.Now;
-            await _taskService.CreateTaskAsync(NewTask);
-
-            TempData["StatusMessage"] = "Task created successfully.";
-            TempData["StatusType"] = "Success";
+            NewTask.AssignedToId = User.Identity.Name; // Assign to current user
+            NewTask.IsComplete = false;
+            
+            try
+            {
+                await _taskService.CreateTaskAsync(NewTask);
+                TempData["StatusMessage"] = "Task created successfully.";
+                TempData["StatusType"] = "Success";
+            }
+            catch (Exception ex)
+            {
+                TempData["StatusMessage"] = $"Error creating task: {ex.Message}";
+                TempData["StatusType"] = "Error";
+            }
 
             return RedirectToPage();
         }
+
+        
 
 
         public async Task<IActionResult> OnPostToggleCompletionAsync(int id)

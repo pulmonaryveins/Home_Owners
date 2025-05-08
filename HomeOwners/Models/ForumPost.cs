@@ -1,6 +1,8 @@
 ﻿// Models/ForumPost.cs
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace HomeOwners.Models
 {
@@ -45,5 +47,11 @@ namespace HomeOwners.Models
         public bool IsPinned { get; set; } = false;
 
         public string? AdminNotes { get; set; }
+
+        [StringLength(255)]
+        public string? ImageUrl { get; set; }
+
+        [NotMapped] 
+        public IFormFile? ImageFile { get; set; }
     }
 }

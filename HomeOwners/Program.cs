@@ -40,6 +40,7 @@ builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<ServicePersonnelService>();
 builder.Services.AddScoped<PollService>();
 builder.Services.AddScoped<ForumService>();
+builder.Services.AddScoped<TaskService>();
 
 builder.Services.AddControllers(options =>
 {

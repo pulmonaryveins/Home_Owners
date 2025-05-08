@@ -179,12 +179,12 @@
                 </div>
 
                 <div class="card-body">
-                    <form method="post" action="@Url.Action("CreateForumPost", "Home")" id="createPostForm">
+                    <form method="post" action="@Url.Action("CreateForumPost", "Home")" id="createPostForm" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="form-floating mb-3">
-                            <input type="text" id="Title" name="Title" class="form-control @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                            <input type="text" id="Title" name="Title" class="form-control @(ViewData.ModelState["Title"]?.Errors.Count > 0 ? "is-invalid" : "")"
                                    placeholder="Enter a title" value="@Model?.Title" required />
                             <label for="Title">Title</label>
                             <span asp-validation-for="Title" class="invalid-feedback"></span>
@@ -206,10 +206,27 @@
 
                         <div class="mb-4">
                             <label for="Content" class="form-label">Content</label>
-                            <textarea id="Content" name="Content" class="form-control @(ViewData.ModelState["Content"]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                            <textarea id="Content" name="Content" class="form-control @(ViewData.ModelState["Content"]?.Errors.Count > 0 ? "is-invalid" : "")"
                                       rows="8" placeholder="Write your post content here..." required>@Model?.Content</textarea>
                             <span asp-validation-for="Content" class="invalid-feedback"></span>
                             <div class="form-text">Provide details for your discussion (minimum 20 characters)</div>
+                        </div>
+
+                        <!-- Image Upload Section -->
+                        <div class="mb-4">
+                            <label for="ImageFile" class="form-label">Add an Image (optional)</label>
+                            <input type="file" id="ImageFile" name="ImageFile" class="form-control @(ViewData.ModelState["ImageFile"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                   accept="image/*" />
+                            <span asp-validation-for="ImageFile" class="invalid-feedback"></span>
+                            <div class="form-text">You can upload an image to include with your post (max 5MB, supported formats: JPG, PNG, GIF)</div>
+
+                            <!-- Image preview container -->
+                            <div id="imagePreview" class="mt-2 d-none">
+                                <img id="previewImage" class="img-thumbnail" style="max-height: 200px;" />
+                                <button type="button" id="removeImage" class="btn btn-sm btn-outline-danger mt-2">
+                                    <i class="bi bi-x-circle me-1"></i> Remove Image
+                                </button>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center">
@@ -583,12 +600,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Initially highlight the selected category
             highlightSelectedCategory();
-            
+
             // Change highlight when category changes
             document.getElementById('Category').addEventListener('change', function() {
                 highlightSelectedCategory();
             });
-            
+
             // Click on category item to select that category
             document.querySelectorAll('.category-item').forEach(item => {
                 item.addEventListener('click', function() {
@@ -597,21 +614,45 @@
                     highlightSelectedCategory();
                 });
             });
-            
+
             function highlightSelectedCategory() {
                 const selectedCategory = document.getElementById('Category').value;
-                
+
                 // Remove active class from all items
                 document.querySelectorAll('.category-item').forEach(item => {
                     item.classList.remove('active');
                 });
-                
+
                 // Add active class to selected category
                 const selectedItem = document.querySelector(`.category-item[data-category="${selectedCategory}"]`);
                 if (selectedItem) {
                     selectedItem.classList.add('active');
                 }
             }
+
+            // Image preview functionality
+            const imageFile = document.getElementById('ImageFile');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+            const removeImage = document.getElementById('removeImage');
+
+            imageFile.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        imagePreview.classList.remove('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeImage.addEventListener('click', function() {
+                imageFile.value = '';
+                imagePreview.classList.add('d-none');
+                previewImage.src = '';
+            });
         });
     </script>
 }

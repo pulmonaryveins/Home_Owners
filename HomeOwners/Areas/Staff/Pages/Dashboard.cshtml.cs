@@ -16,11 +16,14 @@ namespace HomeOwners.Areas.Staff.Pages
     {
         private readonly HomeDbContext _context;
         private readonly ServiceRequestService _serviceRequestService;
+        private readonly TaskService _taskService;
 
-        public DashboardModel(HomeDbContext context, ServiceRequestService serviceRequestService)
+
+        public DashboardModel(HomeDbContext context, ServiceRequestService serviceRequestService, TaskService taskService)
         {
             _context = context;
             _serviceRequestService = serviceRequestService;
+            _taskService = taskService;
         }
 
         // Stats Summary Properties
@@ -32,6 +35,8 @@ namespace HomeOwners.Areas.Staff.Pages
         public double FacilityChangeRate { get; set; }
         public int PendingRequests { get; set; }
         public double PendingRequestChangeRate { get; set; }
+        public List<StaffTask> UpcomingTasks { get; set; }
+
 
         // Charts Data
         public ServiceActivityData ChartData { get; set; }
@@ -46,6 +51,9 @@ namespace HomeOwners.Areas.Staff.Pages
             await LoadServiceActivityDataAsync();
             await LoadTaskStatusDataAsync();
             await LoadRecentActivitiesAsync();
+
+            // Load upcoming tasks
+            UpcomingTasks = await _taskService.GetUpcomingTasksAsync(7); // Get tasks due in the next 7 days
         }
 
         private async Task LoadStatisticsAsync()

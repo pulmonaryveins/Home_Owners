@@ -884,7 +884,7 @@ public class HomeController : Controller
     [HttpPost]
     [RequireAuthentication]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateForumPost(ForumPost post)
+    public async Task<IActionResult> CreateForumPost(ForumPost post, IFormFile ImageFile)
     {
         // Debug information
         if (!User.Identity.IsAuthenticated)
@@ -925,6 +925,49 @@ public class HomeController : Controller
                 IsVisible = true,
                 AdminNotes = ""  // Default empty value for required field
             };
+
+            // Handle image upload if provided
+            if (ImageFile != null && ImageFile.Length > 0)
+            {
+                // Validate file type and size
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                var extension = Path.GetExtension(ImageFile.FileName).ToLowerInvariant();
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    TempData["StatusMessage"] = "Invalid file type. Only JPG, PNG, and GIF images are allowed.";
+                    TempData["StatusType"] = "Error";
+                    return View(post);
+                }
+
+                // Limit file size (5MB)
+                if (ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    TempData["StatusMessage"] = "The uploaded image exceeds the maximum size of 5MB.";
+                    TempData["StatusType"] = "Error";
+                    return View(post);
+                }
+
+                // Generate a unique filename
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageFile.FileName;
+
+                // Ensure directory exists
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "forum");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // Save the file
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageFile.CopyToAsync(fileStream);
+                }
+
+                // Set the image URL in the post
+                newPost.ImageUrl = "/images/forum/" + uniqueFileName;
+            }
 
             await _forumService.CreateForumPostAsync(newPost);
 

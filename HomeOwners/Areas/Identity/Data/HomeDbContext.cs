@@ -40,6 +40,7 @@ namespace HomeOwners.Areas.Identity.Data
         public DbSet<ForumComment> ForumComments { get; set; }
         public DbSet<BookingRating> BookingRatings { get; set; }
         public DbSet<ServiceRating> ServiceRatings { get; set; }
+        public DbSet<StaffTask> StaffTasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

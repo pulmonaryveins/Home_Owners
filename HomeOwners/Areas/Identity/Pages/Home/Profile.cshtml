@@ -189,6 +189,11 @@
                             <i class="bi bi-sliders me-1"></i> Preferences
                         </a>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" id="resources-tab" data-bs-toggle="tab" href="#resources" role="tab" aria-controls="resources" aria-selected="false">
+                            <i class="bi bi-file-earmark-text me-1"></i> Resources
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -344,6 +349,312 @@
                                             <li><i class="bi bi-check-circle me-1"></i> Include numbers</li>
                                             <li><i class="bi bi-check-circle me-1"></i> Include special characters</li>
                                         </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab">
+                    <div class="content-card">
+                        <div class="content-header">
+                            <h3><i class="bi bi-folder2-open"></i> Community Resources</h3>
+                            <p class="text-muted">Access important community documents and information</p>
+                        </div>
+
+                        <!-- Resource categories with accordion layout -->
+                        <div class="accordion resources-accordion" id="resourcesAccordion">
+                            <!-- Forms Section -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="formsHeading">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#formsCollapse" aria-expanded="true" aria-controls="formsCollapse">
+                                        <i class="bi bi-file-earmark-text me-2"></i> Downloadable Forms
+                                    </button>
+                                </h2>
+                                <div id="formsCollapse" class="accordion-collapse collapse show" aria-labelledby="formsHeading" data-bs-parent="#resourcesAccordion">
+                                    <div class="accordion-body">
+                                        <div class="resource-list">
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">HOA Membership Application</h5>
+                                                    <p class="resource-desc">New homeowner registration form</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 258 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Updated May 1, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/membership_application.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon doc">
+                                                    <i class="bi bi-file-earmark-word"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">Architectural Change Request</h5>
+                                                    <p class="resource-desc">Form for requesting property modifications</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> DOCX, 124 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Updated Apr 15, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/architectural_request.docx" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">Maintenance Request Form</h5>
+                                                    <p class="resource-desc">Request form for community property maintenance</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 186 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Updated Mar 10, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/maintenance_request.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon xls">
+                                                    <i class="bi bi-file-earmark-excel"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">Community Event Planning Template</h5>
+                                                    <p class="resource-desc">Spreadsheet template for planning community events</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> XLSX, 342 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Updated Feb 22, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/event_planning.xlsx" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Community Guidelines Section -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="guidelinesHeading">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guidelinesCollapse" aria-expanded="false" aria-controls="guidelinesCollapse">
+                                        <i class="bi bi-journal-check me-2"></i> Community Guidelines
+                                    </button>
+                                </h2>
+                                <div id="guidelinesCollapse" class="accordion-collapse collapse" aria-labelledby="guidelinesHeading" data-bs-parent="#resourcesAccordion">
+                                    <div class="accordion-body">
+                                        <div class="resource-list">
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">HOA Bylaws</h5>
+                                                    <p class="resource-desc">Official bylaws of the homeowners association</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 1.2 MB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Updated Jan 15, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/hoa_bylaws.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">Architectural Guidelines</h5>
+                                                    <p class="resource-desc">Guidelines for property modifications and renovations</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 845 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Updated Feb 3, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/architectural_guidelines.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">Community Rules & Regulations</h5>
+                                                    <p class="resource-desc">Rules for maintaining community standards</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 623 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Updated Mar 22, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/community_rules.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Financial Reports Section -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="financialsHeading">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#financialsCollapse" aria-expanded="false" aria-controls="financialsCollapse">
+                                        <i class="bi bi-graph-up me-2"></i> Financial Reports
+                                    </button>
+                                </h2>
+                                <div id="financialsCollapse" class="accordion-collapse collapse" aria-labelledby="financialsHeading" data-bs-parent="#resourcesAccordion">
+                                    <div class="accordion-body">
+                                        <div class="resource-list">
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">2025 Q1 Financial Statement</h5>
+                                                    <p class="resource-desc">Quarterly financial report (Jan-Mar 2025)</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 532 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Published Apr 15, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/financial_2025_q1.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">2024 Annual Financial Report</h5>
+                                                    <p class="resource-desc">Annual financial statement for fiscal year 2024</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 1.4 MB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Published Jan 30, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/financial_2024_annual.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">2025 Budget Proposal</h5>
+                                                    <p class="resource-desc">Proposed budget for fiscal year 2025</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 968 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Published Dec 5, 2024</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/budget_proposal_2025.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Meeting Minutes Section -->
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="minutesHeading">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#minutesCollapse" aria-expanded="false" aria-controls="minutesCollapse">
+                                        <i class="bi bi-calendar3 me-2"></i> Meeting Minutes
+                                    </button>
+                                </h2>
+                                <div id="minutesCollapse" class="accordion-collapse collapse" aria-labelledby="minutesHeading" data-bs-parent="#resourcesAccordion">
+                                    <div class="accordion-body">
+                                        <div class="resource-list">
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">April 2025 Board Meeting Minutes</h5>
+                                                    <p class="resource-desc">Meeting notes from the April 12, 2025 board meeting</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 324 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Published Apr 19, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/minutes_april_2025.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">March 2025 Board Meeting Minutes</h5>
+                                                    <p class="resource-desc">Meeting notes from the March 8, 2025 board meeting</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 298 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Published Mar 15, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/minutes_march_2025.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">Annual HOA Meeting Minutes</h5>
+                                                    <p class="resource-desc">Minutes from the annual homeowners meeting on Feb 15, 2025</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 546 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Published Feb 22, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/annual_meeting_2025.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+
+                                            <div class="resource-item">
+                                                <div class="resource-icon pdf">
+                                                    <i class="bi bi-file-earmark-pdf"></i>
+                                                </div>
+                                                <div class="resource-info">
+                                                    <h5 class="resource-title">February 2025 Board Meeting Minutes</h5>
+                                                    <p class="resource-desc">Meeting notes from the February 10, 2025 board meeting</p>
+                                                    <div class="resource-meta">
+                                                        <span class="file-info"><i class="bi bi-info-circle me-1"></i> PDF, 312 KB</span>
+                                                        <span class="date-info"><i class="bi bi-calendar3 me-1"></i> Published Feb 17, 2025</span>
+                                                    </div>
+                                                </div>
+                                                <a href="/documents/minutes_february_2025.pdf" class="resource-download" download>
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -793,6 +1104,125 @@
     .modal-header.border-warning {
         border-bottom: 3px solid var(--bs-warning);
     }
+
+    /* Resources Tab Styling */
+    .resources-accordion {
+        --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%234e6e4d'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        --bs-accordion-btn-active-icon: var(--bs-accordion-btn-icon);
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        box-shadow: none;
+        font-weight: 600;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: var(--primary-color);
+    }
+
+    .accordion-button .bi {
+        font-size: 1.1rem;
+        color: var(--primary-color);
+    }
+
+    .resource-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .resource-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background-color: #f9f9fa;
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+    }
+
+        .resource-item:hover {
+            background-color: var(--primary-lighter);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+    .resource-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+        .resource-icon.pdf {
+            background-color: #dc3545;
+        }
+
+        .resource-icon.doc {
+            background-color: #0d6efd;
+        }
+
+        .resource-icon.xls {
+            background-color: #198754;
+        }
+
+        .resource-icon.img {
+            background-color: #6610f2;
+        }
+
+    .resource-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .resource-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--text-dark);
+    }
+
+    .resource-desc {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .resource-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+
+    .resource-download {
+        margin-left: 1rem;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        font-size: 1.25rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+        .resource-download:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
 </style>
 
 <script>

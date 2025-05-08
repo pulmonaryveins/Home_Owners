@@ -205,8 +205,15 @@
                             }
                         </div>
                     </div>
-                    <div class="post-content mt-4">
-                        @Model.Content
+                    <div class="post-content">
+                        <p>@Model.Content</p>
+
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <div class="post-image mt-3">
+                                <img src="@Model.ImageUrl" alt="Post image" class="img-fluid rounded" />
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
